@@ -1,0 +1,14 @@
+{
+  "TECHNIC": {
+    "BUILD": "Build",
+    "SOLDERPACK": "Solder pack",
+    "ZIPPACK": "Zip pack",
+    "PACKTYPE": "Pack type",
+    "CREATEFORGEZIP": "Create Forge Zip",
+    "CHECKPERMISSIONS": "Check Permissions",
+    "FORGEVERSION": "Forge version",
+    "PERMISSIONLEVEL": "Permission level",
+    "PUBLICPACK": "Public pack",
+    "PRIVATEPACK": "Private pack"
+  }
+}

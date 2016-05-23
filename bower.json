@@ -1,0 +1,36 @@
+{
+  "name": "go-modpack-packer",
+  "description": "Packs mods for modspacks",
+  "main": "main.js",
+  "authors": [
+    "Zlepper"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "Technic",
+    "Modpacks",
+    "Modpack",
+    "Minecraft"
+  ],
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "^1.5.5",
+    "angular-animate": "^1.5.5",
+    "angular-aria": "^1.5.5",
+    "angular-messages": "^1.5.5",
+    "angular-resource": "^1.5.5",
+    "angular-material": "^1.0.9",
+    "angular-translate": "^2.11.0",
+    "angular-translate-loader-partial": "^2.11.0",
+    "angular-ui-router": "^0.3.0",
+    "angular-websocket": "^2.0.0"
+  }
+}

@@ -1,0 +1,47 @@
+<div>
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <md-button>
+                {{'TECHNIC.BUILD' | translate}}
+            </md-button>
+        </div>
+    </md-toolbar>
+    <form name="technicForm">
+        <div>
+            <p translate>TECHNIC.PACKTYPE</p>
+            <md-input-container class="md-block">
+                <md-radio-group ng-model="vm.application.modpack.technic.isSolderPack" layout="row">
+                    <md-radio-button value="true">{{'TECHNIC.SOLDERPACK' | translate}}</md-radio-button>
+                    <md-radio-button value="false">{{'TECHNIC.ZIPPACK' | translate}}</md-radio-button>
+                </md-radio-group>
+            </md-input-container>
+        </div>
+        <div>
+            <md-checkbox ng-model="vm.application.modpack.technic.createForgeZip">
+                <span translate>TECHNIC.CREATEFORGEZIP</span>
+            </md-checkbox>
+        </div>
+        <div ng-show="vm.application.modpack.technic.createForgeZip">
+            <md-input-container class="md-block">
+                <label>{{'TECHNIC.FORGEVERSION' | translate}}</label>
+                <md-select ng-model="vm.application.modpack.technic.forgeVersion">
+                    <md-option ng-repeat="version in vm.forgeVersions" value="version">{{version}}</md-option>
+                </md-select>
+            </md-input-container>
+        </div>
+        <div>
+            <md-checkbox ng-model="vm.application.modpack.technic.checkPermissions">
+                <span translate>TECHNIC.CHECKPERMISSIONS</span>
+            </md-checkbox>
+        </div>
+        <div ng-show="vm.application.modpack.technic.checkPermissions">
+            <p translate>TECHNIC.PERMISSIONLEVEL</p>
+            <md-input-container class="md-block">
+                <md-radio-group ng-model="vm.application.modpack.technic.isPublicPack">
+                    <md-radio-button value="true">{{'TECHNIC.PUBLICPACK' | translate}}</md-radio-button>
+                    <md-radio-button value="false">{{'TECHNIC.PRIVATEPACK' | translate}}</md-radio-button>
+                </md-radio-group>
+            </md-input-container>
+        </div>
+    </form>
+</div>

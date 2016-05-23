@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="ModpackHelper" ng-controller="MainController as main">
+<head>
+    <meta charset="UTF-8">
+    <title>Modpack Helper {{main.application.modpack ? "- " + main.application.modpack.name : ""}}</title>
+    <!-- build:remove -->
+    <!-- Connect to server process -->
+    <script>require('electron-connect').client.create()</script>
+    <!-- end:build -->
+    <!-- Ignore that these are inresolved, they will appear when the application is build -->
+    <link href="public/bundle.css" rel="stylesheet">
+    <script src="public/vendor.js"></script>
+    <script src="public/bundle.js"></script>
+</head>
+<body >
+<body ng-cloak layout="column" layout-gt-sm="row">
+<md-sidenav md-component-id="left" md-is-locked-open="$mdMedia('gt-sm')" class="md-whiteframe-6dp" layout-align="space-between">
+    <md-list role="list">
+        <md-list-item role="listitem" ng-show="main.application.modpacks.length">
+            <form flex>
+                <md-input-container class="md-block">
+                    <label>Modpack:</label>
+                    <md-select ng-model="main.application.modpack">
+                        <md-option ng-repeat="modpack in main.application.modpacks" ng-value="modpack">
+                            {{modpack.name}}
+                        </md-option>
+                    </md-select>
+                </md-input-container>
+            </form>
+        </md-list-item>
+        <md-list-item role="button" ng-click="main.createNewModpack()">
+            <p>
+                <strong translate>MODPACK.NEW</strong>
+            </p>
+        </md-list-item>
+        <md-list-item role="listitem" ui-sref="modpack" ui-sref-active="active" ng-show="main.application.modpack">
+            <p>
+                <strong translate>MODPACK.DETAILS</strong>
+            </p>
+        </md-list-item>
+        <md-list-item role="listitem" ui-sref="technic" ui-sref-active="active" ng-show="main.application.modpack">
+            <p>
+                <strong translate>SERVICE.TECHNIC</strong>
+            </p>
+        </md-list-item>
+    </md-list>
+</md-sidenav>
+
+<div class="md-whiteframe-6dp" role="main" flex layout="column">
+    <!--<md-toolbar class="md-whiteframe-3dp" layout-align-gt-sm="center center" >-->
+        <!--<div layout-align-gt-sm="center center" class="md-toolbar-tools">-->
+            <!--<md-button class="md-icon-button" area-label="Menu" hide-gt-sm>-->
+                <!--<md-icon class="material-icons">menu</md-icon>-->
+            <!--</md-button>-->
+            <!--<span flex hide-gt-sm></span>-->
+            <!--<h2>-->
+                <!--{{main.application.title | translate}}-->
+            <!--</h2>-->
+        <!--</div>-->
+    <!--</md-toolbar>-->
+    <md-content flex layout="column" ui-view layout-padding>
+
+    </md-content>
+</div>
+</body>
+</html>

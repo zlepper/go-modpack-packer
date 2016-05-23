@@ -1,0 +1,32 @@
+{
+  "name": "go-modpack-packer",
+  "version": "1.0.0",
+  "description": "Packs mods for modspacks",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Technic",
+    "Modpacks",
+    "Modpack",
+    "Minecraft"
+  ],
+  "author": "Zlepper",
+  "license": "MIT",
+  "dependencies": {
+    "electron-prebuilt": "^1.1.1"
+  },
+  "devDependencies": {
+    "electron-connect": "^0.4.2",
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-jshint": "^2.0.1",
+    "gulp-sass": "^2.3.1",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-typescript": "2.12.1",
+    "gulp-uglify": "^1.5.3",
+    "gulp-util": "^3.0.7",
+    "jshint": "^2.9.2"
+  }
+}

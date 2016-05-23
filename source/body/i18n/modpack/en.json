@@ -1,0 +1,9 @@
+{
+  "DETAILS": {
+    "NAME": "Modpack name",
+    "VERSION": "Modpack version",
+    "INPUT": "Input directory",
+    "OUTPUT": "Output directory",
+    "SELECT": "Select"
+  }
+}

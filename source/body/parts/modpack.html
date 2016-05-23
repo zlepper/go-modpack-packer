@@ -1,0 +1,32 @@
+<div>
+    <form name="modpackForm">
+        <div layout-gt-sm="row">
+            <md-input-container class="md-block" flex>
+                <label translate>DETAILS.NAME</label>
+                <input ng-model="vm.application.modpack.name">
+            </md-input-container>
+            <md-input-container class="md-block" flex>
+                <label translate>DETAILS.VERSION</label>
+                <input ng-model="vm.application.modpack.version">
+            </md-input-container>
+        </div>
+        <div layout="row">
+            <md-input-container class="md-block" flex>
+                <label translate>DETAILS.INPUT</label>
+                <input ng-model="vm.application.modpack.inputDirectory">
+            </md-input-container>
+            <md-button ng-click="vm.selectInputDirectory()">
+                <strong translate>DETAILS.SELECT</strong>
+            </md-button>
+        </div>
+        <div layout="row">
+            <md-input-container class="md-block" flex>
+                <label translate>DETAILS.OUTPUT</label>
+                <input ng-model="vm.application.modpack.outputDirectory">
+            </md-input-container>
+            <md-button ng-click="vm.selectOutputDirectory()">
+                <strong translate>DETAILS.SELECT</strong>
+            </md-button>
+        </div>
+    </form>
+</div>
