@@ -6,3 +6,7 @@
 /// <reference path="globals/angular/index.d.ts" />
 /// <reference path="globals/github-electron/index.d.ts" />
 /// <reference path="globals/node/index.d.ts" />
+/// <reference path="globals/gsap/core/index.d.ts" />
+/// <reference path="globals/gsap/ease/index.d.ts" />
+/// <reference path="globals/gsap/tweenlite/index.d.ts" />
+/// <reference path="globals/angular-animate/index.d.ts" />

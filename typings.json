@@ -2,13 +2,17 @@
   "version": false,
   "dependencies": {},
   "globalDependencies": {
-    "github-electron": "registry:dt/github-electron#0.37.8+20160509083739",
-    "node": "registry:dt/node#6.0.0+20160514165920",
     "angular": "registry:dt/angular#1.5.0+20160509150441",
+    "angular-animate": "registry:dt/angular-animate#1.5.0+20160407085121",
     "angular-local-storage": "registry:dt/angular-local-storage#0.1.5+20160317120654",
     "angular-material": "registry:dt/angular-material#1.0.0-rc5.0+20160412154003",
     "angular-translate": "registry:dt/angular-translate#2.4.0+20160505162438",
     "angular-ui-router": "registry:dt/angular-ui-router#1.1.5+20160514162931",
-    "jquery": "registry:dt/jquery#1.10.0+20160417213236"
+    "github-electron": "registry:dt/github-electron#0.37.8+20160509083739",
+    "gsap/core": "registry:dt/gsap/core#0.0.0+20160316155526",
+    "gsap/ease": "registry:dt/gsap/ease#0.0.0+20160316155526",
+    "gsap/tweenlite": "registry:dt/gsap/tweenlite#0.0.0+20160316155526",
+    "jquery": "registry:dt/jquery#1.10.0+20160417213236",
+    "node": "registry:dt/node#6.0.0+20160514165920"
   }
 }
