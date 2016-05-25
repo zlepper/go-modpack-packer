@@ -39,7 +39,6 @@ module GoCommService {
                 t.ready = true;
             });
             this.dataStream.onMessage(function(data: IWebsocketOnMessageEvent) {
-                debugger;
                 var message: MessageData = JSON.parse(data.data);
                 // Special logging trick
                 if(message.action === "log") {

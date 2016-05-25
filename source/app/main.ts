@@ -8,7 +8,7 @@ import path = require("path");
 import childprocess = require("child_process");
 import {IpcHandlersCreator} from './IpcHandlers';
 // There is no typings available for electron-connect, and i'm lazy, so any will have to do
-var client:any = require("electron-connect");
+//var client:any = require("electron-connect");
 
 let win : Electron.BrowserWindow;
 console.log("Bla");
@@ -46,9 +46,9 @@ function createWindow() {
 
     // and load the index.body of the app.
     win.loadURL(`file://${__dirname}/index.html`);
-
+    win.webContents.openDevTools();
     // live reload from electron connect
-    client.client.create(win);
+    //client.client.create(win);
     
     // Save the window state, so it opens in that place next time
     win.on("close", function() {

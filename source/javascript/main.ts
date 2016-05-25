@@ -63,4 +63,5 @@ module ModpackHelper{
 
     app.config(ModpackHelperConfigure);
     app.run(ConfigureTranslate);
+    
 }

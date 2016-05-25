@@ -16,6 +16,14 @@ type websocketConnection interface {
 	Write(data interface{})
 }
 
+func Write(conn websocketConnection, action string, data interface{}) {
+	message := Message{
+		Action:action,
+		Data:data,
+	}
+	conn.Write(message)
+}
+
 func HandleMessage(conn websocketConnection, messageType int, message []byte) {
 	log.Println("TEST")
 	if messageType == websocket.TextMessage {
@@ -23,7 +31,14 @@ func HandleMessage(conn websocketConnection, messageType int, message []byte) {
 		json.Unmarshal(message, &m)
 		switch m.Action {
 		case "find-additional-folders": {
-			findAdditionalFolders(conn, m)
+			findAdditionalFolders(conn, m.Data)
+		}
+		case "save-modpacks": {
+			log.Printf("%v", m.Data)
+			saveModpacks(conn, m.Data)
+		}
+		case "load-modpacks": {
+			loadModpacks(conn)
 		}
 		}
 	}

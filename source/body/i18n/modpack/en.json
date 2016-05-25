@@ -4,6 +4,7 @@
     "VERSION": "Modpack version",
     "INPUT": "Input directory",
     "OUTPUT": "Output directory",
-    "SELECT": "Select"
+    "SELECT": "Select",
+    "ADDITIONALFOLDERS": "Additional folders to include"
   }
 }

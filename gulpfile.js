@@ -70,8 +70,8 @@ function watch() {
     var t3 = gulp.watch(input.body, ["copy-body"]);
     var t4 = gulp.watch(input.mainTypescript, ["build-electron"]);
     var t5 = gulp.watch('source/backend/**/*.go', ['go-compile']);
-    var t6 = gulp.watch('app/**/*', [electron.restart("--enable-logging")]);
-    return [t1, t2, t3, t4, t5, t6];
+    //var t6 = gulp.watch('app/**/*', [electron.restart("--enable-logging")]);
+    return [t1, t2, t3, t4, t5/*, t6*/];
 }
 
 /* run the watch task when gulp is called without arguments */
@@ -121,7 +121,7 @@ gulp.task("copy-body", function () {
 });
 
 gulp.task('run-electron', function () {
-    electron.start("--enable-logging");
+    //electron.start("--enable-logging");
 });
 
 gulp.task("go-compile", function () {
