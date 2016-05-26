@@ -3,7 +3,6 @@ package handlers
 import (
 	"github.com/gorilla/websocket"
 	"encoding/json"
-	"log"
 )
 
 type Message struct {
@@ -25,7 +24,6 @@ func Write(conn websocketConnection, action string, data interface{}) {
 }
 
 func HandleMessage(conn websocketConnection, messageType int, message []byte) {
-	log.Println("TEST")
 	if messageType == websocket.TextMessage {
 		var m Message
 		json.Unmarshal(message, &m)
@@ -34,11 +32,16 @@ func HandleMessage(conn websocketConnection, messageType int, message []byte) {
 			findAdditionalFolders(conn, m.Data)
 		}
 		case "save-modpacks": {
-			log.Printf("%v", m.Data)
 			saveModpacks(conn, m.Data)
 		}
 		case "load-modpacks": {
 			loadModpacks(conn)
+		}
+		case "gather-information": {
+			gatherInformation(conn, m.Data)
+		}
+		case "build": {
+			build(conn, m.Data)
 		}
 		}
 	}

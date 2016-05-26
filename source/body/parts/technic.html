@@ -1,7 +1,7 @@
 <div>
     <md-toolbar>
         <div class="md-toolbar-tools">
-            <md-button>
+            <md-button ng-click="vm.build($event)" class="md-primary">
                 {{'TECHNIC.BUILD' | translate}}
             </md-button>
         </div>
@@ -11,8 +11,8 @@
             <p translate>TECHNIC.PACKTYPE</p>
             <md-input-container class="md-block">
                 <md-radio-group ng-model="vm.application.modpack.technic.isSolderPack" layout="row">
-                    <md-radio-button value="true">{{'TECHNIC.SOLDERPACK' | translate}}</md-radio-button>
-                    <md-radio-button value="false">{{'TECHNIC.ZIPPACK' | translate}}</md-radio-button>
+                    <md-radio-button value="1">{{'TECHNIC.SOLDERPACK' | translate}}</md-radio-button>
+                    <md-radio-button value="0" disabled>{{'TECHNIC.ZIPPACK' | translate}}</md-radio-button>
                 </md-radio-group>
             </md-input-container>
         </div>
@@ -21,20 +21,20 @@
                 <span translate>TECHNIC.CREATEFORGEZIP</span>
             </md-checkbox>
         </div>
-        <div ng-show="vm.application.modpack.technic.createForgeZip" class="collapsible">
+        <div ng-show="vm.application.modpack.technic.createForgeZip" class="collapsible clearfix" >
             <md-input-container class="md-block">
                 <label>{{'TECHNIC.FORGEVERSION' | translate}}</label>
                 <md-select ng-model="vm.application.modpack.technic.forgeVersion">
-                    <md-option ng-repeat="version in vm.forgeVersions" value="version">{{version}}</md-option>
+                    <md-option ng-repeat="version in vm.forge.forgeVersions | filter:vm.application.modpack.minecraftVersion:vm.filterByMcVersion track by version.build" ng-value="version">{{version.build}}</md-option>
                 </md-select>
             </md-input-container>
         </div>
         <div>
-            <md-checkbox ng-model="vm.application.modpack.technic.checkPermissions">
+            <md-checkbox ng-model="vm.application.modpack.technic.checkPermissions" disabled="disabled">
                 <span translate>TECHNIC.CHECKPERMISSIONS</span>
             </md-checkbox>
         </div>
-        <div ng-show="vm.application.modpack.technic.checkPermissions">
+        <div ng-show="vm.application.modpack.technic.checkPermissions" class="collapsible clearfix">
             <p translate>TECHNIC.PERMISSIONLEVEL</p>
             <md-input-container class="md-block">
                 <md-radio-group ng-model="vm.application.modpack.technic.isPublicPack">

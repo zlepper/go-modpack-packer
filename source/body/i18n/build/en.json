@@ -1,0 +1,17 @@
+{
+  "BUILD": {
+    "PROGRESS": "Build progress",
+    "SHOWDONE": "Show done",
+    "CANCEL": "Cancel",
+    "BUILD": "Build",
+    "MOD": {
+      "DETAILS": "Mod details",
+      "NAME": "Name",
+      "MODID": "ModId",
+      "DESCRIPTION": "Description",
+      "VERSION": "Version",
+      "MCVERSION": "Minecraft Version",
+      "AUTHORS": "Authors"
+    }
+  }
+}

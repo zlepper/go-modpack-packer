@@ -1,4 +1,14 @@
 module ModpackController {
+    function folderListContains(folders: Array<Application.Folder>, folder: string): number {
+        for(var i = 0; i < folders.length; i++) {
+            if(folders[i].name === folder) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    import Folder = Application.Folder;
     export class ModpackController {
         static $inject = ["application", "electron", "$state", "$translatePartialLoader", "goComm", "$rootScope"];
 
@@ -28,12 +38,22 @@ module ModpackController {
                 application.modpack.outputDirectory = path[0];
             });
             $rootScope.$on("found-folders", (event: angular.IAngularEvent, folders: Array<string>) => {
-                console.log(folders);
                 // Add folders to dictionary
-                controller.application.modpack.additionalFolders = {};
-                folders.forEach((folder: string) => {
-                    controller.application.modpack.additionalFolders[folder] = false;
+                var oldFolders = controller.application.modpack.additionalFolders;
+                controller.application.modpack.additionalFolders = [];
+                folders.forEach(function(folder) {
+                    var index = folderListContains(oldFolders, folder);
+                    if(index === -1) {
+                        var f = new Application.Folder();
+                        f.include = false;
+                        f.name = folder;
+                        controller.application.modpack.additionalFolders.push(f);
+                    } else {
+                        var f = oldFolders[index];
+                        controller.application.modpack.additionalFolders.push(f);
+                    }
                 });
+
             })
         }
 

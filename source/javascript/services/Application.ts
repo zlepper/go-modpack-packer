@@ -1,10 +1,10 @@
 module Application {
 
     export class TechnicConfig {
-        public isSolderPack:boolean = true;
+        public isSolderPack:number = 1;
 
         public createForgeZip:boolean = false;
-        public forgeVersion:string = "0";
+        public forgeVersion:ForgeVersion.ForgeVersion;
 
         public checkPermissions:boolean = false;
         public isPublicPack:boolean = true;
@@ -14,6 +14,11 @@ module Application {
         public isPublicPack:boolean = true;
     }
 
+    export class Folder {
+        public name:string;
+        public include:boolean;
+    }
+    
     export class Modpack {
         public name:string;
         public inputDirectory:string = "";
@@ -21,7 +26,7 @@ module Application {
         public clearOutputDirectory:boolean = true;
         public minecraftVersion:string = "1.9";
         public version:string = "1.0.0";
-        public additionalFolders:{[folder:string]:boolean } = {};
+        public additionalFolders:Array<Folder> = [];
         public technic:TechnicConfig = new TechnicConfig();
         public ftb:FtbConfig = new FtbConfig();
 
@@ -43,6 +48,52 @@ module Application {
             modpack.ftb = data.ftb;
             return modpack;
         }
+        
+        public isValid(): boolean {
+            if(!this.name) return false;
+            if(!this.inputDirectory) return false;
+            if(!this.outputDirectory) return false;
+            if(!this.minecraftVersion) return false;
+            if(!this.version) return false;
+            return true;
+        }
+    }
+
+    export class Mod {
+        public modid: string;
+        public name: string;
+        public description: string;
+        public version: string;
+        public mcversion: string;
+        public url: string;
+        public authors: string;
+        public credits: string;
+        public filename: string;
+        // Naming is totally a hack to make sure the value does not get send to the server
+        public $$isDone: boolean;
+
+        public static fromJson(data:Mod): Mod {
+            var m = new Mod();
+            m.modid = data.modid;
+            m.name = data.name;
+            m.description = data.description;
+            m.version = data.version;
+            m.mcversion = data.mcversion;
+            m.url = data.url;
+            m.authors = data.authors;
+            m.credits = data.credits;
+            m.filename = data.filename;
+            return m;
+        }
+        
+        public isValid(): boolean {
+            if (!this.modid) return false;
+            if (!this.name) return false;
+            if (!this.version) return false;
+            if (!this.mcversion) return false;
+            if (this.authors.length <= 0) return false;
+            return true;
+        }
     }
 
 
@@ -60,8 +111,6 @@ module Application {
                 self.saveModpackData()
             }, true);
             $rootScope.$on("data-loaded", (event:angular.IAngularEvent, modpacks:Array<Modpack>) => {
-                console.log("Data loaded");
-
                 modpacks.forEach((modpack:Modpack) => {
                     self.modpacks.push(Modpack.fromJson(modpack))
                 });

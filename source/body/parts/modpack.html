@@ -30,9 +30,9 @@
         </div>
         <md-list ng-hide="vm.application.modpack.additionalFolders | isEmpty">
             <md-subheader class="md-no-sticky"><span translate>DETAILS.ADDITIONALFOLDERS</span></md-subheader>
-            <md-list-item ng-repeat="(folder, include) in vm.application.modpack.additionalFolders">
-                <p> {{ folder }} </p>
-                <md-checkbox class="md-secondary" ng-model="include"></md-checkbox>
+            <md-list-item ng-repeat="folder in vm.application.modpack.additionalFolders">
+                <p> {{ folder.name }} </p>
+                <md-checkbox class="md-secondary" ng-model="folder.include"></md-checkbox>
             </md-list-item>
         </md-list>
     </form>

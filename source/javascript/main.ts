@@ -1,6 +1,3 @@
-/**
- * Created by Rasmus on 5/21/2016.
- */
 module ModpackHelper{
     var app = angular.module("ModpackHelper", ["ngMaterial", "ui.router", "ngResource", "ngAnimate", "pascalprecht.translate", "ngMessages", "ngWebSocket"]);
 

@@ -1,7 +1,4 @@
 .collapsible {
-  transition: all linear 0.5s;
-  -webkit-transition: all linear 0.5s;
-  &.ng-hide {
-    height: 0;
-  }
+  height: auto;
+  overflow:hidden;
 }

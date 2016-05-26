@@ -27,39 +27,45 @@ module GoCommService {
     }
 
     export class GoCommService {
-        static $inject = ["$websocket", "$rootScope", "$timeout"];
+        static $inject = ["$websocket", "$rootScope", "$timeout", "$interval"];
 
         private dataStream: IWebsocket;
         private ready: boolean;
-        constructor(private $websocket: IWebsocketService, protected $rootScope: angular.IRootScopeService, protected $timeout: angular.ITimeoutService) {
+        private events: Array<IWebsocketOnMessageEvent> = [];
+        constructor(private $websocket: IWebsocketService, protected $rootScope: angular.IRootScopeService, protected $timeout: angular.ITimeoutService, protected $interval: angular.IIntervalService) {
             var t = this;
             this.dataStream = $websocket("ws://localhost:8084/ws");
             this.dataStream.onOpen(function() {
-                console.log("Websocket is ready");
                 t.ready = true;
             });
-            this.dataStream.onMessage(function(data: IWebsocketOnMessageEvent) {
-                var message: MessageData = JSON.parse(data.data);
-                // Special logging trick
-                if(message.action === "log") {
-                    return console.log(message.data);
+
+            this.$interval(function() {
+                if(t.events.length > 0) {
+                    var data = t.events.shift();
+                    var message:MessageData = JSON.parse(data.data);
+                    // Special logging trick
+                    if (message.action === "log") {
+                        return console.log(message.data);
+                    }
+                    $rootScope.$emit(message.action, message.data);
                 }
-                $rootScope.$emit(message.action, message.data);
+            }, 5);
+
+            this.dataStream.onMessage(function(data: IWebsocketOnMessageEvent) {
+                t.events.push(data);
             });
         }
 
         public send(action: string, data: any) {
             if(this.ready) {
-                console.log("Sending to websocket");
                 var md = new MessageData();
                 md.action = action;
                 md.data = data;
-                this.dataStream.send(JSON.stringify(md));
+                this.dataStream.send(angular.toJson(md));
             } else {
                 var t = this;
                 // Keep retrying in case the socket is not yet ready
                 this.$timeout(function() {
-                    console.log("Waiting");
                     t.send(action, data);
                 }, 50);
             }

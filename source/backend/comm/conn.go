@@ -1,4 +1,3 @@
-
 // Copyright 2013 The Gorilla WebSocket Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
@@ -13,6 +12,7 @@ import (
 	"time"
 	"github.com/zlepper/go-modpack-packer/source/backend/handlers"
 	"encoding/json"
+	"sync"
 )
 
 const (
@@ -26,19 +26,23 @@ const (
 	pingPeriod = (pongWait * 9) / 10
 
 	// Maximum message size allowed from peer.
-	maxMessageSize = 512
+	maxMessageSize = 51200
 )
 
 var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin:func(r *http.Request) bool {return true},
+	ReadBufferSize:  102400,
+	WriteBufferSize: 102400,
+	CheckOrigin:func(r *http.Request) bool {
+		return true
+	},
 }
 
 // connection is an middleman between the websocket connection and the hub.
 type Connection struct {
 	// The websocket connection.
-	ws *websocket.Conn
+	ws   *websocket.Conn
+
+	mu   sync.Mutex
 
 	// Buffered channel of outbound messages.
 	send chan []byte
@@ -47,27 +51,31 @@ type Connection struct {
 // readPump pumps messages from the websocket connection to the hub.
 func (c *Connection) readPump() {
 	defer func() {
+		log.Println("Exiting socket")
 		h.unregister <- c
 		c.ws.Close()
 	}()
 	c.ws.SetReadLimit(maxMessageSize)
 	c.ws.SetReadDeadline(time.Now().Add(pongWait))
-	c.ws.SetPongHandler(func(string) error { c.ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+	c.ws.SetPongHandler(func(string) error {
+		c.ws.SetReadDeadline(time.Now().Add(pongWait)); return nil
+	})
 	for {
 		messageType, message, err := c.ws.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
 				log.Printf("error: %v", err)
 			}
+			log.Printf("%v", err)
 			break
 		}
-		handlers.HandleMessage(c, messageType, message)
+		go handlers.HandleMessage(c, messageType, message)
 	}
 
 }
 
 func (c *Connection) Log(message string) {
-	m := handlers.Message {
+	m := handlers.Message{
 		Action: "log",
 		Data: message,
 	}
@@ -77,8 +85,11 @@ func (c *Connection) Log(message string) {
 
 // write writes a message with the given message type and payload.
 func (c *Connection) write(mt int, payload []byte) error {
+	c.mu.Lock()
 	c.ws.SetWriteDeadline(time.Now().Add(writeWait))
-	return c.ws.WriteMessage(mt, payload)
+	err := c.ws.WriteMessage(mt, payload)
+	c.mu.Unlock()
+	return err;
 }
 
 func (c *Connection) Write(data interface{}) {

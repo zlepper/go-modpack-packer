@@ -1,0 +1,67 @@
+<md-dialog flex>
+    <form>
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2 translate>BUILD.PROGRESS</h2>
+            </div>
+        </md-toolbar>
+        <md-dialog-content class="md-dialog-content">
+            <section ng-show="build.state == 'info'">
+                <h2 translate>BUILD.MOD.DETAILS</h2>
+                <div ng-repeat="mod in build.mods | orderBy:'name'" ng-init="showDetails = false"
+                     ng-show="!mod.$$isDone || build.showDone">
+                    <md-button class="mod-button" ng-click="showDetails = !showDetails">{{!!mod.name ? mod.name :
+                        mod.filename}}
+                    </md-button>
+                    <div ng-show="showDetails" class="collapsible">
+                        <div layout="row">
+                            <md-input-container flex="50">
+                                <label translate>BUILD.MOD.NAME</label>
+                                <input ng-model="mod.name" type="text">
+                            </md-input-container>
+                            <md-input-container flex="50">
+                                <label translate>BUILD.MOD.MODID</label>
+                                <input ng-model="mod.modid" type="text">
+                            </md-input-container>
+                        </div>
+                        <div layout="row">
+                            <md-input-container flex="50">
+                                <label translate>BUILD.MOD.VERSION</label>
+                                <input ng-model="mod.version" type="text">
+                            </md-input-container>
+                            <md-input-container flex="50">
+                                <label translate>BUILD.MOD.MCVERSION</label>
+                                <input ng-model="mod.mcversion" type="text">
+                            </md-input-container>
+                        </div>
+                        <md-input-container class="md-block">
+                            <label translate>BUILD.MOD.AUTHORS</label>
+                            <input ng-model="mod.authors" type="text">
+                        </md-input-container>
+                        <md-input-container class="md-block">
+                            <label translate>BUILD.MOD.DESCRIPTION</label>
+                            <textarea ng-model="mod.description"></textarea>
+                        </md-input-container>
+                    </div>
+                </div>
+            </section>
+            <section ng-show="build.state == 'building'">
+                <div>
+                    <p>Total progress</p>
+                    <md-progress-linear md-mode="determinate" value="{{build.progress}}"></md-progress-linear>
+                </div>
+                <md-list role="list">
+                    <md-list-item role="listitem" ng-repeat="todo in build.todos">
+                        <p>{{todo}}</p>
+                    </md-list-item>
+                </md-list>
+            </section>
+        </md-dialog-content>
+        <md-dialog-actions layout="row">
+            <md-checkbox class="mod-checkbox" ng-model="build.showDone">{{'BUILD.SHOWDONE' | translate}}</md-checkbox>
+            <span flex></span>
+            <md-button class="md-primary md-raised" ng-click="build.build()">{{'BUILD.BUILD'|translate}}</md-button>
+            <md-button class="md-warn md-raised" ng-click="build.cancel()">{{'BUILD.CANCEL' | translate}}</md-button>
+        </md-dialog-actions>
+    </form>
+</md-dialog>

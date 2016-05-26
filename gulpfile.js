@@ -56,7 +56,8 @@ var gulp = require('gulp'),
             bowersource + "angular-ui-router/release/angular-ui-router.js",
             bowersource + "angular-local-storage/dist/angular-local-storage.js",
             bowersource + "angular-websocket/dist/angular-websocket.js",
-            bowersource + "tweenlite/TweenLite.min.js"
+            "source/javascript/vendor/TweenLite.js",
+            "source/javascript/vendor/CSSPlugin.js"
         ]
     },
 
