@@ -47,7 +47,7 @@
             </section>
             <section ng-show="build.state == 'building'">
                 <div>
-                    <p>Total progress</p>
+                    <p>Total progress {{build.progressNumber}}/{{build.total}}</p>
                     <md-progress-linear md-mode="determinate" value="{{build.progress}}"></md-progress-linear>
                 </div>
                 <md-list role="list">
