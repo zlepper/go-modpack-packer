@@ -16,7 +16,7 @@ const packingPartName string = "packing-part"
 func build(conn websocketConnection, data interface{}) {
 	dat := data.(map[string]interface{})
 	modpack := createSingleModpackData(dat["modpack"])
-	mods := make([]ModResponse, 0)
+	mods := make([]Mod, 0)
 	modsData := dat["mods"]
 	modsDat, _ := json.Marshal(modsData)
 	err := json.Unmarshal(modsDat, &mods)
@@ -27,7 +27,7 @@ func build(conn websocketConnection, data interface{}) {
 	buildModpack(modpack, mods, conn)
 }
 
-func buildModpack(modpack Modpack, mods []ModResponse, conn websocketConnection) {
+func buildModpack(modpack Modpack, mods []Mod, conn websocketConnection) {
 	// Create output directory
 	outputDirectory := path.Join(modpack.OutputDirectory, modpack.Name)
 	os.MkdirAll(outputDirectory, os.ModePerm)
@@ -145,7 +145,7 @@ func packFolder(zipWriter *zip.Writer, folder string, parent string, conn websoc
 	}
 }
 
-func packMod(mod ModResponse, conn websocketConnection, outputDirectory string) {
+func packMod(mod Mod, conn websocketConnection, outputDirectory string) {
 	Write(conn, packingPartName, mod.Filename)
 	outputDirectory = path.Join(outputDirectory, "mods", mod.ModId)
 	os.MkdirAll(outputDirectory, os.ModePerm)
@@ -179,3 +179,4 @@ func packMod(mod ModResponse, conn websocketConnection, outputDirectory string) 
 
 	Write(conn, donePackingPartName, mod.Filename)
 }
+

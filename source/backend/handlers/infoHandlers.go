@@ -59,7 +59,7 @@ func gatherInformationAboutMod(modfile string, conn websocketConnection) {
 	}
 }
 
-type ModResponse struct {
+type Mod struct {
 	ModId            string `json:"modid"`
 	Name             string `json:"name"`
 	Description      string `json:"description"`
@@ -71,7 +71,7 @@ type ModResponse struct {
 	Filename         string `json:"filename"`
 }
 
-func (m *ModResponse) normalizeId() {
+func (m *Mod) normalizeId() {
 	reg := []rune("\\\\|\\/|\\||:|\\*|\\\"|<|>|'|\\?|&|\\$|@|=|;|\\+|\\s|,|{|}|\\^|%|`|\\]|\\[|~|#") // Also known as the Fuck You Regex
 	for i := 0; i < 32; i++ {
 		c := rune(i)
@@ -87,7 +87,7 @@ func (m *ModResponse) normalizeId() {
 	m.ModId = re.ReplaceAllString(m.ModId, "")
 }
 
-type Mod struct {
+type ModInfo struct {
 	ModId            string `json:"modid"`
 	Name             string `json:"name"`
 	Description      string `json:"description"`
@@ -99,11 +99,11 @@ type Mod struct {
 	Author           string `json:"author"`
 	Credits          string `json:"credits"`
 	ModListVersion   int32 `json:"modListVersion"`
-	ModList          []Mod `json:"modList"`
+	ModList          []ModInfo `json:"modList"`
 }
 
-func (m *Mod) createModResponse(filename string) ModResponse {
-	modRes := ModResponse{
+func (m *ModInfo) createModResponse(filename string) Mod {
+	modRes := Mod{
 		ModId:m.ModId,
 		Name:m.Name,
 		Description:m.Description,
@@ -123,7 +123,7 @@ func (m *Mod) createModResponse(filename string) ModResponse {
 	return modRes
 }
 
-func (m *ModResponse) getVersionString() string {
+func (m *Mod) getVersionString() string {
 	return m.ModId + "-" + m.MinecraftVersion + "-" + m.Version
 }
 
@@ -134,8 +134,8 @@ func readInfoFile(file io.ReadCloser, conn websocketConnection, size int64, file
 	if err != nil {
 		conn.Log(err.Error() + "\n" + string(debug.Stack()))
 	}
-	var mod Mod
-	normalMod := make([]Mod, 0)
+	var mod ModInfo
+	normalMod := make([]ModInfo, 0)
 	err = json.Unmarshal(content, &normalMod)
 	if err != nil {
 		// Try with mod version 2, or with litemod
@@ -155,12 +155,12 @@ func readInfoFile(file io.ReadCloser, conn websocketConnection, size int64, file
 	if len(normalMod) > 0 {
 		createModResponse(conn, normalMod[0], filename)
 	} else {
-		createModResponse(conn, Mod{}, filename)
+		createModResponse(conn, ModInfo{}, filename)
 	}
 
 }
 
-func createModResponse(conn websocketConnection, mod Mod, filename string) {
+func createModResponse(conn websocketConnection, mod ModInfo, filename string) {
 	const modDataReadyEvent string = "mod-data-ready"
 	modRes := mod.createModResponse(filename)
 	modRes.normalizeId()
