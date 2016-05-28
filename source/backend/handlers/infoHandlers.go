@@ -71,6 +71,10 @@ type Mod struct {
 	Filename         string `json:"filename"`
 }
 
+func (m *Mod) GenerateOnlineVersion() string {
+	return m.MinecraftVersion + "-" + m.Version
+}
+
 func (m *Mod) normalizeId() {
 	reg := []rune("\\\\|\\/|\\||:|\\*|\\\"|<|>|'|\\?|&|\\$|@|=|;|\\+|\\s|,|{|}|\\^|%|`|\\]|\\[|~|#") // Also known as the Fuck You Regex
 	for i := 0; i < 32; i++ {

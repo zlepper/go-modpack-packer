@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"regexp"
+	"strings"
 )
 
 type inputDirData struct {
@@ -75,6 +77,14 @@ type Modpack struct {
 	AdditionalFolders    []Folder `json:"additionalFolders"`
 	Technic              TechnicConfig `json:"technic"`
 	Ftb                  FtbConfig `json:"ftb"`
+}
+
+func (m *Modpack) GetSlug() string {
+	re := regexp.MustCompile("\\|/|\\||:|\\*|\"|<|>|\\?|'")
+	s := re.ReplaceAllString(m.Name, "")
+	s := strings.Replace(s, " ", "-", -1)
+	s := strings.ToLower(s)
+	return s
 }
 
 func (m *Modpack) GetVersionString() string {
