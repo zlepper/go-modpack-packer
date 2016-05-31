@@ -90,11 +90,71 @@ func (s *solderClient) AddMod(mod handlers.Mod) string {
 	// TODO Return
 }
 
-func (s *solderClient) GetModVersionId(modId, modVersion string) string {
+func (s *solderClient) GetActiveModversionInBuildId(mod handlers.Mod, buildId string) string {
+	Url := s.createUrl("modpack/build/" + buildId)
+	res := s.doRequest(http.MethodGet, Url.String(), "")
+	defer res.Close()
+	build := crawlers.CrawlBuild(res)
+
+}
+
+func (s *solderClient) SetModVersionInBuild(mod handlers.Mod, buildId string) {
+	modVersionId := s.GetModVersionId(mod)
+	Url := s.createUrl("modpack/build/modify")
+
+	form := url.Values{}
+	form.Add("action", "version")
+	form.Add("build-id", buildId)
+	form.Add("version", modVersionId)
+	form.Add("modversion-id", s.GetActiveModversionInBuildId(mod, buildId))
+
+	res := s.doRequest(http.MethodPost, Url.String(), form.Encode())
+	defer res.Close()
+
+}
+
+func (s *solderClient) IsPackOnline(modpack handlers.Modpack) bool {
+	return s.GetModpackId(modpack.GetSlug()) != ""
+}
+
+func (s *solderClient) IsBuildOnline(modpack handlers.Modpack) bool {
+	return s.GetBuildId(modpack) != ""
+}
+
+func (s *solderClient) GetModVersionId(mod handlers.Mod) string {
+	modId, modVersion := mod.ModId, mod.GenerateOnlineVersion()
 	l, ok := s.modVersionIdCache[modId]
 	if ok {
 		id, ok := l[modVersion]
+		if ok {
+			return id
+		}
 	}
+
+	solderModId := s.GetModId(modId)
+	Url := s.createUrl("mod/view/" + solderModId)
+	res := s.doRequest(http.MethodGet, Url.String(), "")
+	defer res.Close()
+	modVersions := crawlers.CrawlModVersion(res)
+	var id string
+
+	for _, mv := range modVersions {
+		if mv.Version == modVersion {
+			id = mv.Id
+			break
+		}
+	}
+
+	if id != "" {
+		l, contains := s.modVersionIdCache[modId]
+		if !contains {
+			l = make(map[string]string, 0)
+			s.modVersionIdCache[modId] = l
+		}
+		l[modVersion] = id
+	}
+
+	return id
 }
 
 func (s *solderClient) CreateBuild(modpack handlers.Modpack) string {
