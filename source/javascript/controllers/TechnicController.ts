@@ -1,9 +1,21 @@
 module TechnicController {
     export class TechnicController {
-        static $inject = ["application", "$translatePartialLoader", "$mdDialog", "$mdMedia", "forge"];
-        
-        constructor(protected application: Application.Application, protected $translatePartialLoader: angular.translate.ITranslatePartialLoaderService, protected $mdDialog: angular.material.IDialogService, protected $mdMedia: angular.material.IMedia, protected forge: ForgeVersion.ForgeVersionService) {
+        static $inject = ["application", "$translatePartialLoader", "$mdDialog", "$mdMedia", "forge", "goComm", "$rootScope"];
+
+        public buckets: Array<string> = [];
+
+        constructor(protected application: Application.Application,
+                    protected $translatePartialLoader: angular.translate.ITranslatePartialLoaderService,
+                    protected $mdDialog: angular.material.IDialogService,
+                    protected $mdMedia: angular.material.IMedia,
+                    protected forge: ForgeVersion.ForgeVersionService,
+                    protected goComm: GoCommService.GoCommService,
+                    protected $rootScope: angular.IRootScopeService) {
             $translatePartialLoader.addPart("technic");
+            var controller = this;
+            $rootScope.$on("found-aws-buckets", function(event: angular.IAngularEvent, buckets: Array<string>) {
+                controller.buckets = buckets;
+            });
         }
 
         public build(ev: MouseEvent): void {
@@ -33,6 +45,11 @@ module TechnicController {
         
         public filterByMcVersion(input: ForgeVersion.ForgeVersion, minecraftVersion: string) {
             return input.minecraftVersion === minecraftVersion;
+        }
+
+        public getAwsBuckets():void {
+            console.log("GEt aws buckets");
+            this.goComm.send("get-aws-buckets", this.application.modpack)
         }
     }
 

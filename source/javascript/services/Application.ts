@@ -1,5 +1,18 @@
 module Application {
 
+    export class AWSConfig {
+        public accessKey: string = "";
+        public secretKey: string = "";
+        public region: string = "us-east-1";
+        public bucket: string = "";
+    }
+
+    export class UploadConfig {
+        public type: string = "none";
+        public aws: AWSConfig = new AWSConfig();
+    }
+
+
     export class TechnicConfig {
         public isSolderPack:number = 1;
 
@@ -8,6 +21,18 @@ module Application {
 
         public checkPermissions:boolean = false;
         public isPublicPack:boolean = true;
+        
+        public memory: number = 0;
+        public java: string = "1.8";
+
+        public upload: UploadConfig = new UploadConfig();
+    }
+
+    export class SolderInfo {
+        public use: boolean = false;
+        public url: string = "";
+        public username: string = "";
+        public password: string = "";
     }
 
     export class FtbConfig {
@@ -29,6 +54,7 @@ module Application {
         public additionalFolders:Array<Folder> = [];
         public technic:TechnicConfig = new TechnicConfig();
         public ftb:FtbConfig = new FtbConfig();
+        public solder: SolderInfo = new SolderInfo();
 
         constructor() {
             this.name = "Unnamed modpack";
@@ -46,6 +72,7 @@ module Application {
             modpack.additionalFolders = data.additionalFolders;
             modpack.technic = data.technic;
             modpack.ftb = data.ftb;
+            modpack.solder = data.solder;
             return modpack;
         }
         
@@ -116,7 +143,9 @@ module Application {
                 });
                 if (self.modpacks.length) {
                     self.modpack = self.modpacks[0];
-                    self.$state.go("modpack");
+                    if(self.$state.is("home")) {
+                        self.$state.go("modpack");
+                    }
                 }
             });
         }

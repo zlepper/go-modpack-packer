@@ -24,6 +24,7 @@ module ForgeVersion {
     export class ForgeVersionService {
         static $inject = ["$http"];
         public forgeVersions: Array<ForgeVersion> = [];
+        public minecraftVersions: Array<string> = [];
         constructor(protected $http: angular.IHttpService) {
             this.getForgeVersions();
         }
@@ -61,6 +62,10 @@ module ForgeVersion {
                     fv.downloadUrl = downloadUrl;
                     fv.minecraftVersion = mcversion;
                     this.forgeVersions.push(fv);
+
+                    if (this.minecraftVersions.indexOf(mcversion) === -1) {
+                        this.minecraftVersions.push(mcversion);
+                    }
 
                     concurrentGone = 0;
                 } else {

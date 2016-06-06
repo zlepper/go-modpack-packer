@@ -3,10 +3,15 @@ package handlers
 import (
 	"archive/zip"
 	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/zlepper/go-modpack-packer/source/backend/solder"
+	"github.com/zlepper/go-modpack-packer/source/backend/solder/s3"
+	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path"
@@ -16,10 +21,10 @@ import (
 const donePackingPartName string = "done-packing-part"
 const packingPartName string = "packing-part"
 
-func build(conn websocketConnection, data interface{}) {
+func build(conn types.WebsocketConnection, data interface{}) {
 	dat := data.(map[string]interface{})
-	modpack := createSingleModpackData(dat["modpack"])
-	mods := make([]Mod, 0)
+	modpack := types.CreateSingleModpackData(dat["modpack"])
+	mods := make([]types.Mod, 0)
 	modsData := dat["mods"]
 	modsDat, _ := json.Marshal(modsData)
 	err := json.Unmarshal(modsDat, &mods)
@@ -30,105 +35,112 @@ func build(conn websocketConnection, data interface{}) {
 	buildModpack(modpack, mods, conn)
 }
 
-type outputInfo struct {
-	File             string
-	Name             string
-	Id               string
-	Version          string
-	MinecraftVersion string
-	Description      string
-	Author           string
-	Url              string
-	ProgressKey      string
-}
-
-func (o *outputInfo) GenerateOnlineVersion() string {
-	return o.MinecraftVersion + "-" + o.Version
-}
-
-func buildModpack(modpack Modpack, mods []Mod, conn websocketConnection) {
+func buildModpack(modpack types.Modpack, mods []types.Mod, conn types.WebsocketConnection) {
 	// Create output directory
 	outputDirectory := path.Join(modpack.OutputDirectory, modpack.Name)
 	os.MkdirAll(outputDirectory, os.ModePerm)
 	var total int
 
-	var ch chan outputInfo
-	if modpack.Solder.Url {
-		ch = make(chan outputInfo)
-	}
+	var ch chan *types.OutputInfo
+	ch = make(chan *types.OutputInfo)
 
 	// Handle forge
 	if modpack.Technic.CreateForgeZip {
 		total++
-		go packForgeFolder(modpack, conn, outputDirectory, ch)
+		go packForgeFolder(modpack, conn, outputDirectory, &ch)
 	}
 
 	// Handle any additional folder
 	for _, folder := range modpack.AdditionalFolders {
 		if folder.Include {
 			total++
-			go packAdditionalFolder(modpack, path.Join(modpack.InputDirectory, folder.Name), outputDirectory, conn, ch)
+			go packAdditionalFolder(modpack, path.Join(modpack.InputDirectory, folder.Name), outputDirectory, conn, &ch)
 		}
 	}
 
 	// Handle mods
 	total += len(mods)
-	Write(conn, "total-to-pack", total)
+	conn.Write("total-to-pack", total)
 	for _, mod := range mods {
-		go packMod(mod, conn, outputDirectory, ch)
+		go packMod(mod, conn, outputDirectory, &ch)
 	}
 
-	if ch != nil {
-		updateSolder(modpack, ch, conn, total)
+	infos := make([]*types.OutputInfo, 0)
+
+	count := 0
+	for count < total {
+		info := <-ch
+		infos = append(infos, info)
+		count++
+	}
+
+	switch modpack.Technic.Upload.Type {
+	case "none":
+		{
+			return // TODO Send back information and await clearance from client
+		}
+	case "ftp":
+		{
+
+		}
+	case "s3":
+		{
+			s3.UploadFiles(&modpack, infos, conn)
+		}
+	}
+
+	if modpack.Solder.Use {
+		updateSolder(modpack, conn, infos)
 	}
 }
 
-func updateSolder(modpack Modpack, ch chan outputInfo, conn websocketConnection, total int) {
+func ftpUpload(modpack types.Modpack) {
+
+}
+
+func updateSolder(modpack types.Modpack, conn types.WebsocketConnection, infos []*types.OutputInfo) {
 	// Create solder client
-	solderclient := NewSolderClient(modpack.Solder.Url)
+	solderclient := solder.NewSolderClient(modpack.Solder.Url)
 	loginSuccessful := solderclient.Login(modpack.Solder.Username, modpack.Solder.Password)
 	if !loginSuccessful {
-		panic("Could not login to solder with the supplied credentials.")
+		log.Panic("Could not login to solder with the supplied credentials.")
 	}
 
 	var modpackId string
-	if solderclient.IsPackOnline(modpack) {
+	if solderclient.IsPackOnline(&modpack) {
 		modpackId = solderclient.GetModpackId(modpack.GetSlug())
 	} else {
 		modpackId = solderclient.CreatePack(modpack.Name, modpack.GetSlug())
 	}
 
 	var buildId string
-	if solderclient.IsBuildOnline(modpack) {
-		buildId = solderclient.GetBuildId(modpack)
+	if solderclient.IsBuildOnline(&modpack) {
+		buildId = solderclient.GetBuildId(&modpack)
 	} else {
-		buildId = solderclient.CreateBuild(modpack, modpackId)
-	}
-	count := 0
-	for count < total {
-		info := <-ch
-		go addInfoToSolder(info, buildId, conn, solderclient)
-		count++
+		buildId = solderclient.CreateBuild(&modpack, modpackId)
 	}
 
+	for _, info := range infos {
+		go addInfoToSolder(info, buildId, conn, solderclient)
+	}
 }
 
-func addInfoToSolder(info outputInfo, buildId string, conn websocketConnection, solderclient *SolderClient) {
+func addInfoToSolder(info *types.OutputInfo, buildId string, conn types.WebsocketConnection, solderclient *solder.SolderClient) {
 	var modid string
 	modid = solderclient.GetModId(info.Id)
 	if modid == "" {
 		modid = solderclient.AddMod(info)
 	}
 	if modid == "" {
-		panic("Something went wrong wehn adding a mod to solder.")
+		log.Panic("Something went wrong wehn adding a mod to solder.")
 	}
 
 	if !solderclient.IsModversionOnline(info) {
 		md5, err := ComputeMd5(info.File)
 		if err != nil {
-			panic(err)
+			log.Panic(err)
 		}
-		solderclient.AddModVersion(info.Id, string(md5), info.GenerateOnlineVersion())
+		solderclient.AddModVersion(info.Id, hex.EncodeToString(md5), info.GenerateOnlineVersion())
 	}
 	if !solderclient.IsModversionActiveInBuild(info, buildId) {
 		if solderclient.IsModInBuild(info, buildId) {
@@ -138,7 +150,7 @@ func addInfoToSolder(info outputInfo, buildId string, conn websocketConnection, 
 		}
 	}
 
-	Write(conn, "done-updating-solder", info.ProgressKey)
+	conn.Write("done-updating-solder", info.ProgressKey)
 }
 
 func ComputeMd5(filePath string) ([]byte, error) {
@@ -157,13 +169,13 @@ func ComputeMd5(filePath string) ([]byte, error) {
 	return hash.Sum(result), nil
 }
 
-func packForgeFolder(modpack Modpack, conn websocketConnection, outputDirectory string, ch chan outputInfo) {
+func packForgeFolder(modpack types.Modpack, conn types.WebsocketConnection, outputDirectory string, ch *chan *types.OutputInfo) {
 	const minecraftForge string = "Minecraft Forge"
 	outputDirectory = path.Join(outputDirectory, "mods", "forge")
 	os.MkdirAll(outputDirectory, os.ModePerm)
 	version := fmt.Sprintf("%v", modpack.Technic.ForgeVersion.Build)
 	outputFile := path.Join(outputDirectory, "forge-"+modpack.MinecraftVersion+"-"+version+".zip")
-	Write(conn, packingPartName, minecraftForge)
+	conn.Write(packingPartName, minecraftForge)
 
 	zipfile, err := os.Create(outputFile)
 	if err != nil {
@@ -193,10 +205,10 @@ func packForgeFolder(modpack Modpack, conn websocketConnection, outputDirectory 
 		conn.Log("Error white writing content to zip file: " + err.Error())
 		return
 	}
-	Write(conn, donePackingPartName, minecraftForge)
+	conn.Write(donePackingPartName, minecraftForge)
 
 	if ch != nil {
-		info := outputInfo{
+		info := types.OutputInfo{
 			File:             outputFile,
 			Name:             minecraftForge,
 			Id:               "forge",
@@ -207,12 +219,12 @@ func packForgeFolder(modpack Modpack, conn websocketConnection, outputDirectory 
 			Author:           "LexManos, cpw",
 			ProgressKey:      minecraftForge,
 		}
-		ch <- info
+		*ch <- &info
 	}
 }
 
-func packAdditionalFolder(modpack Modpack, folderPath string, outputDirectory string, conn websocketConnection, ch chan outputInfo) {
-	Write(conn, packingPartName, folderPath)
+func packAdditionalFolder(modpack types.Modpack, folderPath string, outputDirectory string, conn types.WebsocketConnection, ch *chan *types.OutputInfo) {
+	conn.Write(packingPartName, folderPath)
 	inputFolderInfo, _ := os.Stat(folderPath)
 	outputDirectory = path.Join(outputDirectory, "mods", modpack.Name+"-"+inputFolderInfo.Name())
 	os.MkdirAll(outputDirectory, os.ModePerm)
@@ -229,22 +241,22 @@ func packAdditionalFolder(modpack Modpack, folderPath string, outputDirectory st
 
 	packFolder(zipWriter, folderPath, ".", conn)
 
-	Write(conn, donePackingPartName, folderPath)
+	conn.Write(donePackingPartName, folderPath)
 
 	if ch != nil {
-		info := outputInfo{
+		info := types.OutputInfo{
 			File:             outputFile,
-			Name:             modpack + "-" + inputFolderInfo.Name(),
-			Id:               strings.ToLower(modpack + "-" + inputFolderInfo.Name()),
+			Name:             modpack.Name + "-" + inputFolderInfo.Name(),
+			Id:               strings.ToLower(modpack.Name + "-" + inputFolderInfo.Name()),
 			Version:          modpack.Version,
 			MinecraftVersion: modpack.MinecraftVersion,
 			ProgressKey:      folderPath,
 		}
-		ch <- info
+		*ch <- &info
 	}
 }
 
-func packFolder(zipWriter *zip.Writer, folder string, parent string, conn websocketConnection) {
+func packFolder(zipWriter *zip.Writer, folder string, parent string, conn types.WebsocketConnection) {
 	files, _ := ioutil.ReadDir(folder)
 	for _, file := range files {
 		if file.IsDir() {
@@ -275,11 +287,11 @@ func packFolder(zipWriter *zip.Writer, folder string, parent string, conn websoc
 	}
 }
 
-func packMod(mod Mod, conn websocketConnection, outputDirectory string, ch chan outputInfo) {
-	Write(conn, packingPartName, mod.Filename)
+func packMod(mod types.Mod, conn types.WebsocketConnection, outputDirectory string, ch *chan *types.OutputInfo) {
+	conn.Write(packingPartName, mod.Filename)
 	outputDirectory = path.Join(outputDirectory, "mods", mod.ModId)
 	os.MkdirAll(outputDirectory, os.ModePerm)
-	outputFile := path.Join(outputDirectory, mod.getVersionString()+".zip")
+	outputFile := path.Join(outputDirectory, mod.GetVersionString()+".zip")
 	zipfile, err := os.Create(outputFile)
 	if err != nil {
 		conn.Log("Error when creating zip file: " + err.Error() + "\n" + outputFile)
@@ -307,13 +319,13 @@ func packMod(mod Mod, conn websocketConnection, outputDirectory string, ch chan 
 		conn.Log("Error white writing content to zip file: " + err.Error() + "\n" + outputFile)
 	}
 
-	Write(conn, donePackingPartName, mod.Filename)
+	conn.Write(donePackingPartName, mod.Filename)
 
 	if ch != nil {
-		info := outputInfo{
+		info := types.OutputInfo{
 			File:             outputFile,
 			Name:             mod.Name,
-			Id:               mod.ModId,
+			Id:               strings.ToLower(mod.ModId),
 			Version:          mod.Version,
 			MinecraftVersion: mod.MinecraftVersion,
 			Description:      mod.Description,
@@ -321,6 +333,6 @@ func packMod(mod Mod, conn websocketConnection, outputDirectory string, ch chan 
 			Url:              mod.Url,
 			ProgressKey:      mod.Filename,
 		}
-		ch <- info
+		*ch <- &info
 	}
 }

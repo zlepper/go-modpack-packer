@@ -9,6 +9,27 @@
     "FORGEVERSION": "Forge version",
     "PERMISSIONLEVEL": "Permission level",
     "PUBLICPACK": "Public pack",
-    "PRIVATEPACK": "Private pack"
+    "PRIVATEPACK": "Private pack",
+    "NOREQUIREMENT": "No requirement",
+    "JAVA": "Minimum required java version",
+    "SOLDER": {
+      "USE": "Use Solder",
+      "URL": "Solder url",
+      "USERNAME": "Username/email",
+      "PASSWORD": "Password"
+    },
+    "UPLOAD": {
+      "TYPE": "Upload type",
+      "FTP": "FTP",
+      "AWSS3": "AWS s3",
+      "NONE":"No automatic upload",
+      "AWS": {
+        "ACCESSKEY": "Access key",
+        "SECRETKEY": "Secret key",
+        "REGION": "Region",
+        "GETBUCKETS": "Get buckets",
+        "BUCKETS": "Buckets on S3"
+      }
+    }
   }
 }

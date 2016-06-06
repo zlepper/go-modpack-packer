@@ -1,12 +1,11 @@
 package crawlers
 
 import (
-	"net/http"
 	"github.com/PuerkitoBio/goquery"
-	"strings"
-	"go/build"
-	"golang.org/x/net/html"
+	"log"
+	"net/http"
 	"regexp"
+	"strings"
 )
 
 type Mod struct {
@@ -21,8 +20,7 @@ type Mod struct {
 	Active      string
 }
 
-
-const complexNamePattern string = "(?:<.+?>)(.+?)(?:<.+?>) ?\\((.+?)\\)(?:.+)"
+const complexNamePattern string = `(.+?) ?\((.+?)\)(?:.+)`
 
 func CrawlModList(res *http.Response) []Mod {
 	doc := makeDoc(res)
@@ -32,12 +30,10 @@ func CrawlModList(res *http.Response) []Mod {
 	tableRows := doc.Find("table > tbody > tr")
 
 	c := make(chan Mod)
-
-	for _, node := range tableRows.Nodes {
-		go func(n html.Node) {
+	tableRows.Each(func(_ int, r *goquery.Selection) {
+		go func(row *goquery.Selection) {
 
 			var mod Mod
-			row := newSingleSelection(n, doc)
 
 			mod.Id = row.Find(" td:nth-child(1)").Text()
 
@@ -45,24 +41,28 @@ func CrawlModList(res *http.Response) []Mod {
 			content := row.Find(" td:nth-child(2)").Text()
 			// Remove newlines
 			re := regexp.MustCompile("\\r\\n?|\\n|\\t")
-			re.ReplaceAll(content, []byte(""))
+			content = string(re.ReplaceAll([]byte(content), []byte("")))
 
 			// Remove double spaces
 			content = strings.Replace(content, "  ", " ", -1)
-
 			// Get matches
 			re = regexp.MustCompile(complexNamePattern)
-			r := re.FindAllString(content, -1)
-			mod.PrettyName = r[0]
-			mod.Name = r[1]
+			r := re.FindStringSubmatch(content)
+			if len(r) > 2 {
+				mod.PrettyName = r[1]
+				mod.Name = r[2]
+			} else {
+				log.Println(content)
+				log.Println(r)
+				log.Panic("Something went wrong when regexing stuff")
+			}
 
 			c <- mod
 
-		}(node)
-	}
-
+		}(r)
+	})
 	for i := 0; i < tableRows.Length(); i++ {
-		mod := <- c
+		mod := <-c
 		mods = append(mods, mod)
 	}
 

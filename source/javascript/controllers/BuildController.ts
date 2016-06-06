@@ -7,8 +7,9 @@ module BuildController {
         public showDone: boolean;
         public state: string = "info";
         public total: number;
-        public progress: number = 0;
         public progressNumber: number = 0;
+        public uploading: string = "";
+        public uploadNumber: number = 0;
         constructor(protected application: Application.Application, protected $mdDialog: angular.material.IDialogService, protected goComm: GoCommService.GoCommService, protected $rootScope: angular.IRootScopeService, protected $translatePartialLoader:angular.translate.ITranslatePartialLoaderService) {
             var self = this;
             $translatePartialLoader.addPart("build");
@@ -32,11 +33,27 @@ module BuildController {
                     self.todos.splice(i, 1)
                 }
                 self.progressNumber++;
-                // GASP MATH!
-                self.progress = (self.progressNumber / self.total) * 100;
-                console.log(self.progress);
             });
-            
+
+            $rootScope.$on("starting-upload", function(event:angular.IAngularEvent, key: string) {
+                self.uploading = key;
+                console.log("Starting upload of " + key);
+            });
+
+            $rootScope.$on("finished-uploading", function(event:angular.IAngularEvent, key: string) {
+                self.uploadNumber++;
+                console.log("Finished upload of " + key);
+            });
+
+            $rootScope.$on("finished-all-uploading", function() {
+                self.uploading = "";
+                console.log("Finished all uploading");
+            });
+
+            $rootScope.$on("started-uploading-all", function() {
+                console.log("Starting uploading");
+            });
+
             this.startBuild(application.modpack);
         }
         

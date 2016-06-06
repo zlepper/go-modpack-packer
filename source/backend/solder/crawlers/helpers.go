@@ -1,10 +1,10 @@
 package crawlers
 
 import (
-	"regexp"
-	"net/http"
 	"github.com/PuerkitoBio/goquery"
 	"log"
+	"net/http"
+	"regexp"
 )
 
 var re *regexp.Regexp
@@ -14,7 +14,7 @@ func init() {
 	re = regexp.MustCompile(namePattern)
 }
 
-func makeDoc(res *http.Response) (goquery.Document) {
+func makeDoc(res *http.Response) *goquery.Document {
 	doc, err := goquery.NewDocumentFromResponse(res)
 	if err != nil {
 		log.Panic(err)

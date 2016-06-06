@@ -1,19 +1,18 @@
 package crawlers
 
 import (
-	"net/http"
 	"github.com/PuerkitoBio/goquery"
 	"log"
+	"net/http"
 )
 
 type ModVersion struct {
 	Filesize string
-	Md5 string
-	Url string
-	Id string
-	Version string
+	Md5      string
+	Url      string
+	Id       string
+	Version  string
 }
-
 
 func CrawlModVersion(res *http.Response) []ModVersion {
 	mvs := make([]ModVersion, 0)
@@ -23,7 +22,7 @@ func CrawlModVersion(res *http.Response) []ModVersion {
 		log.Panic(err)
 	}
 
-	doc.Find("table > tbody > tr.version").Each(func(_, sel *goquery.Selection) {
+	doc.Find("table > tbody > tr.version").Each(func(_ int, sel *goquery.Selection) {
 		var mv ModVersion
 		mv.Id, _ = sel.Attr("rel")
 		mv.Version = sel.Find("td.version").Text()
@@ -34,4 +33,3 @@ func CrawlModVersion(res *http.Response) []ModVersion {
 
 	return mvs
 }
-

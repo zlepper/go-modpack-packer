@@ -4,71 +4,98 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"log"
-	"path"
-	"os"
+	"encoding/base64"
+	"encoding/hex"
+	"errors"
+	"fmt"
+	"io"
 	"io/ioutil"
+	"log"
+	"os"
+	"path"
 )
-var commonIV []byte
-var cypher cipher.Block
+
+// NOTE: Don't ever ask me to explain how this works, i barely understand it myself.
+// Derived from this answer on SO: http://stackoverflow.com/a/18819040/3950006
+var key []byte
 
 func init() {
 	// Read bytes from file
 	keyfile := path.Join(os.Args[1], "key")
-	var bytes []byte
-	bytes, err := ioutil.ReadFile(keyfile)
+	var err error
+	key, err = ioutil.ReadFile(keyfile)
 	if err == nil {
-		getCommonIV(bytes)
 		return
 	}
 
-	bytes = make([]byte, 32)
-	_, err = rand.Read(bytes)
+	key = make([]byte, 32)
+	_, err = rand.Read(key)
 	if err != nil {
 		log.Printf("%v", err)
 		return
 	}
-	ioutil.WriteFile(keyfile, bytes, os.ModePerm)
-	getCommonIV(bytes)
-
+	ioutil.WriteFile(keyfile, key, os.ModePerm)
 }
 
-func getCommonIV(key []byte) {
-	ivFile := path.Join(os.Args[1], "iv")
-	commonIV, err := ioutil.ReadFile(ivFile)
-	if err == nil {
-		createCypher(key)
-		return
-	}
-	commonIV = make([]byte, 16)
-	_, err = rand.Read(commonIV)
+func encrypt(key, text []byte) ([]byte, error) {
+	block, err := aes.NewCipher(key)
 	if err != nil {
-		log.Printf("%v", err)
-		return
+		return nil, err
 	}
-	ioutil.WriteFile(ivFile, commonIV, os.ModePerm)
-	createCypher(key)
+	b := base64.StdEncoding.EncodeToString(text)
+	ciphertext := make([]byte, aes.BlockSize+len(b))
+	iv := ciphertext[:aes.BlockSize]
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		return nil, err
+	}
+	cfb := cipher.NewCFBEncrypter(block, iv)
+	cfb.XORKeyStream(ciphertext[aes.BlockSize:], []byte(b))
+	return ciphertext, nil
 }
 
-
-func createCypher(key []byte) {
-	cypher, err := aes.NewCipher(key)
+func Encrypt(text []byte) []byte {
+	b, err := encrypt(key, text)
 	if err != nil {
-		log.Printf("%v", err)
-		return
+		log.Panic(err)
 	}
+	return b
 }
 
-func Encrypt(plain []byte) []byte {
-	cfb := cipher.NewCFBEncrypter(cypher, commonIV)
-	encryptedText := make([]byte, len(plain))
-	cfb.XORKeyStream(encryptedText, plain)
-	return encryptedText
+func EncryptString(text string) string {
+	return fmt.Sprintf("%0x", Encrypt([]byte(text)))
 }
 
-func Decrypt(encrypted []byte) []byte {
-	cfbdec := cipher.NewCFBDecrypter(cypher, commonIV)
-	plain := make([]byte, len(encrypted))
-	cfbdec.XORKeyStream(plain, encrypted)
-	return plain
+func decrypt(key, text []byte) ([]byte, error) {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+	if len(text) < aes.BlockSize {
+		return nil, errors.New("ciphertext too short")
+	}
+	iv := text[:aes.BlockSize]
+	text = text[aes.BlockSize:]
+	cfb := cipher.NewCFBDecrypter(block, iv)
+	cfb.XORKeyStream(text, text)
+	data, err := base64.StdEncoding.DecodeString(string(text))
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func Decrypt(text []byte) []byte {
+	b, err := decrypt(key, text)
+	if err != nil {
+		log.Panic(err)
+	}
+	return b
+}
+
+func DecryptString(text string) string {
+	by, err := hex.DecodeString(text)
+	if err != nil {
+		log.Panic(err)
+	}
+	return string(Decrypt(by))
 }

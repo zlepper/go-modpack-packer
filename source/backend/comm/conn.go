@@ -6,13 +6,14 @@
 package comm
 
 import (
+	"encoding/json"
 	"github.com/gorilla/websocket"
+	"github.com/zlepper/go-modpack-packer/source/backend/handlers"
+	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	"log"
 	"net/http"
-	"time"
-	"github.com/zlepper/go-modpack-packer/source/backend/handlers"
-	"encoding/json"
 	"sync"
+	"time"
 )
 
 const (
@@ -32,7 +33,7 @@ const (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  102400,
 	WriteBufferSize: 102400,
-	CheckOrigin:func(r *http.Request) bool {
+	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
 }
@@ -40,9 +41,9 @@ var upgrader = websocket.Upgrader{
 // connection is an middleman between the websocket connection and the hub.
 type Connection struct {
 	// The websocket connection.
-	ws   *websocket.Conn
+	ws *websocket.Conn
 
-	mu   sync.Mutex
+	mu sync.Mutex
 
 	// Buffered channel of outbound messages.
 	send chan []byte
@@ -58,7 +59,8 @@ func (c *Connection) readPump() {
 	c.ws.SetReadLimit(maxMessageSize)
 	c.ws.SetReadDeadline(time.Now().Add(pongWait))
 	c.ws.SetPongHandler(func(string) error {
-		c.ws.SetReadDeadline(time.Now().Add(pongWait)); return nil
+		c.ws.SetReadDeadline(time.Now().Add(pongWait))
+		return nil
 	})
 	for {
 		messageType, message, err := c.ws.ReadMessage()
@@ -75,9 +77,9 @@ func (c *Connection) readPump() {
 }
 
 func (c *Connection) Log(message string) {
-	m := handlers.Message{
+	m := types.Message{
 		Action: "log",
-		Data: message,
+		Data:   message,
 	}
 	ms, _ := json.Marshal(m)
 	c.write(websocket.TextMessage, ms)
@@ -89,12 +91,20 @@ func (c *Connection) write(mt int, payload []byte) error {
 	c.ws.SetWriteDeadline(time.Now().Add(writeWait))
 	err := c.ws.WriteMessage(mt, payload)
 	c.mu.Unlock()
-	return err;
+	return err
 }
 
-func (c *Connection) Write(data interface{}) {
+func (c *Connection) WriteData(data interface{}) {
 	jsonData, _ := json.Marshal(data)
 	c.write(websocket.TextMessage, jsonData)
+}
+
+func (conn *Connection) Write(action string, data interface{}) {
+	message := types.Message{
+		Action: action,
+		Data:   data,
+	}
+	conn.WriteData(message)
 }
 
 // writePump pumps messages from the hub to the websocket connection.

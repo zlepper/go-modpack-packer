@@ -28,6 +28,14 @@
                 <strong translate>DETAILS.SELECT</strong>
             </md-button>
         </div>
+        <div layout="row">
+            <md-input-container class="md-block" flex>
+                <label>DETAILS.MINECRAFTVERSION</label>
+                <md-select ng-model="vm.application.modpack.minecraftVersion">
+                    <md-option ng-repeat="mcversion in vm.forge.minecraftVersions" ng-value="mcversion">{{mcversion}}</md-option>
+                </md-select>
+            </md-input-container>
+        </div>
         <md-list ng-hide="vm.application.modpack.additionalFolders | isEmpty">
             <md-subheader class="md-no-sticky"><span translate>DETAILS.ADDITIONALFOLDERS</span></md-subheader>
             <md-list-item ng-repeat="folder in vm.application.modpack.additionalFolders">

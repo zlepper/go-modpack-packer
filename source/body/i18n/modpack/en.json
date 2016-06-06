@@ -5,6 +5,7 @@
     "INPUT": "Input directory",
     "OUTPUT": "Output directory",
     "SELECT": "Select",
-    "ADDITIONALFOLDERS": "Additional folders to include"
+    "ADDITIONALFOLDERS": "Additional folders to include",
+    "MINECRAFTVERSION": "Minecraft Version"
   }
 }

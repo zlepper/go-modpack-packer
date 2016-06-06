@@ -4,34 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"github.com/zlepper/go-modpack-packer/source/backend/solder/s3"
+	"github.com/zlepper/go-modpack-packer/source/backend/types"
+	"runtime/debug"
 )
 
-type Message struct {
-	Action string      `json:"action"`
-	Data   interface{} `json:"data"`
-}
-
-type websocketConnection interface {
-	Log(message string)
-	Write(data interface{})
-}
-
-func Write(conn websocketConnection, action string, data interface{}) {
-	message := Message{
-		Action: action,
-		Data:   data,
-	}
-	conn.Write(message)
-}
-
-func HandleMessage(conn websocketConnection, messageType int, message []byte) {
+func HandleMessage(conn types.WebsocketConnection, messageType int, message []byte) {
 	defer func() {
 		if r := recover(); r != nil {
-			conn.Log(fmt.Sprint(r))
+			conn.Log(fmt.Sprint(r) + "\n" + string(debug.Stack()))
 		}
 	}()
 	if messageType == websocket.TextMessage {
-		var m Message
+		var m types.Message
 		json.Unmarshal(message, &m)
 		switch m.Action {
 		case "find-additional-folders":
@@ -53,6 +38,10 @@ func HandleMessage(conn websocketConnection, messageType int, message []byte) {
 		case "build":
 			{
 				build(conn, m.Data)
+			}
+		case "get-aws-buckets":
+			{
+				s3.GetAwsBuckets(conn, m.Data)
 			}
 		}
 	}

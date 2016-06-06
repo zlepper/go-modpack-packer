@@ -1,23 +1,22 @@
 package crawlers
 
 import (
-	"net/http"
 	"github.com/PuerkitoBio/goquery"
 	"log"
-	"golang.org/x/net/html"
+	"net/http"
 	"strings"
 )
 
 type Build struct {
-	Id string
+	Id        string
 	Minecraft string
-	Java string
-	Memory string
-	Mods []Mod
-	Version string
+	Java      string
+	Memory    string
+	Mods      []Mod
+	Version   string
 }
 
-func CrawlBuild(res *http.Response) (Build) {
+func CrawlBuild(res *http.Response) Build {
 	doc, err := goquery.NewDocumentFromResponse(res)
 	if err != nil {
 		log.Panic(err)
@@ -41,27 +40,25 @@ func CrawlBuild(res *http.Response) (Build) {
 	tableRows := doc.Find("table#mod-list > tbody > tr")
 
 	c := make(chan Mod)
-
-	for _, node := range tableRows.Nodes {
-		go func(n html.Node) {
+	tableRows.Each(func(_ int, r *goquery.Selection) {
+		go func(row *goquery.Selection) {
 
 			var mod Mod
-			row := newSingleSelection(n, doc)
 
 			// Use regex to calculate modname and slug
 			firstPart := row.Find("td:first-child").First().Text()
-			matches := re.FindAllString(firstPart, -1)
+			matches := re.FindStringSubmatch(firstPart)
 			mod.PrettyName = matches[0]
 			mod.Name = matches[1]
 
 			// Find mod id
 			anchor := row.Find("a")
 			url, _ := anchor.Attr("href")
-			mod.Id = url[strings.LastIndex(url, "/")+ 1:]
+			mod.Id = url[strings.LastIndex(url, "/")+1:]
 
 			// Find mod versions
 			mod.Versions = make([]string, 0)
-			row.Find("select > option").Each(func(_, s *goquery.Selection) {
+			row.Find("select > option").Each(func(_ int, s *goquery.Selection) {
 				_, exists := s.Attr("selected")
 				if exists {
 					mod.Active = s.Text()
@@ -70,19 +67,17 @@ func CrawlBuild(res *http.Response) (Build) {
 			})
 
 			c <- mod
-
-		}(node)
-	}
-
+		}(r)
+	})
 	for i := 0; i < tableRows.Length(); i++ {
-		mod := <- c
+		mod := <-c
 		build.Mods = append(build.Mods, mod)
 	}
 
 	return build
 }
 
-func CrawlBuildList(res *http.Response) ([]Build) {
+func CrawlBuildList(res *http.Response) []Build {
 
 	doc, err := goquery.NewDocumentFromResponse(res)
 	if err != nil {
@@ -93,19 +88,14 @@ func CrawlBuildList(res *http.Response) ([]Build) {
 
 	tableRows := doc.Find("table#dataTables > tbody > tr")
 
-	tableRows.Each(func(_, row *goquery.Selection) {
+	tableRows.Each(func(_ int, row *goquery.Selection) {
 		build := Build{
-			Id: row.Find("td:nth-child(1)").Text(),
+			Id:        row.Find("td:nth-child(1)").Text(),
 			Minecraft: row.Find("td:nth-child(2)").Text(),
-			Version: row.Find("td:nth-child(3)").Text(),
+			Version:   row.Find("td:nth-child(3)").Text(),
 		}
 		builds = append(builds, build)
 	})
 
 	return builds
-}
-
-// Helper constructor to create a selection of only one node
-func newSingleSelection(node *html.Node, doc *goquery.Document) *goquery.Selection {
-	return &goquery.Selection{[]*html.Node{node}, doc, nil}
 }

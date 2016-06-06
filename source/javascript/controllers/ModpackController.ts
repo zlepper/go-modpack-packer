@@ -10,9 +10,15 @@ module ModpackController {
 
     import Folder = Application.Folder;
     export class ModpackController {
-        static $inject = ["application", "electron", "$state", "$translatePartialLoader", "goComm", "$rootScope"];
+        static $inject = ["application", "electron", "$state", "$translatePartialLoader", "goComm", "$rootScope", "forge"];
 
-        constructor(protected application:Application.Application, protected electron:Electron.ElectronService, protected $state:angular.ui.IStateService, protected $translatePartialLoader:angular.translate.ITranslatePartialLoaderService, protected goComm:GoCommService.GoCommService, protected $rootScope:angular.IRootScopeService) {
+        constructor(protected application:Application.Application,
+                    protected electron:Electron.ElectronService,
+                    protected $state:angular.ui.IStateService,
+                    protected $translatePartialLoader:angular.translate.ITranslatePartialLoaderService,
+                    protected goComm:GoCommService.GoCommService,
+                    protected $rootScope:angular.IRootScopeService,
+                    protected forge:ForgeVersion.ForgeVersionService) {
             // Get translations for this page
             var controller = this;
             $translatePartialLoader.addPart("modpack");
@@ -54,7 +60,9 @@ module ModpackController {
                     }
                 });
 
-            })
+            });
+
+            
         }
 
         public selectInputDirectory():void {
@@ -64,6 +72,7 @@ module ModpackController {
         public selectOutputDirectory():void {
             this.electron.send('open-output-directory-dialog');
         }
+
     }
 
     angular.module("ModpackHelper").controller("ModpackController", ModpackController);

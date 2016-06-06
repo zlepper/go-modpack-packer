@@ -1,8 +1,12 @@
-package handlers
+package solder
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/zlepper/go-modpack-packer/source/backend/solder/crawlers"
+	"github.com/zlepper/go-modpack-packer/source/backend/types"
+	"io"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
@@ -13,8 +17,8 @@ import (
 )
 
 type SolderClient struct {
-	Client            http.Client
-	Url               url.URL
+	Client            *http.Client
+	Url               *url.URL
 	modVersionIdCache map[string]map[string]string
 	modIdCache        map[string]string
 	buildCache        map[string]crawlers.Build
@@ -33,20 +37,43 @@ func NewSolderClient(Url string) *SolderClient {
 	}
 
 	return &SolderClient{
-		Client: client,
-		Url:    u,
+		Client:            client,
+		Url:               u,
+		modVersionIdCache: make(map[string]map[string]string),
+		modIdCache:        make(map[string]string),
+		buildCache:        make(map[string]crawlers.Build),
 	}
 }
 
 func (s *SolderClient) createUrl(after string) url.URL {
-	var url url.URL
-	*url = *s.Url
+	url := *s.Url
 	url.Path = path.Join(url.Path, after)
 	return url
 }
 
+func (s *SolderClient) postForm(url string, data url.Values) *http.Response {
+	log.Println("POST FORM")
+	log.Println(url)
+	log.Println(data)
+	req, _ := http.NewRequest(http.MethodPost, url, strings.NewReader(data.Encode()))
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("X-Requested-With", "XMLHttpRequest")
+	resp, err := s.Client.Do(req)
+	if err != nil {
+		log.Panic(err)
+	}
+	return resp
+}
+
 func (s *SolderClient) doRequest(method, url, data string) *http.Response {
-	req, _ := http.NewRequest(method, url, data)
+	log.Println("DO REQUEST")
+	log.Println(url)
+	log.Println(data)
+	var body io.Reader
+	if data != "" {
+		body = strings.NewReader(data)
+	}
+	req, _ := http.NewRequest(method, url, body)
 	// Yes, this request is totally an ajax request...
 	req.Header.Add("X-Requested-With", "XMLHttpRequest")
 	response, err := s.Client.Do(req)
@@ -63,8 +90,8 @@ func (s *SolderClient) Login(email string, password string) bool {
 	form.Add("email", email)
 	form.Add("password", password)
 
-	response := s.doRequest(http.MethodPost, Url.String(), form.Encode())
-	defer response.Close()
+	response := s.postForm(Url.String(), form)
+	defer response.Body.Close()
 
 	return crawlers.CrawlLogin(response)
 }
@@ -74,14 +101,16 @@ func (s *SolderClient) CreatePack(name, slug string) string {
 	if id != "" {
 		return id
 	}
+	Url := s.createUrl("modpack/create")
+
 	form := url.Values{}
 	form.Add("name", name)
 	form.Add("slug", slug)
-	form.Add("hidden", false)
-	res := s.doRequest(http.MethodPost, "modpack/create", form.Encode())
-	defer res.Close()
+	form.Add("hidden", "false")
+	res := s.postForm(Url.String(), form)
+	defer res.Body.Close()
 
-	u, _ := res.Location()
+	u := res.Request.URL
 	segments := strings.Split(u.Path, "/")
 	segment := segments[len(segments)-1]
 	if _, err := strconv.Atoi(segment); err == nil {
@@ -92,8 +121,8 @@ func (s *SolderClient) CreatePack(name, slug string) string {
 
 }
 
-func (s *SolderClient) AddMod(mod *outputInfo) string {
-	Url := s.createUrl("mod/add-version")
+func (s *SolderClient) AddMod(mod *types.OutputInfo) string {
+	Url := s.createUrl("mod/create")
 
 	form := url.Values{}
 	form.Add("pretty_name", mod.Name)
@@ -101,8 +130,15 @@ func (s *SolderClient) AddMod(mod *outputInfo) string {
 	form.Add("author", mod.Author)
 	form.Add("description", mod.Description)
 	form.Add("link", mod.Url)
-	response := s.doRequest(http.MethodPost, Url.String(), form.Encode())
-	defer response.Close()
+	//form := make(map[string]interface{})
+	//form["pretty_name"] = mod.Name
+	//form["name"] = mod.Id
+	//form["author"] = mod.Author
+	//form["description"] = mod.Description
+	//form["link"] = mod.Url
+
+	response := s.postForm(Url.String(), form)
+	defer response.Body.Close()
 
 	return s.GetModId(mod.Id)
 }
@@ -112,19 +148,28 @@ func (s *SolderClient) AddModVersion(modId, md5, version string) {
 	form.Add("mod-id", modId)
 	form.Add("add-version", version)
 	form.Add("add-md5", md5)
-	res := s.doRequest(http.MethodPost, "mod/add-version", form.Encode())
-	res.Close()
+	Url := s.createUrl("mod/add-version")
+
+	//form := make(map[string]interface{})
+	//form["mod-id"] = modId
+	//form["add-version"] = version
+	//form["add-md5"] = md5
+	//data, _ := json.Marshal(form)
+
+	res := s.postForm(Url.String(), form)
+	res.Body.Close()
 }
 
 func (s *SolderClient) RehashModVersion(modversionId string, md5 string) {
 	form := url.Values{}
 	form.Add("version-id", modversionId)
 	form.Add("md5", md5)
-	res := s.doRequest(http.MethodPost, "mod/rehash", form.Encode())
-	res.Close()
+	Url := s.createUrl("mod/rehash")
+	res := s.postForm(Url.String(), form)
+	res.Body.Close()
 }
 
-func (s *SolderClient) IsModversionOnline(mod *outputInfo) bool {
+func (s *SolderClient) IsModversionOnline(mod *types.OutputInfo) bool {
 	return s.GetModVersionId(mod) != ""
 }
 
@@ -135,14 +180,14 @@ func (s *SolderClient) GetBuild(buildId string) crawlers.Build {
 
 	Url := s.createUrl("modpack/build/" + buildId)
 	res := s.doRequest(http.MethodGet, Url.String(), "")
-	defer res.Close()
+	defer res.Body.Close()
 	build := crawlers.CrawlBuild(res)
 
 	s.buildCache[buildId] = build
 	return build
 }
 
-func (s *SolderClient) IsModInBuild(mod *outputInfo, buildId string) bool {
+func (s *SolderClient) IsModInBuild(mod *types.OutputInfo, buildId string) bool {
 	build := s.GetBuild(buildId)
 
 	for _, m := range build.Mods {
@@ -153,7 +198,7 @@ func (s *SolderClient) IsModInBuild(mod *outputInfo, buildId string) bool {
 	return false
 }
 
-func (s *SolderClient) IsModversionActiveInBuild(mod *outputInfo, buildId string) bool {
+func (s *SolderClient) IsModversionActiveInBuild(mod *types.OutputInfo, buildId string) bool {
 	build := s.GetBuild(buildId)
 
 	for _, m := range build.Mods {
@@ -164,10 +209,10 @@ func (s *SolderClient) IsModversionActiveInBuild(mod *outputInfo, buildId string
 	return false
 }
 
-func (s *SolderClient) GetActiveModversionInBuildId(mod *outputInfo, buildId string) string {
+func (s *SolderClient) GetActiveModversionInBuildId(mod *types.OutputInfo, buildId string) string {
 	Url := s.createUrl("modpack/build/" + buildId)
 	res := s.doRequest(http.MethodGet, Url.String(), "")
-	defer res.Close()
+	defer res.Body.Close()
 	build := crawlers.CrawlBuild(res)
 
 	var version string
@@ -183,29 +228,35 @@ func (s *SolderClient) GetActiveModversionInBuildId(mod *outputInfo, buildId str
 	return s.GetModVersionId(mod)
 }
 
-func (s *SolderClient) SetModVersionInBuild(mod *outputInfo, buildId string) {
+func (s *SolderClient) SetModVersionInBuild(mod *types.OutputInfo, buildId string) {
 	modVersionId := s.GetModVersionId(mod)
 	Url := s.createUrl("modpack/build/modify")
 
-	form := url.Values{}
-	form.Add("action", "version")
-	form.Add("build-id", buildId)
-	form.Add("version", modVersionId)
-	form.Add("modversion-id", s.GetActiveModversionInBuildId(mod, buildId))
+	//form := url.Values{}
+	//form.Add("action", "version")
+	//form.Add("build-id", buildId)
+	//form.Add("version", modVersionId)
+	//form.Add("modversion-id", s.GetActiveModversionInBuildId(mod, buildId))
+	form := make(map[string]interface{})
+	form["action"] = "version"
+	form["build-id"] = buildId
+	form["version"] = modVersionId
+	form["modversion-id"] = s.GetActiveModversionInBuildId(mod, buildId)
+	data, _ := json.Marshal(form)
 
-	res := s.doRequest(http.MethodPost, Url.String(), form.Encode())
-	res.Close()
+	res := s.doRequest(http.MethodPost, Url.String(), string(data))
+	res.Body.Close()
 }
 
-func (s *SolderClient) IsPackOnline(modpack *Modpack) bool {
+func (s *SolderClient) IsPackOnline(modpack *types.Modpack) bool {
 	return s.GetModpackId(modpack.GetSlug()) != ""
 }
 
-func (s *SolderClient) IsBuildOnline(modpack *Modpack) bool {
+func (s *SolderClient) IsBuildOnline(modpack *types.Modpack) bool {
 	return s.GetBuildId(modpack) != ""
 }
 
-func (s *SolderClient) GetModVersionId(mod *outputInfo) string {
+func (s *SolderClient) GetModVersionId(mod *types.OutputInfo) string {
 	modId, modVersion := mod.Id, mod.GenerateOnlineVersion()
 	l, ok := s.modVersionIdCache[modId]
 	if ok {
@@ -218,7 +269,7 @@ func (s *SolderClient) GetModVersionId(mod *outputInfo) string {
 	solderModId := s.GetModId(modId)
 	Url := s.createUrl("mod/view/" + solderModId)
 	res := s.doRequest(http.MethodGet, Url.String(), "")
-	defer res.Close()
+	defer res.Body.Close()
 	modVersions := crawlers.CrawlModVersion(res)
 	var id string
 
@@ -241,25 +292,25 @@ func (s *SolderClient) GetModVersionId(mod *outputInfo) string {
 	return id
 }
 
-func (s *SolderClient) CreateBuild(modpack *Modpack, modpackId string) string {
+func (s *SolderClient) CreateBuild(modpack *types.Modpack, modpackId string) string {
 	Url := s.createUrl("modpack/add-build/" + modpackId)
 
 	form := url.Values{}
 	form.Add("version", modpack.Version)
 	form.Add("minecraft", modpack.MinecraftVersion)
-	form.Add("java-version", modpack.Java)
-	form.Add("memory-enabled", modpack.Memory != "")
-	form.Add("momory", modpack.Memory)
-	res := s.doRequest(http.MethodPost, Url.String(), form.Encode())
-	defer res.Close()
+	form.Add("java-version", modpack.Technic.Java)
+	form.Add("memory-enabled", strconv.FormatBool(modpack.Technic.Memory != 0))
+	form.Add("memory", strconv.FormatFloat(modpack.Technic.Memory, 'E', -1, 64))
+	res := s.postForm(Url.String(), form)
+	defer res.Body.Close()
 
 	// Return the build id because the response redirects (TODO Test if go also follow redirect
-	u, _ := res.Location()
+	u := res.Request.URL
 	segments := strings.Split(u.Path, "/")
 	return segments[len(segments)-1]
 }
 
-func (s *SolderClient) GetBuildId(modpack *Modpack) string {
+func (s *SolderClient) GetBuildId(modpack *types.Modpack) string {
 	Url := s.createUrl("modpack/view/" + modpack.GetSlug())
 
 	res := s.doRequest(http.MethodGet, Url.String(), "")
@@ -277,6 +328,7 @@ func (s *SolderClient) GetModpackId(slug string) string {
 	Url := s.createUrl("modpack/list")
 
 	res := s.doRequest(http.MethodGet, Url.String(), "")
+	defer res.Body.Close()
 	modpacks := crawlers.CrawlModpackList(res)
 
 	for _, modpack := range modpacks {
@@ -295,10 +347,13 @@ func (s *SolderClient) GetModId(modid string) string {
 	Url := s.createUrl("mod/list")
 
 	response := s.doRequest(http.MethodGet, Url.String(), "")
-	defer response.Close()
+	defer response.Body.Close()
 	mods := crawlers.CrawlModList(response)
+	//log.Panic(mods)
 	for _, mod := range mods {
-		if mod.Name == modid {
+		//log.Printf("%s == %s\n", mod.Name, modid)
+		if strings.ToLower(mod.Name) == strings.ToLower(modid) {
+			log.Println("Found mod with modid " + modid)
 			id := mod.Id
 			if strings.Trim(id, " ") != "" {
 				s.modIdCache[modid] = id
@@ -306,6 +361,7 @@ func (s *SolderClient) GetModId(modid string) string {
 			return id
 		}
 	}
+	fmt.Println("Could not find match for " + modid)
 	return ""
 }
 
@@ -313,26 +369,36 @@ type addBuildToModpackResponse struct {
 	Status string `json:"status"`
 }
 
-func (s *SolderClient) AddModversionToBuild(mod *outputInfo, modpackBuildId string) {
+func (s *SolderClient) AddModversionToBuild(mod *types.OutputInfo, modpackBuildId string) {
 	Url := s.createUrl("modpack/modify/add")
 
 	form := url.Values{}
 	form.Add("build", modpackBuildId)
-	form.Add("mod-name", mod.Name)
+	form.Add("mod-name", mod.Id)
 	form.Add("mod-version", mod.GenerateOnlineVersion())
 	form.Add("action", "add")
-
-	response := s.doRequest(http.MethodPost, Url.String(), form.Encode())
-	defer response.Close()
+	//form := make(map[string]interface{})
+	//form["build"] = modpackBuildId
+	//form["mod-name"] = mod.Id
+	//form["mod-version"] = mod.GenerateOnlineVersion()
+	//form["action"] = "add"
+	//data, _ := json.Marshal(form)
+	response := s.postForm(Url.String(), form)
+	defer response.Body.Close()
 
 	var res addBuildToModpackResponse
 	err := json.NewDecoder(response.Body).Decode(&res)
 
 	if err != nil {
+		log.Println(Url.String())
+		log.Printf("%v", form)
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(response.Body)
+		log.Println(buf.String())
 		log.Panic(err)
 	}
 
-	if res["status"].(string) != "success" {
+	if res.Status != "success" {
 		log.Panic("Something went wrong when adding a mod to a build")
 	}
 
