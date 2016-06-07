@@ -41,4 +41,6 @@ To build everything run the gulp commmand `gulp` in the root directory of the re
 This will build the application and place it in the `app` directory. 
 
 ### Running
-Switch to the `app` directory and run the command `electron .`. This will launch the application. 
+Switch to the `app` directory and run the command `electron .`. 
+
+This will launch the application. 
