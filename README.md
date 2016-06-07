@@ -6,12 +6,11 @@ Modpack helper for creating Technic Solder packs.
 ### Requirements
 * [NodeJS](https://nodejs.org/)
 * [Go](https://golang.org/)
-* Bower
 * Typings
 * Electron-prebuilt
 * Gulp
 
-The last 4 can be installed by running `npm install -g typings bower electron-prebuilt gulp`. 
+The last 3 can be installed by running `npm install -g typings electron-prebuilt gulp`. 
 
 ### Settings up Go correctly, or How to clone a Go project
 If you do not already have a setup fully working Go environment and Go workspace, read this: https://golang.org/doc/code.html#Workspace
@@ -31,7 +30,6 @@ Change into this directory
 Fetch all dependencies by running these commands:
 ```
 npm install
-bower install
 typings install
 ```
 

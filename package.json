@@ -15,7 +15,18 @@
   "author": "Zlepper",
   "license": "MIT",
   "dependencies": {
-    "electron-prebuilt": "^1.1.1"
+    "angular": "^1.5.5",
+    "angular-animate": "^1.5.5",
+    "angular-aria": "^1.5.5",
+    "angular-material": "^1.0.9",
+    "angular-messages": "^1.5.5",
+    "angular-resource": "^1.5.5",
+    "angular-translate": "^2.11.0",
+    "angular-translate-loader-partial": "^2.11.0",
+    "angular-ui-router": "^0.3.0",
+    "angular-websocket": "^2.0.0",
+    "electron-prebuilt": "^1.1.1",
+    "gsap": "^1.18.5"
   },
   "devDependencies": {
     "electron-connect": "^0.4.2",

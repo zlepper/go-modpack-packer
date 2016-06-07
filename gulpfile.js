@@ -5,7 +5,7 @@ var gulp = require('gulp'),
     ts = require("gulp-typescript"),
     tsClientProject = ts.createProject("source/javascript/tsconfig.json"),
     tsElectronProject = ts.createProject("source/app/tsconfig.json"),
-    bowersource = "bower_components/",
+    bowersource = "node_modules/",
 
     jshint = require('gulp-jshint'),
     sass = require('gulp-sass'),
@@ -51,13 +51,13 @@ var gulp = require('gulp'),
             bowersource + "angular-messages/angular-messages.js",
             bowersource + "angular-resource/angular-resource.js",
             bowersource + "angular-material/angular-material.js",
-            bowersource + "angular-translate/angular-translate.js",
+            bowersource + "angular-translate/dist/angular-translate.js",
             bowersource + "angular-translate-loader-partial/angular-translate-loader-partial.js",
             bowersource + "angular-ui-router/release/angular-ui-router.js",
             bowersource + "angular-local-storage/dist/angular-local-storage.js",
             bowersource + "angular-websocket/dist/angular-websocket.js",
-            "source/javascript/vendor/TweenLite.js",
-            "source/javascript/vendor/CSSPlugin.js"
+            bowersource + "gsap/src/uncompressed/TweenLite.js",
+            bowersource + "gsap/src/uncompressed/plugins/CSSPlugin"
         ]
     },
 
