@@ -11,6 +11,7 @@ import (
 	"path"
 	"runtime/debug"
 	"strings"
+	"sync"
 )
 
 func gatherInformation(conn types.WebsocketConnection, data interface{}) {
@@ -27,14 +28,18 @@ func gatherInformationAboutMods(inputDirectory string, conn types.WebsocketConne
 		}
 		files = append(files, f)
 	}
+	var waiter sync.WaitGroup
 	conn.Write("total-mod-files", len(files))
 	for _, f := range files {
+		waiter.Add(1)
 		fullname := path.Join(inputDirectory, f.Name())
-		go gatherInformationAboutMod(fullname, conn)
+		go gatherInformationAboutMod(fullname, conn, &waiter)
 	}
+	waiter.Wait()
+	conn.Write("all-mod-files-scanned", "")
 }
 
-func gatherInformationAboutMod(modfile string, conn types.WebsocketConnection) {
+func gatherInformationAboutMod(modfile string, conn types.WebsocketConnection, waitGroup *sync.WaitGroup) {
 	reader, err := zip.OpenReader(modfile)
 	if err != nil {
 		if err == zip.ErrFormat {
@@ -57,6 +62,7 @@ func gatherInformationAboutMod(modfile string, conn types.WebsocketConnection) {
 			readInfoFile(r, conn, f.FileInfo().Size(), modfile)
 		}
 	}
+	waitGroup.Done()
 }
 
 func readInfoFile(file io.ReadCloser, conn types.WebsocketConnection, size int64, filename string) {

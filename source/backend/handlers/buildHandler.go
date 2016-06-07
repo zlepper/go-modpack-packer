@@ -90,15 +90,20 @@ func buildModpack(modpack types.Modpack, mods []types.Mod, conn types.WebsocketC
 	}
 
 	if modpack.Solder.Use {
-		updateSolder(modpack, conn, infos)
+		solderclient, buildId := updateSolder(modpack)
+
+		for _, info := range infos {
+			go addInfoToSolder(info, buildId, conn, solderclient)
+		}
 	}
+
 }
 
 func ftpUpload(modpack types.Modpack) {
 
 }
 
-func updateSolder(modpack types.Modpack, conn types.WebsocketConnection, infos []*types.OutputInfo) {
+func updateSolder(modpack types.Modpack) (*solder.SolderClient, string) {
 	// Create solder client
 	solderclient := solder.NewSolderClient(modpack.Solder.Url)
 	loginSuccessful := solderclient.Login(modpack.Solder.Username, modpack.Solder.Password)
@@ -119,28 +124,30 @@ func updateSolder(modpack types.Modpack, conn types.WebsocketConnection, infos [
 	} else {
 		buildId = solderclient.CreateBuild(&modpack, modpackId)
 	}
-
-	for _, info := range infos {
-		go addInfoToSolder(info, buildId, conn, solderclient)
-	}
+	return solderclient, buildId
 }
 
 func addInfoToSolder(info *types.OutputInfo, buildId string, conn types.WebsocketConnection, solderclient *solder.SolderClient) {
+	conn.Write("updating-solder", info.ProgressKey)
 	var modid string
 	modid = solderclient.GetModId(info.Id)
 	if modid == "" {
 		modid = solderclient.AddMod(info)
 	}
 	if modid == "" {
+		log.Printf("%v\n", *info)
 		log.Panic("Something went wrong wehn adding a mod to solder.")
 	}
 
+	md5, err := ComputeMd5(info.File)
 	if !solderclient.IsModversionOnline(info) {
-		md5, err := ComputeMd5(info.File)
 		if err != nil {
 			log.Panic(err)
 		}
-		solderclient.AddModVersion(info.Id, hex.EncodeToString(md5), info.GenerateOnlineVersion())
+		solderclient.AddModVersion(modid, hex.EncodeToString(md5), info.GenerateOnlineVersion())
+	} else {
+		id := solderclient.GetModVersionId(info)
+		solderclient.RehashModVersion(id, hex.EncodeToString(md5))
 	}
 	if !solderclient.IsModversionActiveInBuild(info, buildId) {
 		if solderclient.IsModInBuild(info, buildId) {
@@ -226,9 +233,10 @@ func packForgeFolder(modpack types.Modpack, conn types.WebsocketConnection, outp
 func packAdditionalFolder(modpack types.Modpack, folderPath string, outputDirectory string, conn types.WebsocketConnection, ch *chan *types.OutputInfo) {
 	conn.Write(packingPartName, folderPath)
 	inputFolderInfo, _ := os.Stat(folderPath)
-	outputDirectory = path.Join(outputDirectory, "mods", modpack.Name+"-"+inputFolderInfo.Name())
+	s := safeNormalizeString(modpack.Name + "-" + inputFolderInfo.Name())
+	outputDirectory = path.Join(outputDirectory, "mods", s)
 	os.MkdirAll(outputDirectory, os.ModePerm)
-	outputFile := path.Join(outputDirectory, modpack.Name+"-"+inputFolderInfo.Name()+"-"+modpack.GetVersionString()+".zip")
+	outputFile := path.Join(outputDirectory, s+"-"+modpack.GetVersionString()+".zip")
 	zipfile, err := os.Create(outputFile)
 	if err != nil {
 		conn.Log("Error when creating zip file: " + err.Error() + "\n" + outputFile)
@@ -247,7 +255,7 @@ func packAdditionalFolder(modpack types.Modpack, folderPath string, outputDirect
 		info := types.OutputInfo{
 			File:             outputFile,
 			Name:             modpack.Name + "-" + inputFolderInfo.Name(),
-			Id:               strings.ToLower(modpack.Name + "-" + inputFolderInfo.Name()),
+			Id:               s,
 			Version:          modpack.Version,
 			MinecraftVersion: modpack.MinecraftVersion,
 			ProgressKey:      folderPath,
@@ -325,14 +333,22 @@ func packMod(mod types.Mod, conn types.WebsocketConnection, outputDirectory stri
 		info := types.OutputInfo{
 			File:             outputFile,
 			Name:             mod.Name,
-			Id:               strings.ToLower(mod.ModId),
+			Id:               safeNormalizeString(mod.ModId),
 			Version:          mod.Version,
 			MinecraftVersion: mod.MinecraftVersion,
 			Description:      mod.Description,
 			Author:           mod.Authors,
-			Url:              mod.Url,
 			ProgressKey:      mod.Filename,
 		}
+		u := mod.Url
+		if len(u) > 0 && strings.Index(u, "http") != 0 {
+			u = "http://" + u
+		}
+		info.Url = u
 		*ch <- &info
 	}
+}
+
+func safeNormalizeString(s string) string {
+	return strings.Replace(strings.ToLower(s), " ", "-", -1)
 }

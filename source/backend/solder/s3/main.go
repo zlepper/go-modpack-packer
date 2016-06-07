@@ -52,6 +52,7 @@ func UploadFiles(modpack *types.Modpack, infos []*types.OutputInfo, conn types.W
 	for _, info := range infos {
 		conn.Write("starting-upload", info.ProgressKey)
 		key := strings.Replace(info.File, outDir, "", -1)
+		log.Println("Key: " + key)
 		keyString := aws.String(key)
 
 		file, err := os.Open(info.File)

@@ -47,14 +47,9 @@
             </section>
             <section ng-show="build.state == 'building'">
                 <div>
-                    <p>Total progress {{build.progressNumber}}/{{build.total}}</p>
+                    <p>Packing progress {{build.progressNumber}}/{{build.total}}</p>
                     <md-progress-linear md-mode="determinate" value="{{(build.progressNumber / build.total) * 100}}"></md-progress-linear>
                 </div>
-                <md-list role="list">
-                    <md-list-item role="listitem" ng-repeat="todo in build.todos">
-                        <p>{{todo}}</p>
-                    </md-list-item>
-                </md-list>
                 <div>
                     <p>Upload progress {{build.uploadNumber}}/{{build.total}}</p>
                     <p ng-show="build.uploading !== ''">Currently uploading: {{build.uploading}}</p>
@@ -64,12 +59,17 @@
                     <p>Solder progress {{build.solderNumber}}/{{build.total}}</p>
                     <md-progress-linear md-mode="determinate" value="{{(build.solderNumber / build.total) * 100}}"></md-progress-linear>
                 </div>
+                <md-list role="list">
+                    <md-list-item role="listitem" ng-repeat="todo in build.todos">
+                        <p>{{todo}}</p>
+                    </md-list-item>
+                </md-list>
             </section>
         </md-dialog-content>
         <md-dialog-actions layout="row">
             <md-checkbox class="mod-checkbox" ng-model="build.showDone">{{'BUILD.SHOWDONE' | translate}}</md-checkbox>
             <span flex></span>
-            <md-button class="md-primary md-raised" ng-click="build.build()">{{'BUILD.BUILD'|translate}}</md-button>
+            <md-button ng-disabled="!build.readyToBuild" class="md-primary md-raised" ng-click="build.build()">{{'BUILD.BUILD'|translate}}</md-button>
             <md-button class="md-warn md-raised" ng-click="build.cancel()">{{'BUILD.CANCEL' | translate}}</md-button>
         </md-dialog-actions>
     </form>

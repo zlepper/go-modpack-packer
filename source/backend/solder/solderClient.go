@@ -52,9 +52,6 @@ func (s *SolderClient) createUrl(after string) url.URL {
 }
 
 func (s *SolderClient) postForm(url string, data url.Values) *http.Response {
-	log.Println("POST FORM")
-	log.Println(url)
-	log.Println(data)
 	req, _ := http.NewRequest(http.MethodPost, url, strings.NewReader(data.Encode()))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("X-Requested-With", "XMLHttpRequest")
@@ -66,9 +63,6 @@ func (s *SolderClient) postForm(url string, data url.Values) *http.Response {
 }
 
 func (s *SolderClient) doRequest(method, url, data string) *http.Response {
-	log.Println("DO REQUEST")
-	log.Println(url)
-	log.Println(data)
 	var body io.Reader
 	if data != "" {
 		body = strings.NewReader(data)
@@ -130,6 +124,7 @@ func (s *SolderClient) AddMod(mod *types.OutputInfo) string {
 	form.Add("author", mod.Author)
 	form.Add("description", mod.Description)
 	form.Add("link", mod.Url)
+	log.Printf("Adding mod:\n%v\n", form)
 	//form := make(map[string]interface{})
 	//form["pretty_name"] = mod.Name
 	//form["name"] = mod.Id
@@ -139,7 +134,6 @@ func (s *SolderClient) AddMod(mod *types.OutputInfo) string {
 
 	response := s.postForm(Url.String(), form)
 	defer response.Body.Close()
-
 	return s.GetModId(mod.Id)
 }
 
@@ -149,7 +143,7 @@ func (s *SolderClient) AddModVersion(modId, md5, version string) {
 	form.Add("add-version", version)
 	form.Add("add-md5", md5)
 	Url := s.createUrl("mod/add-version")
-
+	log.Printf("Adding mod version:\n%v\n", form)
 	//form := make(map[string]interface{})
 	//form["mod-id"] = modId
 	//form["add-version"] = version
@@ -157,7 +151,7 @@ func (s *SolderClient) AddModVersion(modId, md5, version string) {
 	//data, _ := json.Marshal(form)
 
 	res := s.postForm(Url.String(), form)
-	res.Body.Close()
+	defer res.Body.Close()
 }
 
 func (s *SolderClient) RehashModVersion(modversionId string, md5 string) {
@@ -351,9 +345,7 @@ func (s *SolderClient) GetModId(modid string) string {
 	mods := crawlers.CrawlModList(response)
 	//log.Panic(mods)
 	for _, mod := range mods {
-		//log.Printf("%s == %s\n", mod.Name, modid)
 		if strings.ToLower(mod.Name) == strings.ToLower(modid) {
-			log.Println("Found mod with modid " + modid)
 			id := mod.Id
 			if strings.Trim(id, " ") != "" {
 				s.modIdCache[modid] = id

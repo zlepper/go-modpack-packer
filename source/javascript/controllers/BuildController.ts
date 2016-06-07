@@ -10,12 +10,18 @@ module BuildController {
         public progressNumber: number = 0;
         public uploading: string = "";
         public uploadNumber: number = 0;
+        public solderNumber: number = 0;
+        public readyToBuild: boolean = false;
         constructor(protected application: Application.Application, protected $mdDialog: angular.material.IDialogService, protected goComm: GoCommService.GoCommService, protected $rootScope: angular.IRootScopeService, protected $translatePartialLoader:angular.translate.ITranslatePartialLoaderService) {
             var self = this;
             $translatePartialLoader.addPart("build");
 
             $rootScope.$on("mod-data-ready", function (event: angular.IAngularEvent, mod: Application.Mod) {
                 self.addModData(mod)
+            });
+            
+            $rootScope.$on("all-mod-files-scanned", function() {
+                self.readyToBuild = true;
             });
 
             $rootScope.$on("total-to-pack", function(event: angular.IAngularEvent, total: number) {
@@ -52,6 +58,18 @@ module BuildController {
 
             $rootScope.$on("started-uploading-all", function() {
                 console.log("Starting uploading");
+            });
+            
+            $rootScope.$on("updating-solder", function(event:angular.IAngularEvent, key:string) {
+                self.todos.push(key);
+            });
+            
+            $rootScope.$on("done-updating-solder", function(event:angular.IAngularEvent, key: string) {
+                var i = self.todos.indexOf(key);
+                if(i > -1) {
+                    self.todos.splice(i, 1)
+                }
+                self.solderNumber++;
             });
 
             this.startBuild(application.modpack);
