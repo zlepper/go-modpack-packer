@@ -17,14 +17,8 @@ If you do not already have a setup fully working Go environment and Go workspace
 
 In short, you need to setup the GOPATH variable, to some folder on your system. 
 
-Once you have the variable set, create the following directories in the GOPATH folder `src/github.com/zlepper`, do this by switching to the GOPATH directory, and running the command 
-
-\*nix: `mkdir src/github.com/zlepper`
-
-Windows: `mkdir src\github.com\zlepper`
-
-Then change to the newly created directory, and clone this repository by running `git clone https://github.com/zlepper/go-modpack-packer.git`. This will create a folder called `go-modpack-packer`. 
-Change into this directory
+Once you have that setup, get the repository by running `go get github.com/zlepper/go-modpack-packer/source/backend`. 
+This will fetch the repo and install all go dependencies. 
 
 ### Setup
 Fetch all dependencies by running these commands:
@@ -32,6 +26,8 @@ Fetch all dependencies by running these commands:
 npm install
 typings install
 ```
+
+If you did not install the dependencies by using the `go get` command above, change to the source/backend directory and run the `go get` command again. 
 
 ### Build
 To build everything run the gulp commmand `gulp` in the root directory of the repository. 
