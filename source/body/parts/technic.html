@@ -60,14 +60,26 @@
             <p translate>TECHNIC.UPLOAD.TYPE</p>
             <md-input-container class="md-block">
                 <md-radio-group ng-model="vm.application.modpack.technic.upload.type" layout="row">
-                    <md-radio-button value="ftp" disabled="">{{'TECHNIC.UPLOAD.FTP' | translate}}</md-radio-button>
+                    <md-radio-button value="ftp">{{'TECHNIC.UPLOAD.FTP.NAME' | translate}}</md-radio-button>
                     <md-radio-button value="s3">{{'TECHNIC.UPLOAD.AWSS3' | translate}}</md-radio-button>
                     <md-radio-button value="none">{{'TECHNIC.UPLOAD.NONE' | translate}}</md-radio-button>
                 </md-radio-group>
             </md-input-container>
         </div>
         <div ng-show="vm.application.modpack.technic.upload.type === 'ftp'" class="collapsible">
-            <h1>TODO FTP UPLOAD</h1>
+            <md-input-container class="md-block">
+                <label translate>TECHNIC.UPLOAD.FTP.URL</label>
+                <input type="text" ng-model="vm.application.modpack.technic.upload.ftp.url" required ng-pattern="vm.ftpPattern">
+            </md-input-container>
+            <md-input-container class="md-block">
+                <label translate>TECHNIC.UPLOAD.FTP.USERNAME</label>
+                <input type="text" ng-model="vm.application.modpack.technic.upload.ftp.username">
+            </md-input-container>
+            <md-input-container class="md-block">
+                <label translate>TECHNIC.UPLOAD.FTP.PASSWORD</label>
+                <input type="password" ng-model="vm.application.modpack.technic.upload.ftp.password">
+            </md-input-container>
+            <!--TODO Add a test button-->
             <md-divider ></md-divider>
         </div>
         <div ng-show="vm.application.modpack.technic.upload.type === 's3'" class="collapsible">
@@ -125,6 +137,7 @@
                     <input type="password" ng-model="vm.application.modpack.solder.password">
                 </md-input-container>
             </div>
+            <!-- TODO Add a test button -->
         </div>
     </form>
 </div>

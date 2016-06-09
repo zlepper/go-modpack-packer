@@ -5,7 +5,7 @@ var gulp = require('gulp'),
     ts = require("gulp-typescript"),
     tsClientProject = ts.createProject("source/javascript/tsconfig.json"),
     tsElectronProject = ts.createProject("source/app/tsconfig.json"),
-    bowersource = "node_modules/",
+    nodesource = "node_modules/",
 
     jshint = require('gulp-jshint'),
     sass = require('gulp-sass'),
@@ -24,7 +24,7 @@ var gulp = require('gulp'),
 
     input = {
         sass: [
-            bowersource + "angular-material/angular-material.scss",
+            nodesource + "angular-material/angular-material.scss",
             'source/scss/**/*.scss'
         ],
 
@@ -45,19 +45,19 @@ var gulp = require('gulp'),
         ],
 
         vendor: [
-            bowersource + "angular/angular.js",
-            bowersource + "angular-animate/angular-animate.js",
-            bowersource + "angular-aria/angular-aria.js",
-            bowersource + "angular-messages/angular-messages.js",
-            bowersource + "angular-resource/angular-resource.js",
-            bowersource + "angular-material/angular-material.js",
-            bowersource + "angular-translate/dist/angular-translate.js",
-            bowersource + "angular-translate-loader-partial/angular-translate-loader-partial.js",
-            bowersource + "angular-ui-router/release/angular-ui-router.js",
-            bowersource + "angular-local-storage/dist/angular-local-storage.js",
-            bowersource + "angular-websocket/dist/angular-websocket.js",
-            bowersource + "gsap/src/uncompressed/TweenLite.js",
-            bowersource + "gsap/src/uncompressed/plugins/CSSPlugin"
+            nodesource + "angular/angular.js",
+            nodesource + "angular-animate/angular-animate.js",
+            nodesource + "angular-aria/angular-aria.js",
+            nodesource + "angular-messages/angular-messages.js",
+            nodesource + "angular-resource/angular-resource.js",
+            nodesource + "angular-material/angular-material.js",
+            nodesource + "angular-translate/dist/angular-translate.js",
+            nodesource + "angular-translate-loader-partial/angular-translate-loader-partial.js",
+            nodesource + "angular-ui-router/release/angular-ui-router.js",
+            nodesource + "angular-local-storage/dist/angular-local-storage.js",
+            nodesource + "angular-websocket/dist/angular-websocket.js",
+            nodesource + "gsap/src/uncompressed/TweenLite.js",
+            nodesource + "gsap/src/uncompressed/plugins/CSSPlugin.js"
         ]
     },
 

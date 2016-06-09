@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"encoding/json"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
+	"github.com/zlepper/go-websocket-connection"
 	"io"
 	"io/ioutil"
 	"log"
@@ -14,12 +15,12 @@ import (
 	"sync"
 )
 
-func gatherInformation(conn types.WebsocketConnection, data interface{}) {
+func gatherInformation(conn websocket.WebsocketConnection, data interface{}) {
 	modpack := types.CreateSingleModpackData(data)
 	gatherInformationAboutMods(path.Join(modpack.InputDirectory, "mods"), conn)
 }
 
-func gatherInformationAboutMods(inputDirectory string, conn types.WebsocketConnection) {
+func gatherInformationAboutMods(inputDirectory string, conn websocket.WebsocketConnection) {
 	filesAndDirectories, _ := ioutil.ReadDir(inputDirectory)
 	files := make([]os.FileInfo, 0)
 	for _, f := range filesAndDirectories {
@@ -39,7 +40,7 @@ func gatherInformationAboutMods(inputDirectory string, conn types.WebsocketConne
 	conn.Write("all-mod-files-scanned", "")
 }
 
-func gatherInformationAboutMod(modfile string, conn types.WebsocketConnection, waitGroup *sync.WaitGroup) {
+func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnection, waitGroup *sync.WaitGroup) {
 	reader, err := zip.OpenReader(modfile)
 	if err != nil {
 		if err == zip.ErrFormat {
@@ -65,7 +66,7 @@ func gatherInformationAboutMod(modfile string, conn types.WebsocketConnection, w
 	waitGroup.Done()
 }
 
-func readInfoFile(file io.ReadCloser, conn types.WebsocketConnection, size int64, filename string) {
+func readInfoFile(file io.ReadCloser, conn websocket.WebsocketConnection, size int64, filename string) {
 	content := make([]byte, size)
 	_, err := file.Read(content)
 	content = []byte(strings.Replace(string(content), "\n", " ", -1))
@@ -98,7 +99,7 @@ func readInfoFile(file io.ReadCloser, conn types.WebsocketConnection, size int64
 
 }
 
-func createModResponse(conn types.WebsocketConnection, mod types.ModInfo, filename string) {
+func createModResponse(conn websocket.WebsocketConnection, mod types.ModInfo, filename string) {
 	const modDataReadyEvent string = "mod-data-ready"
 	modRes := mod.CreateModResponse(filename)
 	modRes.NormalizeId()

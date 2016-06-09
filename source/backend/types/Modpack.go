@@ -20,9 +20,16 @@ type AWSConfig struct {
 	Bucket    string `json:"bucket"`
 }
 
+type FtpConfig struct {
+	Url      string `json:"url"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 type UploadConfig struct {
 	Type string    `json:"type"`
 	AWS  AWSConfig `json:"aws"`
+	FTP  FtpConfig `json:"ftp"`
 }
 
 type TechnicConfig struct {

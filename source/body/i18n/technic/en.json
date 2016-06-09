@@ -20,7 +20,6 @@
     },
     "UPLOAD": {
       "TYPE": "Upload type",
-      "FTP": "FTP",
       "AWSS3": "AWS s3",
       "NONE":"No automatic upload",
       "AWS": {
@@ -29,6 +28,12 @@
         "REGION": "Region",
         "GETBUCKETS": "Get buckets",
         "BUCKETS": "Buckets on S3"
+      },
+      "FTP": {
+        "NAME": "ftp",
+        "URL": "Url",
+        "USERNAME": "Username",
+        "PASSWORD": "Password"
       }
     }
   }

@@ -1,15 +1,22 @@
 module Application {
 
     export class AWSConfig {
-        public accessKey: string = "";
-        public secretKey: string = "";
-        public region: string = "us-east-1";
-        public bucket: string = "";
+        public accessKey:string = "";
+        public secretKey:string = "";
+        public region:string = "us-east-1";
+        public bucket:string = "";
+    }
+
+    export class FtpConfig {
+        public url:string = "";
+        public username:string = "";
+        public password:string = "";
     }
 
     export class UploadConfig {
-        public type: string = "none";
-        public aws: AWSConfig = new AWSConfig();
+        public type:string = "none";
+        public aws:AWSConfig = new AWSConfig();
+        public ftp:FtpConfig = new FtpConfig();
     }
 
 
@@ -21,18 +28,18 @@ module Application {
 
         public checkPermissions:boolean = false;
         public isPublicPack:boolean = true;
-        
-        public memory: number = 0;
-        public java: string = "1.8";
 
-        public upload: UploadConfig = new UploadConfig();
+        public memory:number = 0;
+        public java:string = "1.8";
+
+        public upload:UploadConfig = new UploadConfig();
     }
 
     export class SolderInfo {
-        public use: boolean = false;
-        public url: string = "";
-        public username: string = "";
-        public password: string = "";
+        public use:boolean = false;
+        public url:string = "";
+        public username:string = "";
+        public password:string = "";
     }
 
     export class FtbConfig {
@@ -43,7 +50,7 @@ module Application {
         public name:string;
         public include:boolean;
     }
-    
+
     export class Modpack {
         public name:string;
         public inputDirectory:string = "";
@@ -54,7 +61,7 @@ module Application {
         public additionalFolders:Array<Folder> = [];
         public technic:TechnicConfig = new TechnicConfig();
         public ftb:FtbConfig = new FtbConfig();
-        public solder: SolderInfo = new SolderInfo();
+        public solder:SolderInfo = new SolderInfo();
 
         constructor() {
             this.name = "Unnamed modpack";
@@ -75,31 +82,64 @@ module Application {
             modpack.solder = data.solder;
             return modpack;
         }
-        
-        public isValid(): boolean {
-            if(!this.name) return false;
-            if(!this.inputDirectory) return false;
-            if(!this.outputDirectory) return false;
-            if(!this.minecraftVersion) return false;
-            if(!this.version) return false;
+
+        public isValid():boolean {
+            if (!this.name) return false;
+            if (!this.inputDirectory) return false;
+            if (!this.outputDirectory) return false;
+            if (!this.minecraftVersion) return false;
+            if (!this.version) return false;
+            return true;
+        }
+
+        public isValidTechnic():boolean {
+            var t = this.technic;
+            console.log(t.upload.type);
+            switch (t.upload.type) {
+                case "s3":
+                    var aws = t.upload.aws;
+                    if(!aws.accessKey || !aws.bucket || !aws.region || !aws.secretKey) {
+                        return false;
+                    }
+                    break;
+                case "ftp":
+                    var ftp = t.upload.ftp;
+                    // Don't validate password existing, because it's possible to connect to ftp without a password
+                    // even though that is a very bad idea. Security and all that.
+                    if(!ftp.url || !ftp.username) {
+                        return false;
+                    }
+                    break;
+                case "none":
+                default:
+                    break;
+            }
+            if(t.isSolderPack == 1) {
+                var solder = this.solder;
+                if(solder.use) {
+                    if (!solder.url ||!solder.password || !solder.username) {
+                        return false;
+                    }
+                }
+            }
             return true;
         }
     }
 
     export class Mod {
-        public modid: string;
-        public name: string;
-        public description: string;
-        public version: string;
-        public mcversion: string;
-        public url: string;
-        public authors: string;
-        public credits: string;
-        public filename: string;
+        public modid:string;
+        public name:string;
+        public description:string;
+        public version:string;
+        public mcversion:string;
+        public url:string;
+        public authors:string;
+        public credits:string;
+        public filename:string;
         // Naming is totally a hack to make sure the value does not get send to the server
-        public $$isDone: boolean;
+        public $$isDone:boolean;
 
-        public static fromJson(data:Mod): Mod {
+        public static fromJson(data:Mod):Mod {
             var m = new Mod();
             m.modid = data.modid;
             m.name = data.name;
@@ -112,8 +152,8 @@ module Application {
             m.filename = data.filename;
             return m;
         }
-        
-        public isValid(): boolean {
+
+        public isValid():boolean {
             if (!this.modid) return false;
             if (!this.name) return false;
             if (!this.version) return false;
@@ -129,7 +169,7 @@ module Application {
         public modpacks:Array<Modpack> = [];
         public modpack:Modpack;
 
-        constructor(protected $rootScope:angular.IRootScopeService, protected goComm:GoCommService.GoCommService, protected $state: angular.ui.IStateService) {
+        constructor(protected $rootScope:angular.IRootScopeService, protected goComm:GoCommService.GoCommService, protected $state:angular.ui.IStateService) {
             var self = this;
             goComm.send("load-modpacks", {});
             $rootScope.$watch(function () {
@@ -143,7 +183,7 @@ module Application {
                 });
                 if (self.modpacks.length) {
                     self.modpack = self.modpacks[0];
-                    if(self.$state.is("home")) {
+                    if (self.$state.is("home")) {
                         self.$state.go("modpack");
                     }
                 }

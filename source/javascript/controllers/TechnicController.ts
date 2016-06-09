@@ -4,6 +4,8 @@ module TechnicController {
 
         public buckets: Array<string> = [];
 
+        public ftpPattern: RegExp = /^[\w\.]+:\d+$/;
+
         constructor(protected application: Application.Application,
                     protected $translatePartialLoader: angular.translate.ITranslatePartialLoaderService,
                     protected $mdDialog: angular.material.IDialogService,
@@ -19,7 +21,7 @@ module TechnicController {
         }
 
         public build(ev: MouseEvent): void {
-            if(this.application.modpack.isValid()) {
+            if(this.application.modpack.isValid() && this.application.modpack.isValidTechnic()) {
                 var useFullscreen = this.$mdMedia("sm") || this.$mdMedia("xs");
                 this.$mdDialog.show({
                     controller: "BuildController",
@@ -32,7 +34,7 @@ module TechnicController {
                 });
             } else {
                 this.$mdDialog.show(
-                    this.$mdDialog.alert()
+                    this.$mdDialog.alert() // TODO Get translations
                         .clickOutsideToClose(true)
                         .title("Missing info")
                         .textContent("The modpack is missing some info before it can be build.")

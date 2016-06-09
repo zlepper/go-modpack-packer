@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/zlepper/go-modpack-packer/source/backend/comm"
+	"github.com/zlepper/go-modpack-packer/source/backend/handlers"
+	"github.com/zlepper/go-websocket-connection"
 	"log"
 	"os"
 )
@@ -13,5 +14,5 @@ func main() {
 	}
 	defer file.Close()
 	log.SetOutput(file)
-	comm.Run()
+	websocket.Run(handlers.HandleMessage)
 }

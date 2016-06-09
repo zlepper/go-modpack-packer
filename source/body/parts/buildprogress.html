@@ -50,12 +50,12 @@
                     <p>Packing progress {{build.progressNumber}}/{{build.total}}</p>
                     <md-progress-linear md-mode="determinate" value="{{(build.progressNumber / build.total) * 100}}"></md-progress-linear>
                 </div>
-                <div>
+                <div ng-show="build.application.modpack.technic.upload.type !== 'none'">
                     <p>Upload progress {{build.uploadNumber}}/{{build.total}}</p>
                     <p ng-show="build.uploading !== ''">Currently uploading: {{build.uploading}}</p>
                     <md-progress-linear md-mode="determinate" value="{{(build.uploadNumber / build.total) * 100}}"></md-progress-linear>
                 </div>
-                <div>
+                <div ng-show="build.application.modpack.technic.isSolderPack == 1 && build.application.modpack.solder.use">
                     <p>Solder progress {{build.solderNumber}}/{{build.total}}</p>
                     <md-progress-linear md-mode="determinate" value="{{(build.solderNumber / build.total) * 100}}"></md-progress-linear>
                 </div>

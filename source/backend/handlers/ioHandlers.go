@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/zlepper/go-modpack-packer/source/backend/encryption"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
+	"github.com/zlepper/go-websocket-connection"
 	"io/ioutil"
 	"log"
 	"os"
@@ -20,7 +21,7 @@ func createInputDirData(data map[string]interface{}) inputDirData {
 	return res
 }
 
-func findAdditionalFolders(conn types.WebsocketConnection, data interface{}) {
+func findAdditionalFolders(conn websocket.WebsocketConnection, data interface{}) {
 	dir := createInputDirData(data.(map[string]interface{}))
 	files, _ := ioutil.ReadDir(dir.InputDir)
 	folders := []string{}
@@ -44,7 +45,7 @@ func findAdditionalFolders(conn types.WebsocketConnection, data interface{}) {
 	conn.Write("found-folders", folders)
 }
 
-func saveModpacks(conn types.WebsocketConnection, data interface{}) {
+func saveModpacks(conn websocket.WebsocketConnection, data interface{}) {
 	modpacks := types.CreateModpackData(data)
 	for i, _ := range modpacks {
 		modpack := &modpacks[i]
@@ -66,7 +67,7 @@ func saveModpacks(conn types.WebsocketConnection, data interface{}) {
 
 }
 
-func loadModpacks(conn types.WebsocketConnection) {
+func loadModpacks(conn websocket.WebsocketConnection) {
 	dataDirectory := os.Args[1]
 	modpackFile := filepath.Join(dataDirectory, "modpacks.json")
 	modpackData, err := ioutil.ReadFile(modpackFile)
