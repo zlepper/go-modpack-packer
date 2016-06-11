@@ -11,7 +11,7 @@ import {IpcHandlersCreator} from './IpcHandlers';
 //var client:any = require("electron-connect");
 
 let win : Electron.BrowserWindow;
-console.log("Bla");
+
 function startGoServer() {
     var platform = process.platform;
     let executeable: string;
@@ -29,7 +29,6 @@ function startGoServer() {
     backend.stderr.on("data", function(data: any) {
         console.log(data.toString());
     });
-    console.log("Spawned child process");
 }
 
 function createWindow() {
