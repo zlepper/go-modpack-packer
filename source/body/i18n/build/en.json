@@ -11,7 +11,8 @@
       "DESCRIPTION": "Description",
       "VERSION": "Version",
       "MCVERSION": "Minecraft Version",
-      "AUTHORS": "Authors"
+      "AUTHORS": "Authors",
+      "FILENAME": "Filename"
     }
   }
 }

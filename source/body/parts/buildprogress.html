@@ -14,6 +14,10 @@
                         mod.filename}}
                     </md-button>
                     <div ng-show="showDetails" class="collapsible">
+                        <md-input-container class="md-block">
+                            <label translate>BUILD.MOD.FILENAME</label>
+                            <input disabled ng-model="mod.filename">
+                        </md-input-container>
                         <div layout="row">
                             <md-input-container flex="50">
                                 <label translate>BUILD.MOD.NAME</label>

@@ -158,7 +158,36 @@ module Application {
             if (!this.name) return false;
             if (!this.version) return false;
             if (!this.mcversion) return false;
-            if (this.authors.length <= 0) return false;
+            if (this.authors.length < 1) return false;
+
+            return this.isAdvancedValid();
+        }
+
+        private isAdvancedValid(): boolean {
+            if(this.modid.toLowerCase().indexOf("example") > -1) {
+                return false;
+            }
+            if(this.name.toLowerCase().indexOf("example") > -1) {
+                return false;
+            }
+            if(this.version.toLowerCase().indexOf("example") > -1) {
+                return false;
+            }
+            if(this.name.indexOf("${") > -1) {
+                return false;
+            }
+            if(this.version.indexOf("${") > -1) {
+                return false;
+            }
+            if(this.mcversion.indexOf("${") > -1) {
+                return false;
+            }
+            if(this.modid.indexOf("${") > -1) {
+                return false;
+            }
+            if(this.version.toLowerCase().indexOf("@version@") > -1) {
+                return false;
+            }
             return true;
         }
     }
