@@ -9,7 +9,14 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 )
+
+var mutex *sync.Mutex
+
+func init() {
+	mutex = &sync.Mutex{}
+}
 
 type inputDirData struct {
 	InputDir string `json:"inputDir"`
@@ -29,7 +36,7 @@ func findAdditionalFolders(conn websocket.WebsocketConnection, data interface{})
 	for _, file := range files {
 		// We only need the directories
 		if file.IsDir() {
-			// The mods folder should be handles in a special way
+			// The mods folder should be handled in a special way
 			if file.Name() == "mods" {
 				subFiles, _ := ioutil.ReadDir(filepath.Join(dir.InputDir, file.Name()))
 				for _, subfile := range subFiles {
@@ -46,6 +53,9 @@ func findAdditionalFolders(conn websocket.WebsocketConnection, data interface{})
 }
 
 func saveModpacks(conn websocket.WebsocketConnection, data interface{}) {
+	// Get the appData directory, since go doesn't expose it, electron passes it as a parameter
+	dataDirectory := os.Args[1]
+	modpackFile := filepath.Join(dataDirectory, "modpacks.json")
 	modpacks := types.CreateModpackData(data)
 	for i, _ := range modpacks {
 		modpack := &modpacks[i]
@@ -53,24 +63,26 @@ func saveModpacks(conn websocket.WebsocketConnection, data interface{}) {
 		modpack.Technic.Upload.AWS.AccessKey = encryption.EncryptString(modpack.Technic.Upload.AWS.AccessKey)
 		modpack.Solder.Password = encryption.EncryptString(modpack.Solder.Password)
 	}
-	modpackData, err := json.Marshal(modpacks)
+	mutex.Lock()
+	f, err := os.Create(modpackFile)
 	if err != nil {
+		mutex.Unlock()
 		log.Panic(err)
 	}
-	// Get the appData directory, since go doesn't expose it, electron passes it as a parameter
-	dataDirectory := os.Args[1]
-	modpackFile := filepath.Join(dataDirectory, "modpacks.json")
-	err = ioutil.WriteFile(modpackFile, modpackData, os.ModePerm)
+	err = json.NewEncoder(f).Encode(modpacks)
 	if err != nil {
+		mutex.Unlock()
 		log.Panic(err)
 	}
-
+	mutex.Unlock()
 }
 
 func loadModpacks(conn websocket.WebsocketConnection) {
 	dataDirectory := os.Args[1]
 	modpackFile := filepath.Join(dataDirectory, "modpacks.json")
+	mutex.Lock()
 	modpackData, err := ioutil.ReadFile(modpackFile)
+	mutex.Unlock()
 	if err != nil {
 		conn.Log("Unable to reload data " + err.Error())
 		return
@@ -79,8 +91,7 @@ func loadModpacks(conn websocket.WebsocketConnection) {
 	var modpacks []types.Modpack
 	err = json.Unmarshal(modpackData, &modpacks)
 	if err != nil {
-		conn.Log("Could not parse json data " + err.Error() + "\n" + string(modpackData))
-		return
+		panic("Could not parse json data " + err.Error() + "\n" + string(modpackData))
 	}
 	for i, _ := range modpacks {
 		modpack := &modpacks[i]

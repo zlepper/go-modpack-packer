@@ -41,6 +41,7 @@ type TechnicConfig struct {
 	Memory           float64      `json:"memory"`
 	Java             string       `json:"java"`
 	Upload           UploadConfig `json:"upload",mapstructure:"upload"`
+	RepackAllMods    bool         `json:"repackAllMods"`
 }
 
 type FtbConfig struct {

@@ -16,6 +16,11 @@
                 </md-radio-group>
             </md-input-container>
         </div>
+        <div class="collapsible" ng-show="vm.application.modpack.technic.isSolderPack == 1">
+            <md-checkbox ng-model="vm.application.modpack.technic.repackAllMods">
+                <span translate>TECHNIC.REPACKALLMODS</span>
+            </md-checkbox>
+        </div>
         <div>
             <md-checkbox ng-model="vm.application.modpack.technic.createForgeZip">
                 <span translate>TECHNIC.CREATEFORGEZIP</span>

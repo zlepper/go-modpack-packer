@@ -12,6 +12,7 @@
     "PRIVATEPACK": "Private pack",
     "NOREQUIREMENT": "No requirement",
     "JAVA": "Minimum required java version",
+    "REPACKALLMODS": "Repack all found mods",
     "SOLDER": {
       "USE": "Use Solder",
       "URL": "Solder url",

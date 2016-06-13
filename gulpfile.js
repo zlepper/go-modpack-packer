@@ -20,6 +20,7 @@ var gulp = require('gulp'),
         verbosy: true
     }),
     exec = require("child_process").execSync,
+    spawn = require("child_process").spawn,
     ownScripts = 'source/javascript/**/*.ts',
 
     input = {
@@ -126,7 +127,24 @@ gulp.task('run-electron', function () {
     //electron.start("--enable-logging");
 });
 
-gulp.task("go-compile", function () {
+gulp.task("go-test", function(cb) {
+    var command = "go";
+    var cmd = spawn(command, ["test", "./source/backend/..."], {stdio: "inherit"});
+    cmd.on("close", function(code) {
+        if(code != 0) {
+            var err = new Error("Tests failed");
+            cb(err);
+        } else {
+            cb();
+        }
+    });
+    cmd.on("error", function(err) {
+        console.log(err);
+        cb(err);
+    })
+});
+
+gulp.task("go-compile", ["go-test"] , function () {
     var command;
     if (process.platform === "win32") {
         command = "go build -o ./app/backend.exe ./source/backend"

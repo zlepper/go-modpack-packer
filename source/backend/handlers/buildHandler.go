@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"archive/zip"
-	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/zlepper/go-modpack-packer/source/backend/db"
+	"github.com/zlepper/go-modpack-packer/source/backend/helpers"
 	"github.com/zlepper/go-modpack-packer/source/backend/solder"
 	"github.com/zlepper/go-modpack-packer/source/backend/solder/upload"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
@@ -67,6 +68,13 @@ func buildModpack(modpack types.Modpack, mods []types.Mod, conn websocket.Websoc
 	}
 
 	infos := make([]*types.OutputInfo, 0)
+
+	// Save the mods to the database
+	d := db.GetModsDb()
+	for i, _ := range mods {
+		d.AddMod(&mods[i])
+	}
+	d.Save()
 
 	count := 0
 	for count < total {
@@ -140,7 +148,7 @@ func addInfoToSolder(info *types.OutputInfo, buildId string, conn websocket.Webs
 		log.Panic("Something went wrong wehn adding a mod to solder.")
 	}
 
-	md5, err := ComputeMd5(info.File)
+	md5, err := helpers.ComputeMd5(info.File)
 	if !solderclient.IsModversionOnline(info) {
 		if err != nil {
 			log.Panic(err)
@@ -159,22 +167,6 @@ func addInfoToSolder(info *types.OutputInfo, buildId string, conn websocket.Webs
 	}
 
 	conn.Write("done-updating-solder", info.ProgressKey)
-}
-
-func ComputeMd5(filePath string) ([]byte, error) {
-	var result []byte
-	file, err := os.Open(filePath)
-	if err != nil {
-		return result, err
-	}
-	defer file.Close()
-
-	hash := md5.New()
-	if _, err := io.Copy(hash, file); err != nil {
-		return result, err
-	}
-
-	return hash.Sum(result), nil
 }
 
 func packForgeFolder(modpack types.Modpack, conn websocket.WebsocketConnection, outputDirectory string, ch *chan *types.OutputInfo) {

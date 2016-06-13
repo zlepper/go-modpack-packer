@@ -3,6 +3,7 @@ package handlers
 import (
 	"archive/zip"
 	"encoding/json"
+	"github.com/zlepper/go-modpack-packer/source/backend/db"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	"github.com/zlepper/go-websocket-connection"
 	"io"
@@ -103,5 +104,20 @@ func createModResponse(conn websocket.WebsocketConnection, mod types.ModInfo, fi
 	const modDataReadyEvent string = "mod-data-ready"
 	modRes := mod.CreateModResponse(filename)
 	modRes.NormalizeId()
+
+	md5 := modRes.GetMd5()
+	if !modRes.IsValid() {
+		modsDb := db.GetModsDb()
+		possibleMatch := modsDb.GetModFromMd5(md5)
+		if possibleMatch != nil {
+			//if possibleMatch.IsValid() {
+			// Should be valid, but better safe than sorry
+			modRes = *possibleMatch
+			//} else {
+			//	fmt.Println("database mod was not valid!")
+			//}
+		}
+	}
+
 	conn.Write(modDataReadyEvent, modRes)
 }

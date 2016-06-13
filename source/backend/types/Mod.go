@@ -1,6 +1,9 @@
 package types
 
 import (
+	"encoding/hex"
+	"github.com/zlepper/go-modpack-packer/source/backend/helpers"
+	"log"
 	"regexp"
 	"strings"
 )
@@ -15,6 +18,8 @@ type Mod struct {
 	Authors          string `json:"authors"`
 	Credits          string `json:"credits"`
 	Filename         string `json:"filename"`
+	Md5              string `json:"md5"`
+	IsOnSolder       bool   `json:"isOnSolder"`
 }
 
 func (m *Mod) GenerateOnlineVersion() string {
@@ -39,4 +44,33 @@ func (m *Mod) NormalizeId() {
 
 func (m *Mod) GetVersionString() string {
 	return m.ModId + "-" + m.MinecraftVersion + "-" + m.Version
+}
+
+func (m *Mod) GetMd5() string {
+	if m.Md5 != "" {
+		return m.Md5
+	}
+
+	md5, err := helpers.ComputeMd5(m.Filename)
+	if err != nil {
+		log.Panic(err)
+	}
+	m.Md5 = hex.EncodeToString(md5)
+	return m.Md5
+}
+
+func (m *Mod) IsValid() bool {
+	return m.ModId != "" &&
+		m.Name != "" &&
+		m.Version != "" &&
+		m.MinecraftVersion != "" &&
+		m.Authors != "" &&
+		!helpers.IgnoreCaseContains(m.ModId, "example") &&
+		!helpers.IgnoreCaseContains(m.Name, "example") &&
+		!helpers.IgnoreCaseContains(m.Version, "example") &&
+		!helpers.IgnoreCaseContains(m.Name, "${") &&
+		!helpers.IgnoreCaseContains(m.Version, "${") &&
+		!helpers.IgnoreCaseContains(m.MinecraftVersion, "${") &&
+		!helpers.IgnoreCaseContains(m.ModId, "${") &&
+		!helpers.IgnoreCaseContains(m.Version, "@version@")
 }

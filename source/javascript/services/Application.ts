@@ -33,6 +33,8 @@ module Application {
         public java:string = "1.8";
 
         public upload:UploadConfig = new UploadConfig();
+
+        public repackAllMods: boolean = false;
     }
 
     export class SolderInfo {
@@ -136,6 +138,7 @@ module Application {
         public authors:string;
         public credits:string;
         public filename:string;
+        public md5: string;
         // Naming is totally a hack to make sure the value does not get send to the server
         public $$isDone:boolean;
 
@@ -150,6 +153,7 @@ module Application {
             m.authors = data.authors;
             m.credits = data.credits;
             m.filename = data.filename;
+            m.md5 = data.md5;
             return m;
         }
 
