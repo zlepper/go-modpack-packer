@@ -1,15 +1,15 @@
 package types
 
 type OutputInfo struct {
-	File             string
-	Name             string
-	Id               string
-	Version          string
-	MinecraftVersion string
-	Description      string
-	Author           string
-	Url              string
-	ProgressKey      string
+	File             string `json:"file"`
+	Name             string `json:"name"`
+	Id               string `json:"id"`
+	Version          string `json:"version"`
+	MinecraftVersion string `json:"minecraftVersion"`
+	Description      string `json:"description"`
+	Author           string `json:"author"`
+	Url              string `json:"url"`
+	ProgressKey      string `json:"progressKey"`
 }
 
 func (o *OutputInfo) GenerateOnlineVersion() string {

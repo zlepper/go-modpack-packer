@@ -4,7 +4,9 @@ import (
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	//"crypto/tls"
 	"github.com/jlaffaye/ftp"
+	"github.com/mitchellh/mapstructure"
 	"github.com/zlepper/go-websocket-connection"
+	"log"
 	"os"
 	"path"
 	"strings"
@@ -75,4 +77,33 @@ func doesDirectoryExist(f *ftp.ServerConn, dir string) bool {
 		}
 	}
 	return false
+}
+
+func TestFtp(conn websocket.WebsocketConnection, data interface{}) {
+	dict := data.(map[string]interface{})
+	var loginInfo types.FtpConfig
+	err := mapstructure.Decode(dict, &loginInfo)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	var f *ftp.ServerConn
+	if f, err = ftp.Connect(loginInfo.Url); err != nil {
+		conn.Error("TECHNIC.UPLOAD.FTP.ERROR.CONNECT")
+		return
+	}
+
+	defer f.Quit()
+
+	if err = f.Login(loginInfo.Username, loginInfo.Password); err != nil {
+		conn.Error("TECHNIC.UPLOAD.FTP.ERROR.LOGIN")
+		return
+	}
+
+	_, err = f.List("/")
+	if err != nil {
+		conn.Error("TECHNIC.UPLOAD.FTP.ERROR.LIST")
+		return
+	}
+	conn.Write("ftp-test", "TECHNIC.UPLOAD.FTP.SUCCESS")
 }

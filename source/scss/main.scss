@@ -14,5 +14,21 @@
 
 .collapsible {
   height: auto;
-  overflow:hidden;
+  overflow: hidden;
+}
+
+.hidden-input {
+  input, input:hover {
+    background-color: initial;
+    padding: initial;
+    border: initial;
+    font: inherit;
+    outline: initial;
+  }
+}
+
+md-dialog.md-dialog-fullscreen {
+  max-height: 100%;
+  min-width: 100%;
+  border-radius: 0;
 }

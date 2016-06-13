@@ -26,6 +26,7 @@ var gulp = require('gulp'),
     input = {
         sass: [
             nodesource + "angular-material/angular-material.scss",
+            nodesource + "angular-material-data-table/dist/md-data-table.css",
             'source/scss/**/*.scss'
         ],
 
@@ -51,12 +52,14 @@ var gulp = require('gulp'),
             nodesource + "angular-aria/angular-aria.js",
             nodesource + "angular-messages/angular-messages.js",
             nodesource + "angular-resource/angular-resource.js",
+            nodesource + "angular-sanitize/angular-sanitize.js",
             nodesource + "angular-material/angular-material.js",
             nodesource + "angular-translate/dist/angular-translate.js",
             nodesource + "angular-translate-loader-partial/angular-translate-loader-partial.js",
             nodesource + "angular-ui-router/release/angular-ui-router.js",
             nodesource + "angular-local-storage/dist/angular-local-storage.js",
             nodesource + "angular-websocket/dist/angular-websocket.js",
+            nodesource + "angular-material-data-table/dist/md-data-table.js",
             nodesource + "gsap/src/uncompressed/TweenLite.js",
             nodesource + "gsap/src/uncompressed/plugins/CSSPlugin.js"
         ]
@@ -64,7 +67,6 @@ var gulp = require('gulp'),
 
     output = "app/public",
     mainOutput = "app";
-
 
 function watch() {
     "use strict";

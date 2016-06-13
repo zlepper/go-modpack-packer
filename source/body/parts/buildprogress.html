@@ -47,8 +47,8 @@
                             <textarea ng-model="mod.description"></textarea>
                         </md-input-container>
                         <md-input-container class="md-block">
-                            <label>MD5</label>
-                            <input disabled ng-model="mod.md5">
+                            <label translate>BUILD.MOD.URL</label>
+                            <input type="url" ng-model="mod.url">
                         </md-input-container>
                     </div>
                 </div>
@@ -63,9 +63,46 @@
                     <p ng-show="build.uploading !== ''">Currently uploading: {{build.uploading}}</p>
                     <md-progress-linear md-mode="determinate" value="{{(build.uploadNumber / build.total) * 100}}"></md-progress-linear>
                 </div>
-                <div ng-show="build.application.modpack.technic.isSolderPack == 1 && build.application.modpack.solder.use">
-                    <p>Solder progress {{build.solderNumber}}/{{build.total}}</p>
-                    <md-progress-linear md-mode="determinate" value="{{(build.solderNumber / build.total) * 100}}"></md-progress-linear>
+                <div ng-show="build.application.modpack.technic.isSolderPack == 1">
+                    <div ng-if="build.application.modpack.solder.use">
+                    <div ng-show="build.uploadData != null">
+                        <p translate>BUILD.AWAITING.UPLOAD</p>
+                        <md-button class="md-raised md-primary" ng-click="build.continueRunning()">
+                            {{'BUILD.AWAITING.CONTINUE' | translate}}
+                        </md-button>
+                    </div>
+                    <div>
+                        <p>Solder progress {{build.solderNumber}}/{{build.total}}</p>
+                        <md-progress-linear md-mode="determinate" value="{{(build.solderNumber / build.total) * 100}}"></md-progress-linear>
+                    </div>
+                </div>
+                    <div ng-if="!build.application.modpack.solder.use">
+                        <md-table-container>
+                            <table md-table>
+                                <thead md-head md-order="build.query.order">
+                                    <tr md-row>
+                                        <th md-column md-order-by="name"><span translate>BUILD.MOD.NAME</span></th>
+                                        <th md-column md-order-by="id"><span translate>BUILD.MOD.MODID</span></th>
+                                        <th md-column md-order-by="version"><span translate>BUILD.MOD.VERSION</span></th>
+                                        <th md-column md-order-by="author"><span translate>BUILD.MOD.AUTHORS</span></th>
+                                        <th md-column md-order-by="description"><span translate>BUILD.MOD.DESCRIPTION</span></th>
+                                        <th md-column md-order-by="url"><span translate>BUILD.MOD.URL</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody md-body>
+                                    <tr md-row ng-repeat="info in build.uploadData.infos | orderBy:build.query.order | limitTo: build.query.limit: (build.query.page - 1) * build.query.limit" class=hidden-input>
+                                        <td md-cell onmouseover="this.getElementsByTagName('input')[0].select()"><input ng-value="info.name"></td>
+                                        <td md-cell onmouseover="this.getElementsByTagName('input')[0].select()"><input ng-value="info.id"></td>
+                                        <td md-cell onmouseover="this.getElementsByTagName('input')[0].select()"><input ng-value="info.minecraftVersion + '-' + info.version"></td>
+                                        <td md-cell onmouseover="this.getElementsByTagName('input')[0].select()"><input ng-value="info.author"></td>
+                                        <td md-cell onmouseover="this.getElementsByTagName('input')[0].select()"><input ng-value="info.description"></td>
+                                        <td md-cell onmouseover="this.getElementsByTagName('input')[0].select()"><input ng-value="info.url"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </md-table-container>
+                        <md-table-pagination md-limit-options="[5, 10, 15, 20]" md-limit="build.query.limit" md-page="build.query.page" md-total="{{build.uploadData.infos.length}}" md-page-select></md-table-pagination>
+                    </div>
                 </div>
                 <md-list role="list">
                     <md-list-item role="listitem" ng-repeat="todo in build.todos">

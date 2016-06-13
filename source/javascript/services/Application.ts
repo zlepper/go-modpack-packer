@@ -67,7 +67,6 @@ module Application {
 
         constructor() {
             this.name = "Unnamed modpack";
-            console.log(this);
         }
 
         public static fromJson(data:Modpack):Modpack {
@@ -198,11 +197,15 @@ module Application {
 
 
     export class Application {
-        static $inject = ["$rootScope", "goComm", "$state"];
+        static $inject = ["$rootScope", "goComm", "$state", "$mdToast", "$translate"];
         public modpacks:Array<Modpack> = [];
         public modpack:Modpack;
 
-        constructor(protected $rootScope:angular.IRootScopeService, protected goComm:GoCommService.GoCommService, protected $state:angular.ui.IStateService) {
+        constructor(protected $rootScope:angular.IRootScopeService,
+                    protected goComm:GoCommService.GoCommService,
+                    protected $state:angular.ui.IStateService,
+                    protected $mdToast: angular.material.IToastService,
+                    protected $translate: angular.translate.ITranslateService) {
             var self = this;
             goComm.send("load-modpacks", {});
             $rootScope.$watch(function () {
@@ -221,6 +224,14 @@ module Application {
                     }
                 }
             });
+
+            $rootScope.$on("error", (event:angular.IAngularEvent, err: string) => {
+                console.log(err);
+                var self = this;
+                this.$translate(err).then(function(translation: string) {
+                    self.$mdToast.showSimple(translation);
+                });
+            })
         }
 
         protected saveModpackData():void {

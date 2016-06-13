@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"github.com/zlepper/go-modpack-packer/source/backend/solder"
 	"github.com/zlepper/go-modpack-packer/source/backend/solder/upload"
 	wc "github.com/zlepper/go-websocket-connection"
 	"runtime/debug"
@@ -42,6 +43,18 @@ func HandleMessage(conn wc.WebsocketConnection, messageType int, message []byte)
 		case "get-aws-buckets":
 			{
 				upload.GetAwsBuckets(conn, m.Data)
+			}
+		case "test-ftp":
+			{
+				upload.TestFtp(conn, m.Data)
+			}
+		case "test-solder":
+			{
+				solder.TestSolderConnection(conn, m.Data)
+			}
+		case "continue-running":
+			{
+				continueRunning(conn, m.Data)
 			}
 		}
 	}

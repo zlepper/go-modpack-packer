@@ -12,7 +12,7 @@
             <md-input-container class="md-block">
                 <md-radio-group ng-model="vm.application.modpack.technic.isSolderPack" layout="row">
                     <md-radio-button value="1">{{'TECHNIC.SOLDERPACK' | translate}}</md-radio-button>
-                    <md-radio-button value="0" disabled>{{'TECHNIC.ZIPPACK' | translate}}</md-radio-button>
+                    <md-radio-button value="0">{{'TECHNIC.ZIPPACK' | translate}}</md-radio-button>
                 </md-radio-group>
             </md-input-container>
         </div>
@@ -26,14 +26,17 @@
                 <span translate>TECHNIC.CREATEFORGEZIP</span>
             </md-checkbox>
         </div>
-        <div ng-show="vm.application.modpack.technic.createForgeZip" class="collapsible clearfix" >
+        <div ng-show="vm.application.modpack.technic.createForgeZip" class="collapsible clearfix">
             <md-input-container class="md-block">
-                <label>{{'TECHNIC.FORGEVERSION' | translate}}</label>
+                <label translate>TECHNIC.FORGEVERSION</label>
                 <md-select ng-model="vm.application.modpack.technic.forgeVersion">
-                    <md-option ng-repeat="version in vm.forge.forgeVersions | filter:vm.application.modpack.minecraftVersion:vm.filterByMcVersion track by version.build" ng-value="version">{{version.build}}</md-option>
+                    <md-option
+                            ng-repeat="version in vm.forge.forgeVersions | filter:vm.application.modpack.minecraftVersion:vm.filterByMcVersion track by version.build"
+                            ng-value="version">{{version.build}}
+                    </md-option>
                 </md-select>
             </md-input-container>
-            <md-divider ></md-divider>
+            <md-divider></md-divider>
         </div>
         <div>
             <md-checkbox ng-model="vm.application.modpack.technic.checkPermissions" disabled="disabled">
@@ -48,9 +51,9 @@
                     <md-radio-button value="false">{{'TECHNIC.PRIVATEPACK' | translate}}</md-radio-button>
                 </md-radio-group>
             </md-input-container>
-            <md-divider ></md-divider>
+            <md-divider></md-divider>
         </div>
-        <div>
+        <div class="collapsible" ng-show="vm.application.modpack.technic.isSolderPack == 1">
             <md-input-container class="md-block" flex>
                 <label translate>TECHNIC.JAVA</label>
                 <md-select ng-model="vm.application.modpack.technic.java">
@@ -60,89 +63,96 @@
                     <md-option value="1.8">1.8</md-option>
                 </md-select>
             </md-input-container>
-        </div>
-        <div>
-            <p translate>TECHNIC.UPLOAD.TYPE</p>
-            <md-input-container class="md-block">
-                <md-radio-group ng-model="vm.application.modpack.technic.upload.type" layout="row">
-                    <md-radio-button value="ftp">{{'TECHNIC.UPLOAD.FTP.NAME' | translate}}</md-radio-button>
-                    <md-radio-button value="s3">{{'TECHNIC.UPLOAD.AWSS3' | translate}}</md-radio-button>
-                    <md-radio-button value="none">{{'TECHNIC.UPLOAD.NONE' | translate}}</md-radio-button>
-                </md-radio-group>
-            </md-input-container>
-        </div>
-        <div ng-show="vm.application.modpack.technic.upload.type === 'ftp'" class="collapsible">
-            <md-input-container class="md-block">
-                <label translate>TECHNIC.UPLOAD.FTP.URL</label>
-                <input type="text" ng-model="vm.application.modpack.technic.upload.ftp.url" required ng-pattern="vm.ftpPattern">
-            </md-input-container>
-            <md-input-container class="md-block">
-                <label translate>TECHNIC.UPLOAD.FTP.USERNAME</label>
-                <input type="text" ng-model="vm.application.modpack.technic.upload.ftp.username">
-            </md-input-container>
-            <md-input-container class="md-block">
-                <label translate>TECHNIC.UPLOAD.FTP.PASSWORD</label>
-                <input type="password" ng-model="vm.application.modpack.technic.upload.ftp.password">
-            </md-input-container>
-            <!--TODO Add a test button-->
-            <md-divider ></md-divider>
-        </div>
-        <div ng-show="vm.application.modpack.technic.upload.type === 's3'" class="collapsible">
-            <md-input-container class="md-block">
-                <label translate>TECHNIC.UPLOAD.AWS.ACCESSKEY</label>
-                <input type="password" ng-model="vm.application.modpack.technic.upload.aws.accessKey">
-            </md-input-container>
-            <md-input-container class="md-block">
-                <label translate>TECHNIC.UPLOAD.AWS.SECRETKEY</label>
-                <input type="password" ng-model="vm.application.modpack.technic.upload.aws.secretKey">
-            </md-input-container>
-            <md-input-container class="md-block">
-                <label><span translate>TECHNIC.UPLOAD.AWS.REGION</span></label>
-                <md-select ng-model="vm.application.modpack.technic.upload.aws.region">
-                    <md-option value="us-east-1">US East - N. Virginia (us-east-1)</md-option>
-                    <md-option value="us-west-2">US West - Oregon (us-west-2)</md-option>
-                    <md-option value="us-west-1">US West - N. California (us-west-1)</md-option>
-                    <md-option value="eu-west-1">EU - Ireland (eu-west-1)</md-option>
-                    <md-option value="eu-central-1">EU - Frankfurt (eu-central-1)</md-option>
-                    <md-option value="ap-southeast-1">Asia Pacific - Singapore (ap-southeast-1)</md-option>
-                    <md-option value="ap-northeast-1">Asia Pacific - Tokyo (ap-northeast-1)</md-option>
-                    <md-option value="ap-southeast-2">Asia Pacific - Sydney (ap-southeast-2)</md-option>
-                    <md-option value="ap-northeast-2">Asia Pacific - Seoul (ap-northeast-2)</md-option>
-                    <md-option value="sa-east-1">South America - São Paulo (sa-east-1)</md-option>
-                </md-select>
-            </md-input-container>
-            <md-button ng-click="vm.getAwsBuckets()" class="md-primary md-raised">{{'TECHNIC.UPLOAD.AWS.GETBUCKETS' |translate }}</md-button>
-            <md-input-container class="md-block collapsible" ng-show="vm.buckets.length">
-                <label><span translate>TECHNIC.UPLOAD.AWS.BUCKETS</span></label>
-                <md-select ng-model="vm.application.modpack.technic.upload.aws.bucket">
-                    <md-option ng-repeat="bucket in vm.buckets" value="{{bucket}}">{{bucket}}</md-option>
-                </md-select>
-            </md-input-container>
-            <md-divider ></md-divider>
-        </div>
-        <div>
-            <md-checkbox ng-model="vm.application.modpack.solder.use">
-                <span translate>TECHNIC.SOLDER.USE</span>
-            </md-checkbox>
-        </div>
-        <div ng-show="vm.application.modpack.solder.use" class="collapsible">
             <div>
-                <md-input-container class="md-block" flex>
-                    <label translate>TECHNIC.SOLDER.URL</label>
-                    <input type="url" ng-model="vm.application.modpack.solder.url">
+                <p translate>TECHNIC.UPLOAD.TYPE</p>
+                <md-input-container class="md-block">
+                    <md-radio-group ng-model="vm.application.modpack.technic.upload.type" layout="row">
+                        <md-radio-button value="ftp">{{'TECHNIC.UPLOAD.FTP.NAME' | translate}}</md-radio-button>
+                        <md-radio-button value="s3">{{'TECHNIC.UPLOAD.AWSS3' | translate}}</md-radio-button>
+                        <md-radio-button value="none">{{'TECHNIC.UPLOAD.NONE' | translate}}</md-radio-button>
+                    </md-radio-group>
                 </md-input-container>
             </div>
-            <div layout-gt-sm="row">
-                <md-input-container class="md-block" flex="50">
-                    <label translate>TECHNIC.SOLDER.USERNAME</label>
-                    <input type="text" ng-model="vm.application.modpack.solder.username">
+            <div ng-show="vm.application.modpack.technic.upload.type === 'ftp'" class="collapsible">
+                <md-input-container class="md-block">
+                    <label translate>TECHNIC.UPLOAD.FTP.URL</label>
+                    <input type="text" ng-model="vm.application.modpack.technic.upload.ftp.url" required
+                           ng-pattern="vm.ftpPattern">
                 </md-input-container>
-                <md-input-container class="md-block" flex="50">
-                    <label translate>TECHNIC.SOLDER.PASSWORD</label>
-                    <input type="password" ng-model="vm.application.modpack.solder.password">
+                <md-input-container class="md-block">
+                    <label translate>TECHNIC.UPLOAD.FTP.USERNAME</label>
+                    <input type="text" ng-model="vm.application.modpack.technic.upload.ftp.username">
                 </md-input-container>
+                <md-input-container class="md-block">
+                    <label translate>TECHNIC.UPLOAD.FTP.PASSWORD</label>
+                    <input type="password" ng-model="vm.application.modpack.technic.upload.ftp.password">
+                </md-input-container>
+                <md-button class="md-raised md-primary" ng-click="vm.testFtp()">
+                    {{'TECHNIC.UPLOAD.FTP.TEST' | translate }}
+                </md-button>
+                <md-divider></md-divider>
             </div>
-            <!-- TODO Add a test button -->
+            <div ng-show="vm.application.modpack.technic.upload.type === 's3'" class="collapsible">
+                <md-input-container class="md-block">
+                    <label translate>TECHNIC.UPLOAD.AWS.ACCESSKEY</label>
+                    <input type="password" ng-model="vm.application.modpack.technic.upload.aws.accessKey">
+                </md-input-container>
+                <md-input-container class="md-block">
+                    <label translate>TECHNIC.UPLOAD.AWS.SECRETKEY</label>
+                    <input type="password" ng-model="vm.application.modpack.technic.upload.aws.secretKey">
+                </md-input-container>
+                <md-input-container class="md-block">
+                    <label><span translate>TECHNIC.UPLOAD.AWS.REGION</span></label>
+                    <md-select ng-model="vm.application.modpack.technic.upload.aws.region">
+                        <md-option value="us-east-1">US East - N. Virginia (us-east-1)</md-option>
+                        <md-option value="us-west-2">US West - Oregon (us-west-2)</md-option>
+                        <md-option value="us-west-1">US West - N. California (us-west-1)</md-option>
+                        <md-option value="eu-west-1">EU - Ireland (eu-west-1)</md-option>
+                        <md-option value="eu-central-1">EU - Frankfurt (eu-central-1)</md-option>
+                        <md-option value="ap-southeast-1">Asia Pacific - Singapore (ap-southeast-1)</md-option>
+                        <md-option value="ap-northeast-1">Asia Pacific - Tokyo (ap-northeast-1)</md-option>
+                        <md-option value="ap-southeast-2">Asia Pacific - Sydney (ap-southeast-2)</md-option>
+                        <md-option value="ap-northeast-2">Asia Pacific - Seoul (ap-northeast-2)</md-option>
+                        <md-option value="sa-east-1">South America - São Paulo (sa-east-1)</md-option>
+                    </md-select>
+                </md-input-container>
+                <md-button ng-click="vm.getAwsBuckets()" class="md-primary md-raised">{{'TECHNIC.UPLOAD.AWS.GETBUCKETS'
+                    |translate }}
+                </md-button>
+                <md-input-container class="md-block collapsible" ng-show="vm.buckets.length">
+                    <label><span translate>TECHNIC.UPLOAD.AWS.BUCKETS</span></label>
+                    <md-select ng-model="vm.application.modpack.technic.upload.aws.bucket">
+                        <md-option ng-repeat="bucket in vm.buckets" value="{{bucket}}">{{bucket}}</md-option>
+                    </md-select>
+                </md-input-container>
+                <md-divider></md-divider>
+            </div>
+            <div>
+                <md-checkbox ng-model="vm.application.modpack.solder.use">
+                    <span translate>TECHNIC.SOLDER.USE</span>
+                </md-checkbox>
+            </div>
+            <div ng-show="vm.application.modpack.solder.use" class="collapsible">
+                <div>
+                    <md-input-container class="md-block" flex>
+                        <label translate>TECHNIC.SOLDER.URL</label>
+                        <input type="url" ng-model="vm.application.modpack.solder.url">
+                    </md-input-container>
+                </div>
+                <div layout-gt-sm="row">
+                    <md-input-container class="md-block" flex="50">
+                        <label translate>TECHNIC.SOLDER.USERNAME</label>
+                        <input type="text" ng-model="vm.application.modpack.solder.username">
+                    </md-input-container>
+                    <md-input-container class="md-block" flex="50">
+                        <label translate>TECHNIC.SOLDER.PASSWORD</label>
+                        <input type="password" ng-model="vm.application.modpack.solder.password">
+                    </md-input-container>
+                </div>
+                <md-button class="md-raised md-primary" ng-click="vm.testSolder()">
+                    {{'TECHNIC.SOLDER.TEST' | translate}}
+                </md-button>
+            </div>
         </div>
     </form>
 </div>

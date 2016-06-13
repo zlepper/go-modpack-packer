@@ -1,5 +1,5 @@
 module ModpackHelper{
-    var app = angular.module("ModpackHelper", ["ngMaterial", "ui.router", "ngResource", "ngAnimate", "pascalprecht.translate", "ngMessages", "ngWebSocket"]);
+    var app = angular.module("ModpackHelper", ["ngMaterial", "ui.router", "ngResource", "ngAnimate", "pascalprecht.translate", "ngMessages", "ngWebSocket", "ngSanitize", "md.data.table"]);
 
     class ModpackHelperConfigure {
         static $inject = ["$mdThemingProvider", "$stateProvider", "$urlRouterProvider", "$locationProvider", "$sceDelegateProvider", "$translateProvider", "$translatePartialLoaderProvider"];
@@ -46,6 +46,7 @@ module ModpackHelper{
             });
 
             $translateProvider.use("en");
+            $translateProvider.useSanitizeValueStrategy('sanitize');
         }
     }
 

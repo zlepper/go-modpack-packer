@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/mitchellh/mapstructure"
 	"github.com/zlepper/go-modpack-packer/source/backend/solder/crawlers"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
+	"github.com/zlepper/go-websocket-connection"
 	"io"
 	"log"
 	"net/http"
@@ -42,6 +44,24 @@ func NewSolderClient(Url string) *SolderClient {
 		modVersionIdCache: make(map[string]map[string]string),
 		modIdCache:        make(map[string]string),
 		buildCache:        make(map[string]crawlers.Build),
+	}
+}
+
+func TestSolderConnection(conn websocket.WebsocketConnection, data interface{}) {
+	dict := data.(map[string]interface{})
+
+	var solderInfo types.SolderInfo
+	err := mapstructure.Decode(dict, &solderInfo)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	client := NewSolderClient(solderInfo.Url)
+	loginSuccess := client.Login(solderInfo.Username, solderInfo.Password)
+	if loginSuccess {
+		conn.Write("solder-test", "TECHNIC.SOLDER.SUCCESS")
+	} else {
+		conn.Write("solder-test", "TECHNIC.SOLDER.ERROR")
 	}
 }
 
@@ -298,7 +318,7 @@ func (s *SolderClient) CreateBuild(modpack *types.Modpack, modpackId string) str
 	res := s.postForm(Url.String(), form)
 	defer res.Body.Close()
 
-	// Return the build id because the response redirects (TODO Test if go also follow redirect
+	// Return the build id because the response redirects
 	u := res.Request.URL
 	segments := strings.Split(u.Path, "/")
 	return segments[len(segments)-1]

@@ -1,6 +1,6 @@
 module TechnicController {
     export class TechnicController {
-        static $inject = ["application", "$translatePartialLoader", "$mdDialog", "$mdMedia", "forge", "goComm", "$rootScope"];
+        static $inject = ["application", "$translatePartialLoader", "$mdDialog", "$mdMedia", "forge", "goComm", "$rootScope", "$translate", "$mdToast"];
 
         public buckets: Array<string> = [];
 
@@ -12,23 +12,30 @@ module TechnicController {
                     protected $mdMedia: angular.material.IMedia,
                     protected forge: ForgeVersion.ForgeVersionService,
                     protected goComm: GoCommService.GoCommService,
-                    protected $rootScope: angular.IRootScopeService) {
+                    protected $rootScope: angular.IRootScopeService,
+                    protected $translate: angular.translate.ITranslateService,
+                    protected $mdToast: angular.material.IToastService) {
             $translatePartialLoader.addPart("technic");
             var controller = this;
             $rootScope.$on("found-aws-buckets", function(event: angular.IAngularEvent, buckets: Array<string>) {
                 controller.buckets = buckets;
             });
+            $rootScope.$on("solder-test", function(event: angular.IAngularEvent, result: string) {
+                $translate(result).then(function(translated) {
+                    $mdToast.showSimple(translated);
+                });
+            });
+
         }
 
         public build(ev: MouseEvent): void {
             if(this.application.modpack.isValid() && this.application.modpack.isValidTechnic()) {
-                var useFullscreen = this.$mdMedia("sm") || this.$mdMedia("xs");
                 this.$mdDialog.show({
                     controller: "BuildController",
                     controllerAs: "build",
                     templateUrl: "parts/buildprogress.html",
                     clickOutsideToClose: false,
-                    fullscreen: useFullscreen,
+                    fullscreen: true,
                     targetEvent: ev,
                     ariaLabel: "Build progress dialog"
                 });
@@ -43,6 +50,12 @@ module TechnicController {
                         .targetEvent(ev)
                 )
             }
+        }
+        public testFtp(): void {
+            this.goComm.send("test-ftp", this.application.modpack.technic.upload.ftp)
+        }
+        public testSolder(): void {
+            this.goComm.send("test-solder", this.application.modpack.solder)
         }
         
         public filterByMcVersion(input: ForgeVersion.ForgeVersion, minecraftVersion: string) {

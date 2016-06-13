@@ -17,7 +17,10 @@
       "USE": "Use Solder",
       "URL": "Solder url",
       "USERNAME": "Username/email",
-      "PASSWORD": "Password"
+      "PASSWORD": "Password",
+      "TEST": "Test solder connection",
+      "ERROR": "Could not connect to solder and login.",
+      "SUCCESS": "Solder connection seems alright."
     },
     "UPLOAD": {
       "TYPE": "Upload type",
@@ -28,13 +31,20 @@
         "SECRETKEY": "Secret key",
         "REGION": "Region",
         "GETBUCKETS": "Get buckets",
-        "BUCKETS": "Buckets on S3"
+        "BUCKETS": "Buckets on S3",
+        "UNABLE_TO_LIST_BUCKETS": "Unable to list buckets."
       },
       "FTP": {
         "NAME": "ftp",
         "URL": "Url",
         "USERNAME": "Username",
-        "PASSWORD": "Password"
+        "PASSWORD": "Password",
+        "TEST": "Test ftp connection",
+        "ERROR": {
+          "LOGIN": "Could not login with the supplied credentials",
+          "CONNECT": "Could not connect to the provided address",
+          "LIST": "Could not list content. Might be a permission issue."
+        }
       }
     }
   }

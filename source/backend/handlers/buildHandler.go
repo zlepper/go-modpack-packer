@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/mitchellh/mapstructure"
 	"github.com/zlepper/go-modpack-packer/source/backend/db"
 	"github.com/zlepper/go-modpack-packer/source/backend/helpers"
 	"github.com/zlepper/go-modpack-packer/source/backend/solder"
@@ -18,6 +19,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 )
 
 const donePackingPartName string = "done-packing-part"
@@ -37,6 +39,26 @@ func build(conn websocket.WebsocketConnection, data interface{}) {
 	buildModpack(modpack, mods, conn)
 }
 
+type uploadWaiting struct {
+	Modpack types.Modpack       `json:"modpack"`
+	Infos   []*types.OutputInfo `json:"infos"`
+}
+
+func continueRunning(conn websocket.WebsocketConnection, data interface{}) {
+	dict := data.(map[string]interface{})
+
+	var uploadInfo uploadWaiting
+	err := mapstructure.Decode(dict, &uploadInfo)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	solderclient, buildId := updateSolder(uploadInfo.Modpack)
+	for _, info := range uploadInfo.Infos {
+		go addInfoToSolder(info, buildId, conn, solderclient)
+	}
+}
+
 func buildModpack(modpack types.Modpack, mods []types.Mod, conn websocket.WebsocketConnection) {
 	// Create output directory
 	outputDirectory := path.Join(modpack.OutputDirectory, modpack.Name)
@@ -46,6 +68,7 @@ func buildModpack(modpack types.Modpack, mods []types.Mod, conn websocket.Websoc
 	var ch chan *types.OutputInfo
 	ch = make(chan *types.OutputInfo)
 
+	startTime := time.Now()
 	// Handle forge
 	if modpack.Technic.CreateForgeZip {
 		total++
@@ -82,11 +105,17 @@ func buildModpack(modpack types.Modpack, mods []types.Mod, conn websocket.Websoc
 		infos = append(infos, info)
 		count++
 	}
+	endTime := time.Now()
+	spendtime := endTime.UnixNano() - startTime.UnixNano()
+	spendtime = spendtime / (int64(time.Millisecond) / int64(time.Nanosecond))
+	fmt.Printf("Time spend packing: %d ms", spendtime)
 
 	switch modpack.Technic.Upload.Type {
 	case "none":
 		{
-			return // TODO Send back information and await clearance from client
+			// Send back information and await clearance from client
+			conn.Write("waiting-for-file-upload", uploadWaiting{Modpack: modpack, Infos: infos})
+			return
 		}
 	case "ftp":
 		{
@@ -105,10 +134,6 @@ func buildModpack(modpack types.Modpack, mods []types.Mod, conn websocket.Websoc
 			go addInfoToSolder(info, buildId, conn, solderclient)
 		}
 	}
-
-}
-
-func ftpUpload(modpack types.Modpack) {
 
 }
 
