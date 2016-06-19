@@ -1,9 +1,12 @@
 {
   "name": "go-modpack-packer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Packs mods for modspacks",
   "main": "main.js",
   "scripts": {
+    "postinstall": "install-app-deps",
+    "pack": "build --target dir",
+    "dist": "build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -28,9 +31,11 @@
     "angular-ui-router": "^0.3.0",
     "angular-websocket": "^2.0.0",
     "electron-prebuilt": "^1.1.1",
+    "electron-squirrel-startup": "^1.0.0",
     "gsap": "^1.18.5"
   },
   "devDependencies": {
+    "electron-builder": "^5.2.1",
     "electron-connect": "^0.4.2",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",
@@ -42,5 +47,16 @@
     "gulp-uglify": "^1.5.3",
     "gulp-util": "^3.0.7",
     "jshint": "^2.9.2"
+  },
+  "build": {
+    "appId": "dk.zlepper.modpackpacker",
+    "app-category-type": "public.app-category.developer-tools",
+    "win": {
+      "iconUrl": "https://raw.githubusercontent.com/zlepper/TechnicSolderHelper/master/TechnicSolderHelper/modpackhelper.ico"
+    },
+    "compression": "maximum"
+  },
+  "directories": {
+    "app": "./app"
   }
 }

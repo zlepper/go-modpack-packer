@@ -1,5 +1,12 @@
 {
-  "name"    : "modpack-packer",
-  "version" : "0.0.1",
-  "main"    : "main.js"
+  "name"    : "ModpackPacker",
+  "version" : "1.0.1",
+  "main"    : "main.js",
+  "description": "An application that creates modpacks in correct formats",
+  "homepage": "https://github.com/zlepper/go-modpack-packer",
+  "license": "All rights reserved",
+  "author": "Zlepper",
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0"
+  }
 }

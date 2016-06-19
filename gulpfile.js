@@ -19,8 +19,7 @@ var gulp = require('gulp'),
         },
         verbosy: true
     }),
-    exec = require("child_process").execSync,
-    spawn = require("child_process").spawn,
+    exec = require("child_process").exec,
     ownScripts = 'source/javascript/**/*.ts',
 
     input = {
@@ -81,7 +80,7 @@ function watch() {
 
 /* run the watch task when gulp is called without arguments */
 gulp.task('default', ['build-css', 'vendor-js', 'build-ts', 'build-electron', 'copy-body', "go-compile"]);
-gulp.task('build-watch', ['default', "run-electron"], watch);
+gulp.task('build-watch', ['default'], watch);
 
 /* compile scss files */
 gulp.task('build-css', function () {
@@ -107,13 +106,13 @@ gulp.task('build-ts', function () {
         .pipe(gulp.dest(output));
 });
 
-gulp.task('build-electron', function () {
+gulp.task("electron", function() {
     "use strict";
     var tsTask = gulp.src(input.mainTypescript)
         .pipe(sourcemaps.init())
         .pipe(ts(tsElectronProject))
         //only uglify if gulp is ran with '--type production'
-        .pipe(gutil.env.type === 'production' ? uglify() : gutil.noop())
+        // .pipe(gutil.env.type === 'production' ? uglify() : gutil.noop())
         .pipe(sourcemaps.write())
         .pipe(gulp.dest(mainOutput));
     var packageTask = gulp.src("source/app/package.json")
@@ -121,41 +120,39 @@ gulp.task('build-electron', function () {
     return [tsTask, packageTask];
 });
 
+gulp.task('build-electron', ["electron"], function (cb) {
+    exec("npm install", {cwd: "app"}, function(err, stdout, stderr) {
+        !!stdout && console.log(stdout);
+        !!stderr && console.log(stderr);
+        cb(err)
+    });
+});
+
 gulp.task("copy-body", function () {
     return gulp.src(input.body).pipe(gulp.dest(mainOutput));
 });
 
-gulp.task('run-electron', function () {
-    //electron.start("--enable-logging");
-});
 
 gulp.task("go-test", function(cb) {
-    var command = "go";
-    var cmd = spawn(command, ["test", "./source/backend/..."], {stdio: "inherit"});
-    cmd.on("close", function(code) {
-        if(code != 0) {
-            var err = new Error("Tests failed");
-            cb(err);
-        } else {
-            cb();
-        }
-    });
-    cmd.on("error", function(err) {
-        console.log(err);
-        cb(err);
+    exec("go test ./source/backend/...", function(err, stdout, stderr) {
+        !!stdout && console.log(stdout);
+        !!stderr && console.log(stderr);
+        cb(err)
     })
 });
 
-gulp.task("go-compile", ["go-test"] , function () {
+gulp.task("go-compile", ["go-test"] , function (cb) {
     var command;
     if (process.platform === "win32") {
         command = "go build -o ./app/backend.exe ./source/backend"
     } else {
         command = "go build -o ./app/backend ./source/backend";
     }
-    console.log(__dirname);
-    gutil.log(command);
-    return exec(command);
+    exec(command, function(err, stdout, stderr) {
+        !!stdout && console.log(stdout);
+        !!stderr && console.log(stderr);
+        cb(err)
+    });
 });
 
 gulp.task('vendor-js', function () {
@@ -171,3 +168,11 @@ gulp.task('vendor-js', function () {
 
 /* Watch these files for changes and run the task on update */
 gulp.task('watch', watch);
+
+gulp.task("build-release", ["default"], function(cb) {
+    exec("build", function(err, stdout, stderr) {
+        !!stdout && console.log(stdout);
+        !!stderr && console.log(stderr);
+        cb(err)
+    })
+});

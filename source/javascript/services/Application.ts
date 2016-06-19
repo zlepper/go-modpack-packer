@@ -197,23 +197,34 @@ module Application {
 
 
     export class Application {
-        static $inject = ["$rootScope", "goComm", "$state", "$mdToast", "$translate"];
+        static $inject = ["$rootScope", "goComm", "$state", "$mdToast", "$translate", "$timeout"];
         public modpacks:Array<Modpack> = [];
         public modpack:Modpack;
-
+        public waitingForStoredData: boolean = false;
         constructor(protected $rootScope:angular.IRootScopeService,
                     protected goComm:GoCommService.GoCommService,
                     protected $state:angular.ui.IStateService,
                     protected $mdToast: angular.material.IToastService,
-                    protected $translate: angular.translate.ITranslateService) {
+                    protected $translate: angular.translate.ITranslateService,
+                    protected $timeout: angular.ITimeoutService) {
             var self = this;
             goComm.send("load-modpacks", {});
+            this.waitingForStoredData = true;
             $rootScope.$watch(function () {
                 return self.modpacks;
             }, function () {
                 self.saveModpackData()
             }, true);
+            
+            $timeout(function wait() {
+                if(self.waitingForStoredData) {
+                    goComm.send("load-modpacks", {});
+                    $timeout(wait, 1000)
+                }
+            }, 1000);
+            
             $rootScope.$on("data-loaded", (event:angular.IAngularEvent, modpacks:Array<Modpack>) => {
+                self.waitingForStoredData = false;
                 modpacks.forEach((modpack:Modpack) => {
                     self.modpacks.push(Modpack.fromJson(modpack))
                 });
@@ -241,4 +252,14 @@ module Application {
 
 
     angular.module("ModpackHelper").service("application", Application);
+
+    require("electron").ipcRenderer.on("update-info", (event: any, message: any) => {
+        console.log(event);
+        console.log(message);
+    });
+
+    require("electron").ipcRenderer.on("update-error", (event: any, message: any) => {
+        console.log(event);
+        console.log(message);
+    })
 }

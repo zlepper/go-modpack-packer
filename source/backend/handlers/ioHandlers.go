@@ -65,6 +65,7 @@ func saveModpacks(conn websocket.WebsocketConnection, data interface{}) {
 	}
 	mutex.Lock()
 	f, err := os.Create(modpackFile)
+	defer f.Close()
 	if err != nil {
 		mutex.Unlock()
 		log.Panic(err)
@@ -83,12 +84,13 @@ func loadModpacks(conn websocket.WebsocketConnection) {
 	mutex.Lock()
 	modpackData, err := ioutil.ReadFile(modpackFile)
 	mutex.Unlock()
+	var modpacks []types.Modpack = make([]types.Modpack, 0)
 	if err != nil {
 		conn.Log("Unable to reload data " + err.Error())
+		conn.Write("data-loaded", modpacks)
 		return
 	}
 	log.Println(string(modpackData))
-	var modpacks []types.Modpack
 	err = json.Unmarshal(modpackData, &modpacks)
 	if err != nil {
 		panic("Could not parse json data " + err.Error() + "\n" + string(modpackData))
