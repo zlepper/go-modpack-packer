@@ -36,6 +36,11 @@ module ModpackHelper{
                 templateUrl: "parts/ftb.html",
                 controller: "FtbController",
                 controllerAs: "vm"
+            }).state("settings", {
+                url: "/settings",
+                templateUrl: "parts/settings.html",
+                controller: "SettingsController",
+                controllerAs: "settings"
             });
 
             $sceDelegateProvider.resourceUrlWhitelist(["self"]);
@@ -45,8 +50,9 @@ module ModpackHelper{
                 urlTemplate: "i18n/{part}/{lang}.json"
             });
 
-            $translateProvider.use("en");
+            $translateProvider.preferredLanguage("en");
             $translateProvider.useSanitizeValueStrategy('sanitize');
+            $translateProvider.useStorage("languageStorage");
         }
     }
 

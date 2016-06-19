@@ -37,7 +37,7 @@ import {IpcHandlersCreator} from './IpcHandlers';
     }
 
     function canAutoupdate(): boolean {
-        return platform() === "win32";
+        return !devMode && platform() === "win32";
     } 
     
     
@@ -52,6 +52,7 @@ import {IpcHandlersCreator} from './IpcHandlers';
             win.webContents.send("update-info", "UPDATE.DOWNLOADED");
         });
         autoUpdater.addListener("error", function (error:any) {
+            console.log(error);
             win.webContents.send("update-error", error);
         });
         autoUpdater.addListener("checking-for-update", function () {
@@ -122,8 +123,11 @@ import {IpcHandlersCreator} from './IpcHandlers';
         } catch (e) {
         }
 
+        var bounds: Electron.BrowserWindowOptions = data && data.bounds ? data.bounds : {width: 800, height: 600};
+        bounds.frame = false;
+
         // Create the browser window
-        win = new BrowserWindow((data && data.bounds) ? data.bounds : {width: 800, height: 600, frame: true});
+        win = new BrowserWindow(bounds);
 
         // and load the index.body of the app.
         win.loadURL(`file://${__dirname}/index.html`);

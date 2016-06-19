@@ -6,6 +6,14 @@
   },
   "SERVICE": {
     "TECHNIC": "Technic",
-    "FTB": "Feed the Beast"
+    "FTB": "Feed the Beast",
+    "SETTINGS": "Settings"
+  },
+  "UPDATE": {
+    "AVAILABLE": "A new update is available. Downloading now...",
+    "DOWNLOADED": "A new update has been downloaded. Restart the application to update.",
+    "CHECKING_FOR_UPDATE": "Checking for updates.",
+    "NOT_AVAILABLE": "Not updates available, running latest version.",
+    "RESTART_TO_UPDATE": "Restart and update"
   }
 }

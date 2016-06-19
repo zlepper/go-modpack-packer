@@ -1,4 +1,4 @@
-module Electron {
+module ElectronService {
 
     import IpcRendererEvent = Electron.IpcRendererEvent;
     export class ElectronService {
@@ -10,12 +10,12 @@ module Electron {
 
         }
 
-        public send(data:string) {
-            this.ipc.send(data);
+        public send(key:string, data:any):void {
+            this.ipc.send(key, data);
         }
 
         // Totally not a hack to send things back into the angular event loop
-        public on(channel:string, cb:Electron.IpcRendererEventListener) {
+        public on(channel:string, cb:Electron.IpcRendererEventListener):void {
             this.ipc.on(channel, (event:IpcRendererEvent, ...args:any[]) => {
                 this.$timeout(function() {
                     cb(event, args);

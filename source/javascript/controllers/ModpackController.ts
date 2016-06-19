@@ -13,7 +13,7 @@ module ModpackController {
         static $inject = ["application", "electron", "$state", "$translatePartialLoader", "goComm", "$rootScope", "forge"];
 
         constructor(protected application:Application.Application,
-                    protected electron:Electron.ElectronService,
+                    protected electron:ElectronService.ElectronService,
                     protected $state:angular.ui.IStateService,
                     protected $translatePartialLoader:angular.translate.ITranslatePartialLoaderService,
                     protected goComm:GoCommService.GoCommService,
@@ -66,11 +66,11 @@ module ModpackController {
         }
 
         public selectInputDirectory():void {
-            this.electron.send('open-input-directory-dialog');
+            this.electron.send('open-input-directory-dialog', null);
         }
 
         public selectOutputDirectory():void {
-            this.electron.send('open-output-directory-dialog');
+            this.electron.send('open-output-directory-dialog', null);
         }
 
     }

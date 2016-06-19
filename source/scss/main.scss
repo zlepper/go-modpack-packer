@@ -32,3 +32,7 @@ md-dialog.md-dialog-fullscreen {
   min-width: 100%;
   border-radius: 0;
 }
+
+button {
+  -webkit-app-region: no-drag;
+}

@@ -195,18 +195,21 @@ module Application {
         }
     }
 
+    var electron = require("electron");
 
     export class Application {
-        static $inject = ["$rootScope", "goComm", "$state", "$mdToast", "$translate", "$timeout"];
+        static $inject = ["$rootScope", "goComm", "$state", "$mdToast", "$translate", "$timeout", "languageService"];
         public modpacks:Array<Modpack> = [];
         public modpack:Modpack;
         public waitingForStoredData: boolean = false;
+        public updateReady: boolean = false;
         constructor(protected $rootScope:angular.IRootScopeService,
                     protected goComm:GoCommService.GoCommService,
                     protected $state:angular.ui.IStateService,
                     protected $mdToast: angular.material.IToastService,
                     protected $translate: angular.translate.ITranslateService,
-                    protected $timeout: angular.ITimeoutService) {
+                    protected $timeout: angular.ITimeoutService,
+                    protected languageService: LanguageService.LanguageService) {
             var self = this;
             goComm.send("load-modpacks", {});
             this.waitingForStoredData = true;
@@ -225,6 +228,7 @@ module Application {
             
             $rootScope.$on("data-loaded", (event:angular.IAngularEvent, modpacks:Array<Modpack>) => {
                 self.waitingForStoredData = false;
+                console.log("Got stored data");
                 modpacks.forEach((modpack:Modpack) => {
                     self.modpacks.push(Modpack.fromJson(modpack))
                 });
@@ -242,7 +246,17 @@ module Application {
                 this.$translate(err).then(function(translation: string) {
                     self.$mdToast.showSimple(translation);
                 });
-            })
+            });
+            
+            electron.ipcRenderer.on("update-info", (event: Electron.IpcRendererEvent, message: string) => {
+                self.$translate(message).then(function(translated) {
+                    $mdToast.showSimple(translated);
+                });
+                
+                if (message === "UPDATE.DOWNLOADED") {
+                    self.updateReady = true;
+                }
+            });
         }
 
         protected saveModpackData():void {
@@ -253,13 +267,8 @@ module Application {
 
     angular.module("ModpackHelper").service("application", Application);
 
-    require("electron").ipcRenderer.on("update-info", (event: any, message: any) => {
-        console.log(event);
-        console.log(message);
-    });
 
-    require("electron").ipcRenderer.on("update-error", (event: any, message: any) => {
-        console.log(event);
-        console.log(message);
+    electron.ipcRenderer.on("update-error", (event: Electron.IpcRendererEvent, message: any) => {
+        console.error(message);
     })
 }

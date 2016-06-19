@@ -1,0 +1,11 @@
+{
+  "DETAILS": {
+    "NAME": "Modpack navn",
+    "VERSION": "Modpack version",
+    "INPUT": "Input mappe",
+    "OUTPUT": "Output mappe",
+    "SELECT": "Vælg",
+    "ADDITIONALFOLDERS": "Ekstra mapper, der skal inkluderes.",
+    "MINECRAFTVERSION": "Minecraft Version"
+  }
+}

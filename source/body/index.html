@@ -3,53 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <title>Modpack Helper {{main.application.modpack ? "- " + main.application.modpack.name : ""}}</title>
-    <!-- build:remove -->
-    <!-- Connect to server process -->
-    <!--<script>require('electron-connect').client.create()</script>-->
-    <!-- end:build -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!-- Ignore that these are inresolved, they will appear when the application is build -->
     <link href="public/bundle.css" rel="stylesheet">
     <script src="public/vendor.js"></script>
     <script src="public/bundle.js"></script>
 </head>
-<body >
-<body ng-cloak layout="column" layout-gt-sm="row">
-<md-sidenav md-component-id="left" md-is-locked-open="$mdMedia('gt-sm')" class="md-whiteframe-6dp" layout-align="space-between">
-    <md-list role="list">
-        <md-list-item role="listitem" ng-show="main.application.modpacks.length">
-            <form flex>
-                <md-input-container class="md-block">
-                    <label>Modpack:</label>
-                    <md-select ng-model="main.application.modpack">
-                        <md-option ng-repeat="modpack in main.application.modpacks" ng-value="modpack">
-                            {{modpack.name}}
-                        </md-option>
-                    </md-select>
-                </md-input-container>
-            </form>
-        </md-list-item>
-        <md-list-item role="button" ng-click="main.createNewModpack()">
-            <p>
-                <strong translate>MODPACK.NEW</strong>
-            </p>
-        </md-list-item>
-        <md-list-item role="listitem" ui-sref="modpack" ui-sref-active="active" ng-show="main.application.modpack">
-            <p>
-                <strong translate>MODPACK.DETAILS</strong>
-            </p>
-        </md-list-item>
-        <md-list-item role="listitem" ui-sref="technic" ui-sref-active="active" ng-show="main.application.modpack">
-            <p>
-                <strong translate>SERVICE.TECHNIC</strong>
-            </p>
-        </md-list-item>
-    </md-list>
-</md-sidenav>
+<body ng-cloak layout="column" flex>
+<md-toolbar>
+    <div class="md-toolbar-tools" style="-webkit-app-region: drag">
+        <h6>Modpack Helper {{main.application.modpack ? "- " + main.application.modpack.name : ""}}</h6>
+        <span flex></span>
+        <md-button class="md-icon-button" aria-label="Minimize" ng-click="main.minimize()">
+            <md-icon class="material-icons">remove</md-icon>
+        </md-button>
+        <md-button class="md-icon-button" aria-label="Maximize" ng-click="main.toggleMaximized()">
+            <md-icon class="material-icons">fullscreen{{main.isMaximized ? '_exit' : ''}}</md-icon>
+        </md-button>
+        <md-button class="md-icon-button" aria-label="Close" ng-click="main.close()">
+            <md-icon class="material-icons">close</md-icon>
+        </md-button>
+    </div>
+</md-toolbar>
+<div layout="row" flex>
+    <md-sidenav md-component-id="left" md-is-locked-open="true" class="md-whiteframe-6dp" layout-align="space-between">
+        <md-list role="list">
+            <md-list-item role="listitem" ng-show="main.application.modpacks.length">
+                <form flex>
+                    <md-input-container class="md-block">
+                        <label>Modpack:</label>
+                        <md-select ng-model="main.application.modpack">
+                            <md-option ng-repeat="modpack in main.application.modpacks" ng-value="modpack">
+                                {{modpack.name}}
+                            </md-option>
+                        </md-select>
+                    </md-input-container>
+                </form>
+            </md-list-item>
+            <md-list-item role="button" ng-click="main.createNewModpack()">
+                <p>
+                    <strong translate>MODPACK.NEW</strong>
+                </p>
+            </md-list-item>
+            <md-list-item role="listitem" ui-sref="modpack" ui-sref-active="active" ng-show="main.application.modpack">
+                <p>
+                    <strong translate>MODPACK.DETAILS</strong>
+                </p>
+            </md-list-item>
+            <md-list-item role="listitem" ui-sref="technic" ui-sref-active="active" ng-show="main.application.modpack">
+                <p>
+                    <strong translate>SERVICE.TECHNIC</strong>
+                </p>
+            </md-list-item>
+            <md-list-item flex></md-list-item>
+            <md-list-item role="listitem" ng-show="main.application.updateReady" ng-click="main.restart()">
+                <p>
+                    <strong translate>UPDATE.RESTART_TO_UPDATE</strong>
+                </p>
+            </md-list-item>
+            <md-list-item role="listitem" ui-sref="settings" ui-sref-active="active">
+                <p>
+                    <strong translate>SERVICE.SETTINGS</strong>
+                </p>
+            </md-list-item>
+        </md-list>
+    </md-sidenav>
 
-<div class="md-whiteframe-6dp" role="main" flex layout="column">
-    <md-content flex layout="column" ui-view layout-padding>
+    <div class="md-whiteframe-6dp" role="main" flex layout="column">
+        <md-content flex layout="column" ui-view layout-padding>
 
-    </md-content>
+        </md-content>
+    </div>
 </div>
 </body>
 </html>

@@ -1,0 +1,51 @@
+{
+  "TECHNIC": {
+    "BUILD": "Byg",
+    "SOLDERPACK": "Solder pack",
+    "ZIPPACK": "Zip pack",
+    "PACKTYPE": "Pack type",
+    "CREATEFORGEZIP": "Lav Forge zip",
+    "CHECKPERMISSIONS": "Tjek rettigheder",
+    "FORGEVERSION": "Forge version",
+    "PERMISSIONLEVEL": "Rettighedsniveau",
+    "PUBLICPACK": "Offentlig pack",
+    "PRIVATEPACK": "Privat pack",
+    "NOREQUIREMENT": "Ingen minimumskrav",
+    "JAVA": "Mindst krævede java version.",
+    "REPACKALLMODS": "Pack alle fundne mods.",
+    "SOLDER": {
+      "USE": "Brug Solder",
+      "URL": "Solder url",
+      "USERNAME": "Brugernavn/email",
+      "PASSWORD": "Kodeord",
+      "TEST": "Test solder forbindelse",
+      "ERROR": "Kunne ikke forbinde til solder og logge ind.",
+      "SUCCESS": "Solder forbindelsen ser ud til at være i orden."
+    },
+    "UPLOAD": {
+      "TYPE": "Upload type",
+      "AWSS3": "AWS s3",
+      "NONE":"Ingen automatisk upload",
+      "AWS": {
+        "ACCESSKEY": "Access key",
+        "SECRETKEY": "Secret key",
+        "REGION": "Region",
+        "GETBUCKETS": "Hent buckets",
+        "BUCKETS": "Buckets på S3",
+        "UNABLE_TO_LIST_BUCKETS": "Kunne ikke hente liste med buckets."
+      },
+      "FTP": {
+        "NAME": "ftp",
+        "URL": "Url",
+        "USERNAME": "Brugernavn",
+        "PASSWORD": "Kodeord",
+        "TEST": "Test ftp forbindelse",
+        "ERROR": {
+          "LOGIN": "Kunne ikke logge ind med de forsynede loginoplysninger",
+          "CONNECT": "Kunne ikke forbinde til den specificerede adresse",
+          "LIST": "Kunne ikke liste indhold på server. Er måske et rettighedsproblem."
+        }
+      }
+    }
+  }
+}
