@@ -112,9 +112,9 @@
             </section>
         </md-dialog-content>
         <md-dialog-actions layout="row">
-            <md-checkbox class="mod-checkbox" ng-model="build.showDone">{{'BUILD.SHOWDONE' | translate}}</md-checkbox>
+            <md-checkbox ng-hide="build.state == 'building'" class="mod-checkbox" ng-model="build.showDone">{{'BUILD.SHOWDONE' | translate}}</md-checkbox>
             <span flex></span>
-            <md-button ng-disabled="!build.readyToBuild" class="md-primary md-raised" ng-click="build.build()">{{'BUILD.BUILD'|translate}}</md-button>
+            <md-button ng-disabled="!build.readyToBuild" class="md-primary md-raised" ng-click="build.build()" ng-hide="build.state == 'building'">{{'BUILD.BUILD'|translate}}</md-button>
             <md-button class="md-warn md-raised" ng-click="build.cancel()">{{'BUILD.CANCEL' | translate}}</md-button>
         </md-dialog-actions>
     </form>

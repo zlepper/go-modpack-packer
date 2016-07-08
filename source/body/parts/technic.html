@@ -11,8 +11,8 @@
             <p translate>TECHNIC.PACKTYPE</p>
             <md-input-container class="md-block">
                 <md-radio-group ng-model="vm.application.modpack.technic.isSolderPack" layout="row">
-                    <md-radio-button value="1">{{'TECHNIC.SOLDERPACK' | translate}}</md-radio-button>
-                    <md-radio-button value="0" disabled>{{'TECHNIC.ZIPPACK' | translate}}</md-radio-button>
+                    <md-radio-button ng-value="true">{{'TECHNIC.SOLDERPACK' | translate}}</md-radio-button>
+                    <md-radio-button ng-value="false" disabled>{{'TECHNIC.ZIPPACK' | translate}}</md-radio-button>
                 </md-radio-group>
             </md-input-container>
         </div>
@@ -39,7 +39,7 @@
             <md-divider></md-divider>
         </div>
         <div>
-            <md-checkbox ng-model="vm.application.modpack.technic.checkPermissions" disabled="disabled">
+            <md-checkbox ng-model="vm.application.modpack.technic.checkPermissions">
                 <span translate>TECHNIC.CHECKPERMISSIONS</span>
             </md-checkbox>
         </div>
@@ -47,8 +47,8 @@
             <p translate>TECHNIC.PERMISSIONLEVEL</p>
             <md-input-container class="md-block">
                 <md-radio-group ng-model="vm.application.modpack.technic.isPublicPack">
-                    <md-radio-button value="true">{{'TECHNIC.PUBLICPACK' | translate}}</md-radio-button>
-                    <md-radio-button value="false">{{'TECHNIC.PRIVATEPACK' | translate}}</md-radio-button>
+                    <md-radio-button ng-value="true">{{'TECHNIC.PUBLICPACK' | translate}}</md-radio-button>
+                    <md-radio-button ng-value="false">{{'TECHNIC.PRIVATEPACK' | translate}}</md-radio-button>
                 </md-radio-group>
             </md-input-container>
             <md-divider></md-divider>

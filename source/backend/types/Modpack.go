@@ -33,7 +33,7 @@ type UploadConfig struct {
 }
 
 type TechnicConfig struct {
-	IsSolderPack     float64      `json:"isSolderPack"`
+	IsSolderPack     bool         `json:"isSolderPack"`
 	CreateForgeZip   bool         `json:"createForgeZip"`
 	ForgeVersion     ForgeVersion `json:"forgeVersion"`
 	CheckPermissions bool         `json:"checkPermissions"`

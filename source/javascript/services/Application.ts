@@ -21,7 +21,7 @@ module Application {
 
 
     export class TechnicConfig {
-        public isSolderPack:number = 1;
+        public isSolderPack:boolean = true;
 
         public createForgeZip:boolean = false;
         public forgeVersion:ForgeVersion.ForgeVersion;
@@ -115,7 +115,7 @@ module Application {
                 default:
                     break;
             }
-            if(t.isSolderPack == 1) {
+            if(t.isSolderPack) {
                 var solder = this.solder;
                 if(solder.use) {
                     if (!solder.url ||!solder.password || !solder.username) {
