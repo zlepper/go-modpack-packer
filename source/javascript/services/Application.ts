@@ -222,9 +222,9 @@ module Application {
             $timeout(function wait() {
                 if(self.waitingForStoredData) {
                     goComm.send("load-modpacks", {});
-                    $timeout(wait, 1000)
+                    $timeout(wait, 5000)
                 }
-            }, 1000);
+            }, 5000);
             
             $rootScope.$on("data-loaded", (event:angular.IAngularEvent, modpacks:Array<Modpack>) => {
                 self.waitingForStoredData = false;

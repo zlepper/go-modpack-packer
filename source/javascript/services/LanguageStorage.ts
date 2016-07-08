@@ -10,8 +10,6 @@ module LanguageStorage {
             this.electron.on("got-languages", function (event:Electron.IpcRendererEvent, languages:any) {
                 self.hasLanguageData = true;
                 languages = languages[0];
-                console.log("Got languages");
-                console.log(languages);
                 self.languages = languages;
             });
         }
@@ -20,7 +18,6 @@ module LanguageStorage {
             if (this.hasLanguageData) {
                 return cb(this.get("NG_TRANSLATE_LANG_KEY"));
             }
-            console.log("Waiting");
             this.$timeout(this.getCurrentLanguage.bind(this, cb), 50);
         }
 
@@ -30,7 +27,6 @@ module LanguageStorage {
         }
 
         public get(name:string) {
-            console.log("Fetching thing");
             return this.languages[name];
         }
     }
