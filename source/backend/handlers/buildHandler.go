@@ -84,8 +84,6 @@ func buildModpack(modpack types.Modpack, mods []types.Mod, conn websocket.Websoc
 	}
 
 	// Handle mods
-	total += len(mods)
-	conn.Write("total-to-pack", total)
 	for _, mod := range mods {
 		// If the mod already is on solder, then we should likely skip it
 		// however the user can override this. If they do we should still pack all files
@@ -93,7 +91,9 @@ func buildModpack(modpack types.Modpack, mods []types.Mod, conn websocket.Websoc
 			continue
 		}
 		go packMod(mod, conn, outputDirectory, &ch)
+		total++
 	}
+	conn.Write("total-to-pack", total)
 
 	infos := make([]*types.OutputInfo, 0)
 

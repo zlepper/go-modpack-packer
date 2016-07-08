@@ -51,6 +51,7 @@ func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnectio
 	possibleMod := db.GetModsDb().GetModFromMd5(md5String)
 	if possibleMod != nil {
 		sendModDataReady(*possibleMod, conn)
+		waitGroup.Done()
 		return
 	}
 
@@ -86,6 +87,7 @@ func readInfoFile(file io.ReadCloser, conn websocket.WebsocketConnection, size i
 	content = []byte(strings.Replace(string(content), "\n", " ", -1))
 	if err != nil {
 		conn.Log(err.Error() + "\n" + string(debug.Stack()))
+		return
 	}
 	var mod types.ModInfo
 	normalMod := make([]types.ModInfo, 0)
@@ -95,6 +97,7 @@ func readInfoFile(file io.ReadCloser, conn websocket.WebsocketConnection, size i
 		err = json.Unmarshal(content, &mod)
 		if err != nil {
 			conn.Log(err.Error() + "\n" + string(content) + "\n" + filename)
+			return
 		}
 		// Handle version 2 mods
 		if mod.ModListVersion == 2 {

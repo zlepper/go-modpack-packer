@@ -90,13 +90,13 @@
                                     </tr>
                                 </thead>
                                 <tbody md-body>
-                                    <tr md-row ng-repeat="info in build.uploadData.infos | orderBy:build.query.order | limitTo: build.query.limit: (build.query.page - 1) * build.query.limit" class=hidden-input>
-                                        <td md-cell onmouseover="this.getElementsByTagName('input')[0].select()"><input ng-value="info.name"></td>
-                                        <td md-cell onmouseover="this.getElementsByTagName('input')[0].select()"><input ng-value="info.id"></td>
-                                        <td md-cell onmouseover="this.getElementsByTagName('input')[0].select()"><input ng-value="info.minecraftVersion + '-' + info.version"></td>
-                                        <td md-cell onmouseover="this.getElementsByTagName('input')[0].select()"><input ng-value="info.author"></td>
-                                        <td md-cell onmouseover="this.getElementsByTagName('input')[0].select()"><input ng-value="info.description"></td>
-                                        <td md-cell onmouseover="this.getElementsByTagName('input')[0].select()"><input ng-value="info.url"></td>
+                                    <tr md-row ng-repeat="info in build.uploadData.infos | orderBy:build.query.order | limitTo: build.query.limit: (build.query.page - 1) * build.query.limit track by $index" class=hidden-input>
+                                        <td md-cell ng-click="build.copyInput($event)">{{info.name}}</td>
+                                        <td md-cell ng-click="build.copyInput($event)">{{info.id}}</td>
+                                        <td md-cell ng-click="build.copyInput($event)">{{info.minecraftVersion + '-' + info.version}}</td>
+                                        <td md-cell ng-click="build.copyInput($event)">{{info.author}}</td>
+                                        <td md-cell ng-click="build.copyInput($event)">{{info.description}}</td>
+                                        <td md-cell ng-click="build.copyInput($event)">{{info.url}}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -105,7 +105,7 @@
                     </div>
                 </div>
                 <md-list role="list">
-                    <md-list-item role="listitem" ng-repeat="todo in build.todos">
+                    <md-list-item role="listitem" ng-repeat="todo in build.todos track by $index">
                         <p>{{todo}}</p>
                     </md-list-item>
                 </md-list>

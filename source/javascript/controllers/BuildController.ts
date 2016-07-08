@@ -23,7 +23,7 @@ module BuildController {
     }
 
     export class BuildController {
-        static $inject = ["application", "$mdDialog", "goComm", "$rootScope", "$translatePartialLoader", "$window"];
+        static $inject = ["application", "$mdDialog", "goComm", "$rootScope", "$translatePartialLoader", "$window", "$document"];
 
         public mods:Array<Application.Mod> = [];
         public todos:Array<string> = [];
@@ -159,6 +159,17 @@ module BuildController {
             var uploadData = this.uploadData;
             this.goComm.send("continue-running", uploadData);
             this.uploadData = null;
+        }
+
+        public copyInput($event: JQueryEventObject):void {
+            var selection = this.$window.getSelection();
+            var range = document.createRange();
+            range.selectNodeContents($event.target);
+            selection.removeAllRanges();
+            selection.addRange(range);
+
+            document.execCommand('copy');
+            selection.removeAllRanges();
         }
     }
 
