@@ -140,6 +140,7 @@ module Application {
         public md5: string;
         // Naming is totally a hack to make sure the value does not get send to the server
         public $$isDone:boolean;
+        public isOnSolder: boolean;
 
         public static fromJson(data:Mod):Mod {
             var m = new Mod();
@@ -153,6 +154,7 @@ module Application {
             m.credits = data.credits;
             m.filename = data.filename;
             m.md5 = data.md5;
+            m.isOnSolder = data.isOnSolder;
             return m;
         }
 
@@ -222,9 +224,9 @@ module Application {
             $timeout(function wait() {
                 if(self.waitingForStoredData) {
                     goComm.send("load-modpacks", {});
-                    $timeout(wait, 1000)
+                    $timeout(wait, 5000)
                 }
-            }, 1000);
+            }, 5000);
             
             $rootScope.$on("data-loaded", (event:angular.IAngularEvent, modpacks:Array<Modpack>) => {
                 self.waitingForStoredData = false;
