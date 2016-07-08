@@ -50,58 +50,93 @@
                             <label translate>BUILD.MOD.URL</label>
                             <input type="url" ng-model="mod.url">
                         </md-input-container>
+                        <div ng-if="build.application.modpack.technic.checkPermissions">
+                            <div layout="row">
+                                <md-input-container flex="50">
+                                    <label translate>BUILD.MOD.PERMISSIONS.POLICY.NAME</label>
+                                    <input value="{{('BUILD.MOD.PERMISSIONS.POLICY.' + mod.userPermission.policy) | uppercase | translate}}" type="text" disabled>
+                                </md-input-container>
+                                <md-input-container flex="50">
+                                    <label translate>BUILD.MOD.PERMISSIONS.LICENSE</label>
+                                    <input type="url" ng-model="mod.userPermission.licenseLink">
+                                </md-input-container>
+                            </div>
+                            <div layout="row">
+                                <md-input-container flex="50">
+                                    <label translate>BUILD.MOD.PERMISSIONS.LINK</label>
+                                    <input type="url" ng-model="mod.userPermission.modLink">
+                                </md-input-container>
+                                <md-input-container flex="50">
+                                    <label translate>BUILD.MOD.PERMISSIONS.PERMISSION</label>
+                                    <input type="url" ng-model="mod.userPermission.permissionLink">
+                                </md-input-container>
+                            </div>
+                            <div layout="row">
+                                <md-button ng-click="build.checkDbForPermissions(mod)">{{'BUILD.MOD.PERMISSIONS.CHECK_STORE' | translate}}</md-button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
             <section ng-show="build.state == 'building'">
                 <div>
                     <p>Packing progress {{build.progressNumber}}/{{build.total}}</p>
-                    <md-progress-linear md-mode="determinate" value="{{(build.progressNumber / build.total) * 100}}"></md-progress-linear>
+                    <md-progress-linear md-mode="determinate"
+                                        value="{{(build.progressNumber / build.total) * 100}}"></md-progress-linear>
                 </div>
                 <div ng-show="build.application.modpack.technic.upload.type !== 'none'">
                     <p>Upload progress {{build.uploadNumber}}/{{build.total}}</p>
                     <p ng-show="build.uploading !== ''">Currently uploading: {{build.uploading}}</p>
-                    <md-progress-linear md-mode="determinate" value="{{(build.uploadNumber / build.total) * 100}}"></md-progress-linear>
+                    <md-progress-linear md-mode="determinate"
+                                        value="{{(build.uploadNumber / build.total) * 100}}"></md-progress-linear>
                 </div>
                 <div ng-show="build.application.modpack.technic.isSolderPack == 1">
                     <div ng-if="build.application.modpack.solder.use">
-                    <div ng-show="build.uploadData != null">
-                        <p translate>BUILD.AWAITING.UPLOAD</p>
-                        <md-button class="md-raised md-primary" ng-click="build.continueRunning()">
-                            {{'BUILD.AWAITING.CONTINUE' | translate}}
-                        </md-button>
+                        <div ng-show="build.uploadData != null">
+                            <p translate>BUILD.AWAITING.UPLOAD</p>
+                            <md-button class="md-raised md-primary" ng-click="build.continueRunning()">
+                                {{'BUILD.AWAITING.CONTINUE' | translate}}
+                            </md-button>
+                        </div>
+                        <div>
+                            <p>Solder progress {{build.solderNumber}}/{{build.total}}</p>
+                            <md-progress-linear md-mode="determinate"
+                                                value="{{(build.solderNumber / build.total) * 100}}"></md-progress-linear>
+                        </div>
                     </div>
-                    <div>
-                        <p>Solder progress {{build.solderNumber}}/{{build.total}}</p>
-                        <md-progress-linear md-mode="determinate" value="{{(build.solderNumber / build.total) * 100}}"></md-progress-linear>
-                    </div>
-                </div>
                     <div ng-if="!build.application.modpack.solder.use">
                         <md-table-container>
                             <table md-table>
                                 <thead md-head md-order="build.query.order">
-                                    <tr md-row>
-                                        <th md-column md-order-by="name"><span translate>BUILD.MOD.NAME</span></th>
-                                        <th md-column md-order-by="id"><span translate>BUILD.MOD.MODID</span></th>
-                                        <th md-column md-order-by="version"><span translate>BUILD.MOD.VERSION</span></th>
-                                        <th md-column md-order-by="author"><span translate>BUILD.MOD.AUTHORS</span></th>
-                                        <th md-column md-order-by="description"><span translate>BUILD.MOD.DESCRIPTION</span></th>
-                                        <th md-column md-order-by="url"><span translate>BUILD.MOD.URL</span></th>
-                                    </tr>
+                                <tr md-row>
+                                    <th md-column md-order-by="name"><span translate>BUILD.MOD.NAME</span></th>
+                                    <th md-column md-order-by="id"><span translate>BUILD.MOD.MODID</span></th>
+                                    <th md-column md-order-by="version"><span translate>BUILD.MOD.VERSION</span></th>
+                                    <th md-column md-order-by="author"><span translate>BUILD.MOD.AUTHORS</span></th>
+                                    <th md-column md-order-by="description"><span translate>BUILD.MOD.DESCRIPTION</span>
+                                    </th>
+                                    <th md-column md-order-by="url"><span translate>BUILD.MOD.URL</span></th>
+                                </tr>
                                 </thead>
                                 <tbody md-body>
-                                    <tr md-row ng-repeat="info in build.uploadData.infos | orderBy:build.query.order | limitTo: build.query.limit: (build.query.page - 1) * build.query.limit track by $index" class=hidden-input>
-                                        <td md-cell ng-click="build.copyInput($event)">{{info.name}}</td>
-                                        <td md-cell ng-click="build.copyInput($event)">{{info.id}}</td>
-                                        <td md-cell ng-click="build.copyInput($event)">{{info.minecraftVersion + '-' + info.version}}</td>
-                                        <td md-cell ng-click="build.copyInput($event)">{{info.author}}</td>
-                                        <td md-cell ng-click="build.copyInput($event)">{{info.description}}</td>
-                                        <td md-cell ng-click="build.copyInput($event)">{{info.url}}</td>
-                                    </tr>
+                                <tr md-row
+                                    ng-repeat="info in build.uploadData.infos | orderBy:build.query.order | limitTo: build.query.limit: (build.query.page - 1) * build.query.limit track by $index"
+                                    class=hidden-input>
+                                    <td md-cell ng-click="build.copyInput($event)">{{info.name}}</td>
+                                    <td md-cell ng-click="build.copyInput($event)">{{info.id}}</td>
+                                    <td md-cell ng-click="build.copyInput($event)">{{info.minecraftVersion + '-' +
+                                        info.version}}
+                                    </td>
+                                    <td md-cell ng-click="build.copyInput($event)">{{info.author}}</td>
+                                    <td md-cell ng-click="build.copyInput($event)">{{info.description}}</td>
+                                    <td md-cell ng-click="build.copyInput($event)">{{info.url}}</td>
+                                </tr>
                                 </tbody>
                             </table>
                         </md-table-container>
-                        <md-table-pagination md-limit-options="[5, 10, 15, 20]" md-limit="build.query.limit" md-page="build.query.page" md-total="{{build.uploadData.infos.length}}" md-page-select></md-table-pagination>
+                        <md-table-pagination md-limit-options="[5, 10, 15, 20]" md-limit="build.query.limit"
+                                             md-page="build.query.page" md-total="{{build.uploadData.infos.length}}"
+                                             md-page-select></md-table-pagination>
                     </div>
                 </div>
                 <md-list role="list">
@@ -112,9 +147,13 @@
             </section>
         </md-dialog-content>
         <md-dialog-actions layout="row">
-            <md-checkbox ng-hide="build.state == 'building'" class="mod-checkbox" ng-model="build.showDone">{{'BUILD.SHOWDONE' | translate}}</md-checkbox>
+            <md-checkbox ng-hide="build.state == 'building'" class="mod-checkbox" ng-model="build.showDone">
+                {{'BUILD.SHOWDONE' | translate}}
+            </md-checkbox>
             <span flex></span>
-            <md-button ng-disabled="!build.readyToBuild" class="md-primary md-raised" ng-click="build.build()" ng-hide="build.state == 'building'">{{'BUILD.BUILD'|translate}}</md-button>
+            <md-button ng-disabled="!build.readyToBuild" class="md-primary md-raised" ng-click="build.build()"
+                       ng-hide="build.state == 'building'">{{'BUILD.BUILD'|translate}}
+            </md-button>
             <md-button class="md-warn md-raised" ng-click="build.cancel()">{{'BUILD.CANCEL' | translate}}</md-button>
         </md-dialog-actions>
     </form>

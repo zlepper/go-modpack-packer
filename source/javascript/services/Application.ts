@@ -127,6 +127,14 @@ module Application {
         }
     }
 
+    export class UserPermission {
+        public licenseLink: string;
+        public modLink: string;
+        public permissionLink: string;
+        public policy: string;
+        public modId: string;
+    }
+    
     export class Mod {
         public modid:string;
         public name:string;
@@ -141,6 +149,7 @@ module Application {
         // Naming is totally a hack to make sure the value does not get send to the server
         public $$isDone:boolean;
         public isOnSolder: boolean;
+        public userPermission: UserPermission;
 
         public static fromJson(data:Mod):Mod {
             var m = new Mod();
@@ -155,6 +164,7 @@ module Application {
             m.filename = data.filename;
             m.md5 = data.md5;
             m.isOnSolder = data.isOnSolder;
+            m.userPermission = data.userPermission;
             return m;
         }
 
@@ -193,6 +203,14 @@ module Application {
             if(this.version.toLowerCase().indexOf("@version@") > -1) {
                 return false;
             }
+            if(this.userPermission) {
+                if(this.userPermission.policy !== "Open") {
+                    if (!this.userPermission.licenseLink) return false;
+                    if (!this.userPermission.modLink) return false;
+                    if (!this.userPermission.permissionLink) return false;
+                }
+            }
+            
             return true;
         }
     }

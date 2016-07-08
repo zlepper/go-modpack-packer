@@ -22,6 +22,16 @@ module BuildController {
         public limit:number = 10;
     }
 
+    class PermissionSearch {
+        public modId: string;
+        public isPublic: boolean;
+
+        constructor(id: string, isPublic: boolean) {
+            this.modId = id;
+            this.isPublic = isPublic;
+        }
+    }
+
     export class BuildController {
         static $inject = ["application", "$mdDialog", "goComm", "$rootScope", "$translatePartialLoader", "$window", "$document"];
 
@@ -37,6 +47,7 @@ module BuildController {
         public readyToBuild:boolean = false;
         public uploadData:UploadWaiting = null;
         public query:Query = new Query();
+        public currentlyCheckingPermissions: { [id: string]: Application.Mod} = {};
 
         constructor(protected application:Application.Application,
                     protected $mdDialog:angular.material.IDialogService,
@@ -119,6 +130,13 @@ module BuildController {
                 self.uploadData = data;
             });
 
+            $rootScope.$on("got-permission-data", function (event:angular.IAngularEvent, data:Application.UserPermission) {
+                var mod = self.currentlyCheckingPermissions[data.modId];
+                data.modId = undefined;
+                delete self.currentlyCheckingPermissions[mod.modid];
+                mod.userPermission = data;
+            });
+
             this.startBuild(application.modpack);
         }
 
@@ -171,7 +189,16 @@ module BuildController {
             document.execCommand('copy');
             selection.removeAllRanges();
         }
+
+        public checkDbForPermissions(mod: Application.Mod) {
+            // Don't send request for something for which we are currently checking.
+            if(this.currentlyCheckingPermissions[mod.modid]) return;
+            this.currentlyCheckingPermissions[mod.modid] = mod;
+            this.goComm.send("check-permission-store", new PermissionSearch(mod.modid, this.application.modpack.technic.isPublicPack));
+        }
     }
+
+
 
     angular.module("ModpackHelper").controller("BuildController", BuildController);
 }

@@ -31,16 +31,19 @@ func GetModsDb() *modsDb {
 		Mods: make([]*types.Mod, 0),
 	}
 
-	dataDirectory := os.Args[1]
-	modsFile := filepath.Join(dataDirectory, "mods.json")
-	f, err := os.Open(modsFile)
-	if err != nil {
-		return modsDbInstance
-	}
+	if len(os.Args) > 2 {
+		dataDirectory := os.Args[1]
+		modsFile := filepath.Join(dataDirectory, "mods.json")
+		f, err := os.Open(modsFile)
+		if err != nil {
+			return modsDbInstance
+		}
+		defer f.Close()
 
-	err = json.NewDecoder(f).Decode(&modsDbInstance.Mods)
-	if err != nil {
-		panic(err)
+		err = json.NewDecoder(f).Decode(&modsDbInstance.Mods)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	return modsDbInstance
@@ -117,4 +120,15 @@ func (m *modsDb) MarkModAsOnSolder(md5 string) {
 			return
 		}
 	}
+}
+
+func (m *modsDb) GetModPermission(modId string) *types.UserPermission {
+	for _, mod := range m.Mods {
+		if mod.ModId == modId {
+			if *mod.Permission != (types.UserPermission{}) {
+				return mod.Permission
+			}
+		}
+	}
+	return nil
 }

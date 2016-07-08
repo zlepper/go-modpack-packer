@@ -9,17 +9,18 @@ import (
 )
 
 type Mod struct {
-	ModId            string `json:"modid"`
-	Name             string `json:"name"`
-	Description      string `json:"description"`
-	Version          string `json:"version"`
-	MinecraftVersion string `json:"mcversion"`
-	Url              string `json:"url"`
-	Authors          string `json:"authors"`
-	Credits          string `json:"credits"`
-	Filename         string `json:"filename"`
-	Md5              string `json:"md5"`
-	IsOnSolder       bool   `json:"isOnSolder"`
+	ModId            string         `json:"modid"`
+	Name             string         `json:"name"`
+	Description      string         `json:"description"`
+	Version          string         `json:"version"`
+	MinecraftVersion string         `json:"mcversion"`
+	Url              string         `json:"url"`
+	Authors          string         `json:"authors"`
+	Credits          string         `json:"credits"`
+	Filename         string         `json:"filename"`
+	Md5              string         `json:"md5"`
+	IsOnSolder       bool           `json:"isOnSolder"`
+	Permission       *UserPermission `json:"userPermission,omitempty"`
 }
 
 func (m *Mod) GenerateOnlineVersion() string {

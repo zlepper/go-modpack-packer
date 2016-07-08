@@ -30,9 +30,11 @@
     "angular-translate-loader-partial": "^2.11.0",
     "angular-ui-router": "^0.3.0",
     "angular-websocket": "^2.0.0",
-    "electron-prebuilt": "^1.1.1",
+    "electron-builder": "^5.11.2",
+    "electron-prebuilt": "^1.2.6",
     "electron-squirrel-startup": "^1.0.0",
-    "gsap": "^1.18.5"
+    "gsap": "^1.18.5",
+    "gulp-uglify": "^1.5.4"
   },
   "devDependencies": {
     "electron-builder": "^5.2.1",

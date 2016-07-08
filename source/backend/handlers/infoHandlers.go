@@ -16,10 +16,16 @@ import (
 	"runtime/debug"
 	"strings"
 	"sync"
+	"github.com/mitchellh/mapstructure"
 )
+
+var checkPermissions bool
+var checkPublicPermissions bool
 
 func gatherInformation(conn websocket.WebsocketConnection, data interface{}) {
 	modpack := types.CreateSingleModpackData(data)
+	checkPermissions = modpack.Technic.CheckPermissions
+	checkPublicPermissions = modpack.Technic.IsPublicPack
 	gatherInformationAboutMods(path.Join(modpack.InputDirectory, "mods"), conn)
 }
 
@@ -136,7 +142,83 @@ func createModResponse(conn websocket.WebsocketConnection, mod types.ModInfo, fi
 	sendModDataReady(modRes, conn)
 }
 
+const modDataReadyEvent string = "mod-data-ready"
+
 func sendModDataReady(mod types.Mod, conn websocket.WebsocketConnection) {
-	const modDataReadyEvent string = "mod-data-ready"
+	if checkPermissions {
+		permissionsDb := db.GetPermissionsDb()
+		permission := permissionsDb.GetPermissionPolicy(mod.ModId, checkPublicPermissions)
+		if permission != types.Open {
+			mod.Permission = db.GetModsDb().GetModPermission(mod.ModId)
+			if mod.Permission == nil {
+				mod.Permission = &types.UserPermission{}
+			}
+			mod.Permission.Policy = permission
+			if permission != types.Unknown && mod.Permission.PermissionLink == "" {
+				// We have some data on this mod, might as well fill it in
+				permissionData := permissionsDb.GetPermission(mod.ModId)
+				mod.Permission.LicenseLink = permissionData.LicenseLink
+				mod.Permission.ModLink = permissionData.ModLink
+			}
+		} else {
+			entry := permissionsDb.GetPermission(mod.ModId)
+			mod.Permission = &types.UserPermission{
+				Policy:permission,
+				LicenseLink:entry.LicenseLink,
+				ModLink:entry.ModLink,
+			}
+		}
+		log.Printf("Mod '%s' has permission '%v'", mod.ModId, *mod.Permission)
+	}
+
 	conn.Write(modDataReadyEvent, mod)
+}
+
+const gotPermissionDataEvent string = "got-permission-data"
+
+
+
+func CheckPermissionStore(conn websocket.WebsocketConnection, data interface{}) {
+	type dataSearch struct {
+		ModId string `json:"modId"`
+		IsPublic bool `json:"isPublic"`
+	}
+
+	var search dataSearch
+	mapstructure.Decode(data, &search)
+	// First check own database
+	modsDb := db.GetModsDb()
+	permissions := modsDb.GetModPermission(search.ModId)
+	if permissions != nil {
+		permissions.ModId = search.ModId
+		conn.Write(gotPermissionDataEvent, permissions)
+		return
+	}
+
+	// We didn't find anything, so lets check the permissions store
+	permissionsDb := db.GetPermissionsDb()
+	p := permissionsDb.GetPermission(search.ModId)
+	if p == nil {
+		conn.Write(gotPermissionDataEvent, types.UserPermission{
+			Policy:types.Unknown,
+			ModId:search.ModId,
+		})
+		return
+	}
+
+	var policy types.PermissionPolicy
+	if search.IsPublic {
+		policy = p.PublicPolicy
+	} else {
+		policy = p.PrivatePolicy
+	}
+
+	permissions = &types.UserPermission{
+		Policy:policy,
+		LicenseLink:p.LicenseLink,
+		ModLink:p.ModLink,
+		ModId:search.ModId,
+	}
+	conn.Write(gotPermissionDataEvent, permissions)
+
 }

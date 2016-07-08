@@ -56,6 +56,10 @@ func HandleMessage(conn wc.WebsocketConnection, messageType int, message []byte)
 			{
 				continueRunning(conn, m.Data)
 			}
+		case "check-permission-store":
+			{
+				CheckPermissionStore(conn, m.Data)
+			}
 		}
 	}
 }
