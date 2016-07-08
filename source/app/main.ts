@@ -163,7 +163,7 @@ import {IpcHandlersCreator} from './IpcHandlers';
         try {
             createWindow()
         } catch (e) {
-            alert(e);
+            console.error(e);
         }
     });
 

@@ -10,6 +10,7 @@ type OutputInfo struct {
 	Author           string `json:"author"`
 	Url              string `json:"url"`
 	ProgressKey      string `json:"progressKey"`
+	IsOnSolder       bool   `json:"isOnSolder"`
 }
 
 func (o *OutputInfo) GenerateOnlineVersion() string {

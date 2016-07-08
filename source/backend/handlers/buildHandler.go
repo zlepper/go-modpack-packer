@@ -87,6 +87,11 @@ func buildModpack(modpack types.Modpack, mods []types.Mod, conn websocket.Websoc
 	total += len(mods)
 	conn.Write("total-to-pack", total)
 	for _, mod := range mods {
+		// If the mod already is on solder, then we should likely skip it
+		// however the user can override this. If they do we should still pack all files
+		if !modpack.Technic.RepackAllMods && mod.IsOnSolder {
+			continue
+		}
 		go packMod(mod, conn, outputDirectory, &ch)
 	}
 
@@ -190,7 +195,7 @@ func addInfoToSolder(info *types.OutputInfo, buildId string, conn websocket.Webs
 			solderclient.AddModversionToBuild(info, buildId)
 		}
 	}
-
+	go db.GetModsDb().MarkModAsOnSolder(hex.EncodeToString(md5))
 	conn.Write("done-updating-solder", info.ProgressKey)
 }
 
@@ -357,6 +362,7 @@ func packMod(mod types.Mod, conn websocket.WebsocketConnection, outputDirectory 
 			Description:      mod.Description,
 			Author:           mod.Authors,
 			ProgressKey:      mod.Filename,
+			IsOnSolder:       mod.IsOnSolder,
 		}
 		u := mod.Url
 		if len(u) > 0 && strings.Index(u, "http") != 0 {

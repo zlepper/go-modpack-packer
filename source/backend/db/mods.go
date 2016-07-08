@@ -109,3 +109,12 @@ func (m *modsDb) AddMods(mods []*types.Mod) {
 		m.AddMod(mod)
 	}
 }
+
+func (m *modsDb) MarkModAsOnSolder(md5 string) {
+	for _, mod := range m.Mods {
+		if mod.Md5 == md5 {
+			mod.IsOnSolder = true
+			return
+		}
+	}
+}

@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"archive/zip"
+	"encoding/hex"
 	"encoding/json"
 	"github.com/zlepper/go-modpack-packer/source/backend/db"
+	"github.com/zlepper/go-modpack-packer/source/backend/helpers"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	"github.com/zlepper/go-websocket-connection"
 	"io"
@@ -42,6 +44,17 @@ func gatherInformationAboutMods(inputDirectory string, conn websocket.WebsocketC
 }
 
 func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnection, waitGroup *sync.WaitGroup) {
+	// Check if we already have the mod in the database. If we do we should just send that data to the client
+	// instead of working through the zip file and calculating everything again.
+	md5, err := helpers.ComputeMd5(modfile)
+	md5String := hex.EncodeToString(md5)
+	possibleMod := db.GetModsDb().GetModFromMd5(md5String)
+	if possibleMod != nil {
+		sendModDataReady(*possibleMod, conn)
+		return
+	}
+
+	// The mod was not in the database, so time for some data crunching
 	reader, err := zip.OpenReader(modfile)
 	if err != nil {
 		if err == zip.ErrFormat {
@@ -101,7 +114,6 @@ func readInfoFile(file io.ReadCloser, conn websocket.WebsocketConnection, size i
 }
 
 func createModResponse(conn websocket.WebsocketConnection, mod types.ModInfo, filename string) {
-	const modDataReadyEvent string = "mod-data-ready"
 	modRes := mod.CreateModResponse(filename)
 	modRes.NormalizeId()
 
@@ -118,6 +130,10 @@ func createModResponse(conn websocket.WebsocketConnection, mod types.ModInfo, fi
 			//}
 		}
 	}
+	sendModDataReady(modRes, conn)
+}
 
-	conn.Write(modDataReadyEvent, modRes)
+func sendModDataReady(mod types.Mod, conn websocket.WebsocketConnection) {
+	const modDataReadyEvent string = "mod-data-ready"
+	conn.Write(modDataReadyEvent, mod)
 }
