@@ -125,6 +125,8 @@ import {IpcHandlersCreator} from './IpcHandlers';
 
         var bounds: Electron.BrowserWindowOptions = data && data.bounds ? data.bounds : {width: 800, height: 600};
         bounds.frame = false;
+        bounds.minWidth = 700;
+        bounds.minHeight = 450;
 
         // Create the browser window
         win = new BrowserWindow(bounds);
