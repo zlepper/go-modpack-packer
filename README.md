@@ -35,6 +35,7 @@ To build everything run the gulp commmand `gulp` in the root directory of the re
 This will build the application and place it in the `app` directory. 
 
 ### Running
-Switch to the `app` directory and run the command `electron .`. 
+Switch to the `app` directory and run the command `electron . --dev`. 
+The `--dev` flag tells the app to run in dev mode. This way it doesn't check for updates, and also doesn't do some unpacking required when destributing.
 
 This will launch the application. 
