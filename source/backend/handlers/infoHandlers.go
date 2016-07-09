@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"encoding/hex"
 	"encoding/json"
+	"github.com/mitchellh/mapstructure"
 	"github.com/zlepper/go-modpack-packer/source/backend/db"
 	"github.com/zlepper/go-modpack-packer/source/backend/helpers"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
@@ -16,7 +17,6 @@ import (
 	"runtime/debug"
 	"strings"
 	"sync"
-	"github.com/mitchellh/mapstructure"
 )
 
 var checkPermissions bool
@@ -53,6 +53,10 @@ func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnectio
 	// Check if we already have the mod in the database. If we do we should just send that data to the client
 	// instead of working through the zip file and calculating everything again.
 	md5, err := helpers.ComputeMd5(modfile)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
 	md5String := hex.EncodeToString(md5)
 	possibleMod := db.GetModsDb().GetModFromMd5(md5String)
 	if possibleMod != nil {
@@ -82,6 +86,7 @@ func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnectio
 				log.Fatal(err)
 			}
 			readInfoFile(r, conn, f.FileInfo().Size(), modfile)
+			r.Close()
 		}
 	}
 	waitGroup.Done()
@@ -163,9 +168,9 @@ func sendModDataReady(mod types.Mod, conn websocket.WebsocketConnection) {
 		} else {
 			entry := permissionsDb.GetPermission(mod.ModId)
 			mod.Permission = &types.UserPermission{
-				Policy:permission,
-				LicenseLink:entry.LicenseLink,
-				ModLink:entry.ModLink,
+				Policy:      permission,
+				LicenseLink: entry.LicenseLink,
+				ModLink:     entry.ModLink,
 			}
 		}
 		log.Printf("Mod '%s' has permission '%v'", mod.ModId, *mod.Permission)
@@ -176,12 +181,10 @@ func sendModDataReady(mod types.Mod, conn websocket.WebsocketConnection) {
 
 const gotPermissionDataEvent string = "got-permission-data"
 
-
-
 func CheckPermissionStore(conn websocket.WebsocketConnection, data interface{}) {
 	type dataSearch struct {
-		ModId string `json:"modId"`
-		IsPublic bool `json:"isPublic"`
+		ModId    string `json:"modId"`
+		IsPublic bool   `json:"isPublic"`
 	}
 
 	var search dataSearch
@@ -200,8 +203,8 @@ func CheckPermissionStore(conn websocket.WebsocketConnection, data interface{}) 
 	p := permissionsDb.GetPermission(search.ModId)
 	if p == nil {
 		conn.Write(gotPermissionDataEvent, types.UserPermission{
-			Policy:types.Unknown,
-			ModId:search.ModId,
+			Policy: types.Unknown,
+			ModId:  search.ModId,
 		})
 		return
 	}
@@ -214,10 +217,10 @@ func CheckPermissionStore(conn websocket.WebsocketConnection, data interface{}) 
 	}
 
 	permissions = &types.UserPermission{
-		Policy:policy,
-		LicenseLink:p.LicenseLink,
-		ModLink:p.ModLink,
-		ModId:search.ModId,
+		Policy:      policy,
+		LicenseLink: p.LicenseLink,
+		ModLink:     p.ModLink,
+		ModId:       search.ModId,
 	}
 	conn.Write(gotPermissionDataEvent, permissions)
 

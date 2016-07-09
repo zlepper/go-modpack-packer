@@ -3,12 +3,18 @@ package helpers
 import (
 	"crypto/md5"
 	"io"
+	"log"
 	"os"
 )
 
 func ComputeMd5(filePath string) ([]byte, error) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println(r)
+		}
+	}()
 	var result []byte
-	file, err := os.Open(filePath)
+	file, err := os.OpenFile(filePath, os.O_RDONLY, os.ModePerm)
 	if err != nil {
 		return result, err
 	}

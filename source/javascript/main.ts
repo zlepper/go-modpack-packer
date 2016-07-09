@@ -51,7 +51,7 @@ module ModpackHelper{
             });
 
             $translateProvider.preferredLanguage("en");
-            $translateProvider.useSanitizeValueStrategy('sanitize');
+            $translateProvider.useSanitizeValueStrategy(null);
             $translateProvider.useStorage("languageStorage");
         }
     }
