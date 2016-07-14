@@ -1,7 +1,7 @@
 {
   "name": "go-modpack-packer",
-  "version": "1.0.1",
-  "description": "Packs mods for modspacks",
+  "version": "1.0.5",
+  "description": "Packs mods for modpacks",
   "main": "main.js",
   "scripts": {
     "postinstall": "install-app-deps",

@@ -9,6 +9,7 @@ module BuildController {
         author:string;
         url:string;
         progressKey:string;
+        permissions:Application.UserPermission;
     }
 
     class UploadWaiting {
@@ -48,6 +49,7 @@ module BuildController {
         public uploadData:UploadWaiting = null;
         public query:Query = new Query();
         public currentlyCheckingPermissions: { [id: string]: Application.Mod} = {};
+        public permissionsText: string;
 
         constructor(protected application:Application.Application,
                     protected $mdDialog:angular.material.IDialogService,
@@ -182,7 +184,9 @@ module BuildController {
         public copyInput($event: JQueryEventObject):void {
             var selection = this.$window.getSelection();
             var range = document.createRange();
-            range.selectNodeContents($event.target);
+            // $event.currentTarget does not exist on the object, so just ignore how this line works,
+            // because honest truth, i have no clue what so ever. 
+            range.selectNodeContents(<any>$event.currentTarget);
             selection.removeAllRanges();
             selection.addRange(range);
 

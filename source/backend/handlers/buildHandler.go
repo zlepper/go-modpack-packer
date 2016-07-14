@@ -363,6 +363,7 @@ func packMod(mod types.Mod, conn websocket.WebsocketConnection, outputDirectory 
 			Author:           mod.Authors,
 			ProgressKey:      mod.Filename,
 			IsOnSolder:       mod.IsOnSolder,
+			Permissions:      mod.Permission,
 		}
 		u := mod.Url
 		if len(u) > 0 && strings.Index(u, "http") != 0 {

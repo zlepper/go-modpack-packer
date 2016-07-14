@@ -144,6 +144,18 @@
                         <p>{{todo}}</p>
                     </md-list-item>
                 </md-list>
+                <div ng-if="::build.application.modpack.technic.checkPermissions">
+                    <h4 translate>BUILD.PERMISSIONS</h4>
+                    <div  ng-click="build.copyInput($event)">
+                        <p ng-repeat="info in ::build.uploadData.infos">
+                            <span>{{::info.name}}({{::info.id}}) by {{::info.author}}</span>
+                            <span><br />Permissions are: '{{::info.permissions.policy}}'</span>
+                            <span><br />Link to mod: <a href="{{::info.url || info.permissions.modLink}}">{{::info.url || info.permissions.modLink}}</a></span>
+                            <span ng-if="::info.permissions.licenseLink"><br />Link to license: <a href="{{::info.permissions.licenseLink}}">{{::info.permissions.licenseLink}}</a></span>
+                            <span ng-if="::info.permissions.policy != 'Open'"><br/>Link to permissions: <a href="{{::info.permissions.permissionLink}}">{{::info.permissions.permissionLink}}</a></span>
+                        </p>
+                    </div>
+                </div>
             </section>
         </md-dialog-content>
         <md-dialog-actions layout="row">

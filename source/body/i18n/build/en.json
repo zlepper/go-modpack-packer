@@ -33,6 +33,8 @@
     "AWAITING": {
       "UPLOAD": "Please upload the files manually, and click continue once all files are ready to be consumed by solder. Do NOT delete the source files in the output folder yet. ",
       "CONTINUE": "Continue"
-    }
+    },
+    "GENERATE_PERMISSIONS": "Generate Permission Text",
+    "PERMISSIONS": "Permissions text"
   }
 }

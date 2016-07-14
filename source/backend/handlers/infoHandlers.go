@@ -17,6 +17,8 @@ import (
 	"runtime/debug"
 	"strings"
 	"sync"
+	"fmt"
+	"time"
 )
 
 var checkPermissions bool
@@ -30,6 +32,7 @@ func gatherInformation(conn websocket.WebsocketConnection, data interface{}) {
 }
 
 func gatherInformationAboutMods(inputDirectory string, conn websocket.WebsocketConnection) {
+	t1 := time.Now()
 	filesAndDirectories, _ := ioutil.ReadDir(inputDirectory)
 	files := make([]os.FileInfo, 0)
 	for _, f := range filesAndDirectories {
@@ -38,6 +41,7 @@ func gatherInformationAboutMods(inputDirectory string, conn websocket.WebsocketC
 		}
 		files = append(files, f)
 	}
+	fmt.Println(len(files))
 	var waiter sync.WaitGroup
 	conn.Write("total-mod-files", len(files))
 	for _, f := range files {
@@ -47,6 +51,8 @@ func gatherInformationAboutMods(inputDirectory string, conn websocket.WebsocketC
 	}
 	waiter.Wait()
 	conn.Write("all-mod-files-scanned", "")
+	t2 := time.Since(t1).Nanoseconds()
+	fmt.Printf("Exploration time: %d ns\n", t2)
 }
 
 func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnection, waitGroup *sync.WaitGroup) {
@@ -78,16 +84,21 @@ func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnectio
 	defer reader.Close()
 
 	// Iterate the files in the archive to find the info files
+	var foundInfoFile bool
 	for _, f := range reader.File {
 		// We only need .info and a certain .json file
-		if strings.HasSuffix(f.Name, "mod.info") || f.Name == "litemod.json" {
+		if (strings.HasSuffix(f.Name, ".info") && strings.Index(f.Name, "dependancies") == -1 && strings.Index(f.Name, "dependencies") == -1)|| f.Name == "litemod.json" {
 			r, err := f.Open()
 			if err != nil {
 				log.Fatal(err)
 			}
 			readInfoFile(r, conn, f.FileInfo().Size(), modfile)
+			foundInfoFile = true
 			r.Close()
 		}
+	}
+	if !foundInfoFile {
+		sendModDataReady(types.Mod{Filename:modfile}, conn)
 	}
 	waitGroup.Done()
 }
