@@ -1,24 +1,20 @@
-var gulp = require('gulp'),
+/// <reference path="node_modules/electron-builder/out/electron-builder.d.ts" />
+
+const gulp = require('gulp'),
     path = require("path"),
     gutil = require('gulp-util'),
     uglify = require("gulp-uglify"),
     ts = require("gulp-typescript"),
-    tsClientProject = ts.createProject("source/javascript/tsconfig.json"),
-    tsElectronProject = ts.createProject("source/app/tsconfig.json"),
     nodesource = "node_modules/",
+    merge = require("merge-stream"),
+    builder = require('electron-builder'),
+    Platform = builder.Platform,
 
     jshint = require('gulp-jshint'),
     sass = require('gulp-sass'),
     concat = require('gulp-concat'),
     sourcemaps = require('gulp-sourcemaps'),
 
-    electron = require("electron-connect").server.create({
-        path: ".",
-        spawnOpt: {
-            cwd: path.join(__dirname, "app")
-        },
-        verbosy: true
-    }),
     exec = require("child_process").exec,
     ownScripts = 'source/javascript/**/*.ts',
 
@@ -64,10 +60,12 @@ var gulp = require('gulp'),
         ]
     },
 
-    output = "app/public",
-    mainOutput = "app";
-
+    publicDir = "/public",
+    defaultMainOutput = "./app",
+    defaultOutputLocation = defaultMainOutput + publicDir,
+    releaseBaseOutput = "./release";
 function watch() {
+
     "use strict";
     var t1 = gulp.watch(ownScripts, ['build-ts']);
     var t2 = gulp.watch(input.sass, ['build-css']);
@@ -83,19 +81,29 @@ gulp.task('default', ['build-css', 'vendor-js', 'build-ts', 'build-electron', 'c
 gulp.task('build-watch', ['default'], watch);
 
 /* compile scss files */
-gulp.task('build-css', function () {
-    "use strict";
+function buildCss(output) {
+    if (!output) {
+        output = defaultOutputLocation;
+    }
     return gulp.src(input.sass)
         .pipe(sourcemaps.init())
         .pipe(sass())
         .pipe(concat("bundle.css"))
         .pipe(sourcemaps.write())
         .pipe(gulp.dest(output));
+}
+
+gulp.task('build-css', function () {
+    "use strict";
+    return buildCss();
 });
 
 /* concat javascript files, minify if --type production */
-gulp.task('build-ts', function () {
-    "use strict";
+function buildTs(output) {
+    if (!output) {
+        output = defaultOutputLocation;
+    }
+    const tsClientProject = ts.createProject("source/javascript/tsconfig.json");
     return gulp.src(input.typescript)
         .pipe(sourcemaps.init())
         .pipe(ts(tsClientProject))
@@ -104,59 +112,112 @@ gulp.task('build-ts', function () {
         .pipe(gutil.env.type === 'production' ? uglify() : gutil.noop())
         .pipe(sourcemaps.write())
         .pipe(gulp.dest(output));
+}
+gulp.task('build-ts', function () {
+    "use strict";
+    return buildTs();
 });
 
-gulp.task("electron", function() {
-    "use strict";
+function electron(output) {
+    if (!output) {
+        output = defaultOutputLocation;
+    }
+
+    const tsElectronProject = ts.createProject("source/app/tsconfig.json");
     var tsTask = gulp.src(input.mainTypescript)
         .pipe(sourcemaps.init())
         .pipe(ts(tsElectronProject))
-        //only uglify if gulp is ran with '--type production'
-        // .pipe(gutil.env.type === 'production' ? uglify() : gutil.noop())
         .pipe(sourcemaps.write())
-        .pipe(gulp.dest(mainOutput));
+        .pipe(gulp.dest(output));
     var packageTask = gulp.src("source/app/package.json")
-        .pipe(gulp.dest("app"));
-    return [tsTask, packageTask];
+        .pipe(gulp.dest(output));
+    return merge(tsTask, packageTask);
+}
+gulp.task("electron", function () {
+    "use strict";
+    return electron();
 });
 
-gulp.task('build-electron', ["electron"], function (cb) {
-    exec("npm install", {cwd: "app"}, function(err, stdout, stderr) {
+function buildElectron(cb, output) {
+    if (!output) {
+        output = defaultMainOutput;
+    }
+    exec("npm install", {cwd: output}, function (err, stdout, stderr) {
         !!stdout && console.log(stdout);
         !!stderr && console.log(stderr);
         cb(err)
     });
+}
+gulp.task('build-electron', ["electron"], function (cb) {
+    return buildElectron(cb);
 });
 
+function copyBody(output) {
+    if (!output) {
+        output = defaultMainOutput;
+    }
+    return gulp.src(input.body).pipe(gulp.dest(output));
+}
 gulp.task("copy-body", function () {
-    return gulp.src(input.body).pipe(gulp.dest(mainOutput));
+    return copyBody();
 });
 
-
-gulp.task("go-test", function(cb) {
-    exec("go test ./source/backend/...", function(err, stdout, stderr) {
+gulp.task("go-test", function (cb) {
+    exec("go test ./source/backend/...", function (err, stdout, stderr) {
         !!stdout && console.log(stdout);
         !!stderr && console.log(stderr);
         cb(err)
     })
 });
 
-gulp.task("go-compile", ["go-test"] , function (cb) {
-    var command;
-    if (process.platform === "win32") {
-        command = "go build -o ./app/backend.exe ./source/backend"
-    } else {
-        command = "go build -o ./app/backend ./source/backend";
+function goCompile(os, arch, cb, output) {
+    if (!output) {
+        output = defaultMainOutput;
     }
-    exec(command, function(err, stdout, stderr) {
+    // Calculate build command
+    var command = "go build -o ";
+    var outputFileName;
+    if (os === "windows") {
+        outputFileName = "backend.exe";
+    } else {
+        outputFileName = "backend";
+    }
+    command += path.join(output, outputFileName) + " ./source/backend";
+
+    // Create special environment for cross compilation
+    var env = JSON.parse(JSON.stringify(process.env));
+    env.GOOS = os;
+    env.GOARCH = arch;
+
+    exec(command, {env: env}, function (err, stdout, stderr) {
         !!stdout && console.log(stdout);
         !!stderr && console.log(stderr);
         cb(err)
     });
+
+}
+gulp.task("go-compile", ["go-test"], function (cb) {
+    // var command;
+    // if (process.platform === "win32") {
+    //     command = "go build -o ./app/backend.exe ./source/backend"
+    // } else {
+    //     command = "go build -o ./app/backend ./source/backend";
+    // }
+    //
+    var arch = process.arch === 'x64' ? "amd64" : "386";
+    if (process.platform === "win32") {
+        return goCompile("windows", arch, cb);
+    } else if (process.platform === 'darwin') {
+        return goCompile("darwin", arch, cb);
+    } else {
+        return goCompile("linux", arch, cb)
+    }
 });
 
-gulp.task('vendor-js', function () {
-    "use strict";
+function vendorJs(output) {
+    if (!output) {
+        output = defaultOutputLocation;
+    }
     return gulp.src(input.vendor)
         .pipe(sourcemaps.init())
         .pipe(concat('vendor.js'))
@@ -164,15 +225,119 @@ gulp.task('vendor-js', function () {
         .pipe(gutil.env.type === 'production' ? uglify() : gutil.noop())
         .pipe(sourcemaps.write())
         .pipe(gulp.dest(output));
+}
+gulp.task('vendor-js', function () {
+    "use strict";
+    return vendorJs();
 });
 
 /* Watch these files for changes and run the task on update */
 gulp.task('watch', watch);
 
-gulp.task("build-release", ["default"], function(cb) {
-    exec("build", function(err, stdout, stderr) {
-        !!stdout && console.log(stdout);
-        !!stderr && console.log(stderr);
-        cb(err)
-    })
+function buildRelease(os, arch, callback) {
+    var folder = path.join(releaseBaseOutput, os + "-" + arch);
+    var tasks = [];
+    // Css build
+    tasks.push(new Promise(function (resolve) {
+        buildCss(folder + publicDir).on("finish", resolve);
+    }));
+
+    // Vendor js build
+    tasks.push(new Promise(function (resolve) {
+        vendorJs(folder + publicDir).on('finish', resolve);
+    }));
+
+    // Frontend typescript
+    tasks.push(new Promise(function (resolve) {
+        buildTs(folder + publicDir).on('finish', resolve);
+    }));
+
+    // Application typescript
+    tasks.push(new Promise(function (resolve) {
+        electron(folder).on('finish', resolve);
+    }));
+
+    // Electron dependencies
+    tasks.push(new Promise(function (resolve) {
+        buildElectron(resolve, folder);
+    }));
+
+    // Copy body
+    tasks.push(new Promise(function (resolve) {
+        copyBody(folder).on('finish', resolve);
+    }));
+
+    // Go build
+    tasks.push(new Promise(function (resolve) {
+        goCompile(os, arch, resolve, folder);
+    }));
+
+    Promise.all(tasks).then(function() {
+        // return new Promise(function(resolve, reject) {
+        //     exec("build", {cwd: folder}, function (err, stdout, stderr) {
+        //         !!stdout &&  console.log(stdout);
+        //         !!stderr && console.log(stderr);
+        //         if(err) {
+        //             return reject(err);
+        //         }
+        //         return resolve();
+        //     });
+        // });
+        var target;
+        switch (os) {
+            case 'darwin':
+                target = Platform.MAC.createTarget(null, builder.Arch.x64);
+                break;
+            case 'windows':
+                target = Platform.WINDOWS.createTarget(null, arch === '386' ? builder.Arch.ia32 : builder.Arch.x64);
+                break;
+            case 'linux':
+                target = Platform.LINUX.createTarget(null, arch === '386' ? builder.Arch.ia32 : builder.Arch.x64);
+        }
+        return builder.build({
+            targets: target,
+            devMetadata: {
+                build: {
+                    appId: "dk.zlepper.modpackpacker",
+                    "app-category-type": "public.app-category.developer-tools",
+                    win: {
+                        iconUrl: "https://raw.githubusercontent.com/zlepper/TechnicSolderHelper/master/TechnicSolderHelper/modpackhelper.ico",
+                        icon: path.join(__dirname, "build", "icon.ico")
+                    },
+                    compression: "maximum"
+                },
+                directories: {
+                    app: folder,
+                    output: 'dist/' + os + "-" + arch
+                }
+            }
+        });
+    }).then(callback).catch(callback);
+}
+
+gulp.task("build-release:windows:x32", function (cb) {
+    buildRelease('windows', '386', cb);
+});
+
+gulp.task("build-release:windows:x64", function (cb) {
+    buildRelease('windows', 'amd64', cb);
+});
+
+gulp.task("build-release:linux:x64", function (cb) {
+    buildRelease('linux', 'amd64', cb);
+});
+
+gulp.task('build-release:linux:x32', function(cb) {
+    buildRelease('linux', '386', cb);
+});
+
+gulp.task('build-release:mac', function (cb) {
+    buildRelease('darwin', 'amd64', cb);
+});
+
+
+gulp.task("build-release:all", ["build-release:windows:x32",
+    "build-release:windows:x64", "build-release:linux:x64",
+    'build-release:linux:x32'], function () {
+
 });

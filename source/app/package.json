@@ -5,7 +5,7 @@
   "description": "An application that creates modpacks in correct formats",
   "homepage": "https://github.com/zlepper/go-modpack-packer",
   "license": "All rights reserved",
-  "author": "Zlepper",
+  "author": "Zlepper <hansen13579+linux@gmail.com> (https://github.com/zlepper)",
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0"
   }

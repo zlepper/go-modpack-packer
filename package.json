@@ -48,7 +48,8 @@
     "gulp-typescript": "2.12.1",
     "gulp-uglify": "^1.5.3",
     "gulp-util": "^3.0.7",
-    "jshint": "^2.9.2"
+    "jshint": "^2.9.2",
+    "merge-stream": "^1.0.0"
   },
   "build": {
     "appId": "dk.zlepper.modpackpacker",
@@ -59,6 +60,6 @@
     "compression": "maximum"
   },
   "directories": {
-    "app": "./app"
+
   }
 }

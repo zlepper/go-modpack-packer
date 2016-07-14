@@ -170,3 +170,4 @@ Temporary Items
 # Created by .ignore support plugin (hsz.mobi)
 
 dist/
+/release/
