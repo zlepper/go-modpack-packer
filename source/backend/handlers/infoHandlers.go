@@ -39,6 +39,11 @@ func gatherInformationAboutMods(inputDirectory string, conn websocket.WebsocketC
 		if f.IsDir() {
 			continue
 		}
+		// Files starting with . (dot) er hidden files under both OSX and linux
+		// and they should be ignored
+		if strings.HasPrefix(f.Name(), ".") {
+			continue
+		}
 		files = append(files, f)
 	}
 	fmt.Println(len(files))
@@ -119,6 +124,7 @@ func readInfoFile(file io.ReadCloser, conn websocket.WebsocketConnection, size i
 		err = json.Unmarshal(content, &mod)
 		if err != nil {
 			conn.Log(err.Error() + "\n" + string(content) + "\n" + filename)
+			sendModDataReady(types.Mod{Filename:filename}, conn)
 			return
 		}
 		// Handle version 2 mods
@@ -147,12 +153,7 @@ func createModResponse(conn websocket.WebsocketConnection, mod types.ModInfo, fi
 		modsDb := db.GetModsDb()
 		possibleMatch := modsDb.GetModFromMd5(md5)
 		if possibleMatch != nil {
-			//if possibleMatch.IsValid() {
-			// Should be valid, but better safe than sorry
 			modRes = *possibleMatch
-			//} else {
-			//	fmt.Println("database mod was not valid!")
-			//}
 		}
 	}
 	sendModDataReady(modRes, conn)
