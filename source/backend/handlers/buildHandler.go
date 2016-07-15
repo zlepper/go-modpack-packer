@@ -28,7 +28,7 @@ const packingPartName string = "packing-part"
 func build(conn websocket.WebsocketConnection, data interface{}) {
 	dat := data.(map[string]interface{})
 	modpack := types.CreateSingleModpackData(dat["modpack"])
-	mods := make([]types.Mod, 0)
+	mods := make([]*types.Mod, 0)
 	modsData := dat["mods"]
 	modsDat, _ := json.Marshal(modsData)
 	err := json.Unmarshal(modsDat, &mods)
@@ -59,7 +59,7 @@ func continueRunning(conn websocket.WebsocketConnection, data interface{}) {
 	}
 }
 
-func buildModpack(modpack types.Modpack, mods []types.Mod, conn websocket.WebsocketConnection) {
+func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.WebsocketConnection) {
 	// Create output directory
 	outputDirectory := path.Join(modpack.OutputDirectory, modpack.Name)
 	os.MkdirAll(outputDirectory, os.ModePerm)
@@ -88,6 +88,7 @@ func buildModpack(modpack types.Modpack, mods []types.Mod, conn websocket.Websoc
 		// If the mod already is on solder, then we should likely skip it
 		// however the user can override this. If they do we should still pack all files
 		if !modpack.Technic.RepackAllMods && mod.IsOnSolder {
+			ch <- GenerateOutputInfo(mod, "")
 			continue
 		}
 		go packMod(mod, conn, outputDirectory, &ch)
@@ -99,8 +100,9 @@ func buildModpack(modpack types.Modpack, mods []types.Mod, conn websocket.Websoc
 
 	// Save the mods to the database
 	d := db.GetModsDb()
-	for i, _ := range mods {
-		d.AddMod(&mods[i])
+	for _, mod := range mods {
+		mod.IsOnSolder = true
+		d.AddMod(mod)
 	}
 	d.Save()
 
@@ -178,15 +180,18 @@ func addInfoToSolder(info *types.OutputInfo, buildId string, conn websocket.Webs
 		log.Panic("Something went wrong wehn adding a mod to solder.")
 	}
 
-	md5, err := helpers.ComputeMd5(info.File)
-	if !solderclient.IsModversionOnline(info) {
-		if err != nil {
-			log.Panic(err)
+	if info.File != "" {
+		md5, err := helpers.ComputeMd5(info.File)
+		if !solderclient.IsModversionOnline(info) {
+			if err != nil {
+				log.Panic(err)
+			}
+			solderclient.AddModVersion(modid, hex.EncodeToString(md5), info.GenerateOnlineVersion())
+		} else {
+			id := solderclient.GetModVersionId(info)
+			solderclient.RehashModVersion(id, hex.EncodeToString(md5))
 		}
-		solderclient.AddModVersion(modid, hex.EncodeToString(md5), info.GenerateOnlineVersion())
-	} else {
-		id := solderclient.GetModVersionId(info)
-		solderclient.RehashModVersion(id, hex.EncodeToString(md5))
+		go db.GetModsDb().MarkModAsOnSolder(hex.EncodeToString(md5))
 	}
 	if !solderclient.IsModversionActiveInBuild(info, buildId) {
 		if solderclient.IsModInBuild(info, buildId) {
@@ -195,7 +200,6 @@ func addInfoToSolder(info *types.OutputInfo, buildId string, conn websocket.Webs
 			solderclient.AddModversionToBuild(info, buildId)
 		}
 	}
-	go db.GetModsDb().MarkModAsOnSolder(hex.EncodeToString(md5))
 	conn.Write("done-updating-solder", info.ProgressKey)
 }
 
@@ -318,7 +322,12 @@ func packFolder(zipWriter *zip.Writer, folder string, parent string, conn websoc
 	}
 }
 
-func packMod(mod types.Mod, conn websocket.WebsocketConnection, outputDirectory string, ch *chan *types.OutputInfo) {
+func packMod(mod *types.Mod, conn websocket.WebsocketConnection, outputDirectory string, ch *chan *types.OutputInfo) {
+	if mod.Md5 == "" {
+		fmt.Println("Calculating md5 of file " + mod.Filename)
+		md5, _ := helpers.ComputeMd5(mod.Filename)
+		mod.Md5 = hex.EncodeToString(md5)
+	}
 	conn.Write(packingPartName, mod.Filename)
 	outputDirectory = path.Join(outputDirectory, "mods", mod.ModId)
 	os.MkdirAll(outputDirectory, os.ModePerm)
@@ -353,27 +362,32 @@ func packMod(mod types.Mod, conn websocket.WebsocketConnection, outputDirectory 
 	conn.Write(donePackingPartName, mod.Filename)
 
 	if ch != nil {
-		info := types.OutputInfo{
-			File:             outputFile,
-			Name:             mod.Name,
-			Id:               safeNormalizeString(mod.ModId),
-			Version:          mod.Version,
-			MinecraftVersion: mod.MinecraftVersion,
-			Description:      mod.Description,
-			Author:           mod.Authors,
-			ProgressKey:      mod.Filename,
-			IsOnSolder:       mod.IsOnSolder,
-			Permissions:      mod.Permission,
-		}
-		u := mod.Url
-		if len(u) > 0 && strings.Index(u, "http") != 0 {
-			u = "http://" + u
-		}
-		info.Url = u
-		*ch <- &info
+		*ch <- GenerateOutputInfo(mod, outputFile)
 	}
 }
 
 func safeNormalizeString(s string) string {
 	return strings.Replace(strings.ToLower(s), " ", "-", -1)
+}
+
+func GenerateOutputInfo(mod *types.Mod, outputFile string) *types.OutputInfo {
+	info := types.OutputInfo{
+		File:             outputFile,
+		Name:             mod.Name,
+		Id:               safeNormalizeString(mod.ModId),
+		Version:          mod.Version,
+		MinecraftVersion: mod.MinecraftVersion,
+		Description:      mod.Description,
+		Author:           mod.Authors,
+		ProgressKey:      mod.Filename,
+		IsOnSolder:       mod.IsOnSolder,
+		Permissions:      mod.Permission,
+
+	}
+	u := mod.Url
+	if len(u) > 0 && strings.Index(u, "http") != 0 {
+		u = "http://" + u
+	}
+	info.Url = u
+	return &info
 }

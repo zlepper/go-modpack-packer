@@ -75,6 +75,7 @@ func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnectio
 		waitGroup.Done()
 		return
 	}
+	fmt.Println("File was not in db " + modfile)
 
 	// The mod was not in the database, so time for some data crunching
 	reader, err := zip.OpenReader(modfile)

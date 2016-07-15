@@ -31,6 +31,10 @@ func UploadFilesToFtp(modpack *types.Modpack, infos []*types.OutputInfo, conn we
 	outDir := path.Join(modpack.OutputDirectory, modpack.Name)
 
 	for _, info := range infos {
+		// If the file variable is empty, it indicates that the mod was not actually repacked
+		if info.File == "" {
+			continue
+		}
 		conn.Write("starting-upload", info.Name)
 		err = f.ChangeDir("/")
 		if err != nil {

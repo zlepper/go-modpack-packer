@@ -31,11 +31,12 @@ func GetModsDb() *modsDb {
 		Mods: make([]*types.Mod, 0),
 	}
 
-	if len(os.Args) > 2 {
+	if len(os.Args) > 1 {
 		dataDirectory := os.Args[1]
 		modsFile := filepath.Join(dataDirectory, "mods.json")
 		f, err := os.Open(modsFile)
 		if err != nil {
+			fmt.Print(err)
 			return modsDbInstance
 		}
 		defer f.Close()
@@ -44,16 +45,15 @@ func GetModsDb() *modsDb {
 		if err != nil {
 			panic(err)
 		}
+		fmt.Printf("Loaded %d mods\n", len(modsDbInstance.Mods))
 	}
 
 	return modsDbInstance
 }
 
 func (m *modsDb) GetModFromMd5(md5 string) *types.Mod {
-	//fmt.Println("Looking for mod " + md5)
 	for i, _ := range m.Mods {
 		if m.Mods[i].Md5 == md5 {
-			//fmt.Println("Found mod with " + md5)
 			return m.Mods[i]
 		}
 	}
@@ -90,6 +90,9 @@ func (m *modsDb) Save() {
 }
 
 func (m *modsDb) AddMod(mod *types.Mod) {
+	if mod.Md5 == "" {
+
+	}
 	fmt.Println(mod.Md5)
 	// Check if mods exists
 	for i, _ := range m.Mods {

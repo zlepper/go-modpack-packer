@@ -57,7 +57,7 @@ func saveModpacks(conn websocket.WebsocketConnection, data interface{}) {
 	dataDirectory := os.Args[1]
 	modpackFile := filepath.Join(dataDirectory, "modpacks.json")
 	modpacks := types.CreateModpackData(data)
-	for i, _ := range modpacks {
+	for i := range modpacks {
 		modpack := &modpacks[i]
 		modpack.Technic.Upload.AWS.SecretKey = encryption.EncryptString(modpack.Technic.Upload.AWS.SecretKey)
 		modpack.Technic.Upload.AWS.AccessKey = encryption.EncryptString(modpack.Technic.Upload.AWS.AccessKey)
@@ -87,7 +87,8 @@ func loadModpacks(conn websocket.WebsocketConnection) {
 	var modpacks []types.Modpack = make([]types.Modpack, 0)
 	if err != nil {
 		conn.Log("Unable to reload data " + err.Error())
-		conn.Write("data-loaded", modpacks)
+		//conn.Write("data-loaded", modpacks)
+		panic(err)
 		return
 	}
 	log.Println(string(modpackData))
@@ -95,7 +96,7 @@ func loadModpacks(conn websocket.WebsocketConnection) {
 	if err != nil {
 		panic("Could not parse json data " + err.Error() + "\n" + string(modpackData))
 	}
-	for i, _ := range modpacks {
+	for i := range modpacks {
 		modpack := &modpacks[i]
 		modpack.Technic.Upload.AWS.SecretKey = encryption.DecryptString(modpack.Technic.Upload.AWS.SecretKey)
 		modpack.Technic.Upload.AWS.AccessKey = encryption.DecryptString(modpack.Technic.Upload.AWS.AccessKey)

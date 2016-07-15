@@ -336,8 +336,14 @@ gulp.task('build-release:mac', function (cb) {
 });
 
 
-gulp.task("build-release:all", ["build-release:windows:x32",
-    "build-release:windows:x64", "build-release:linux:x64",
+gulp.task("build-release:all", [ "build-release:windows", "build-release:linux"], function () {
+
+});
+
+gulp.task("build-release:linux", ["build-release:linux:x64",
     'build-release:linux:x32'], function () {
 
 });
+
+gulp.task('build-release:windows', ["build-release:windows:x32",
+    "build-release:windows:x64"], function(){});

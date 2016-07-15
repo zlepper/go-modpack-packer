@@ -166,7 +166,7 @@
             <md-button ng-disabled="!build.readyToBuild" class="md-primary md-raised" ng-click="build.build()"
                        ng-hide="build.state == 'building'">{{'BUILD.BUILD'|translate}}
             </md-button>
-            <md-button class="md-warn md-raised" ng-click="build.cancel()">{{'BUILD.CANCEL' | translate}}</md-button>
+            <md-button class="md-warn md-raised" ng-click="build.cancel()">{{(build.state == 'building' ? 'BUILD.CLOSE' : 'BUILD.CANCEL') | translate}}</md-button>
         </md-dialog-actions>
     </form>
 </md-dialog>

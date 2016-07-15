@@ -51,6 +51,11 @@ func UploadFilesToS3(modpack *types.Modpack, infos []*types.OutputInfo, conn web
 	log.Println(modpack.Technic.Upload.AWS.Bucket)
 	bucket := aws.String(modpack.Technic.Upload.AWS.Bucket)
 	for _, info := range infos {
+		// If the filename is empty it indicates that the file was not actually repacked, but
+		// is assumed to already be on solder
+		if info.File == "" {
+			continue;
+		}
 		conn.Write("starting-upload", info.ProgressKey)
 		key := strings.Replace(info.File, outDir, "", -1)
 		log.Println("Key: " + key)
