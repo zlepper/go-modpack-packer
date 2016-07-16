@@ -4,7 +4,6 @@
   "description": "Packs mods for modpacks",
   "main": "main.js",
   "scripts": {
-    "postinstall": "install-app-deps",
     "pack": "build --target dir",
     "dist": "build",
     "test": "echo \"Error: no test specified\" && exit 1"

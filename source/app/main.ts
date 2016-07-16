@@ -98,7 +98,7 @@ import {IpcHandlersCreator} from './IpcHandlers';
         if (platform() === "win32") {
             executeable = "backend.exe";
         } else {
-            executeable = "backend";
+            executeable = "./backend";
         }
 
         unpackBackend(executeable, function () {

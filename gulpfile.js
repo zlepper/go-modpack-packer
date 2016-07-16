@@ -120,7 +120,7 @@ gulp.task('build-ts', function () {
 
 function electron(output) {
     if (!output) {
-        output = defaultOutputLocation;
+        output = defaultMainOutput;
     }
 
     const tsElectronProject = ts.createProject("source/app/tsconfig.json");
