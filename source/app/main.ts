@@ -11,8 +11,8 @@ import {
 
 import {createReadStream, createWriteStream, readFileSync, writeFileSync} from 'fs'
 
-import {join} from 'path';
-import {spawn} from 'child_process';
+import {join, resolve, basename} from 'path';
+import {spawn, exec} from 'child_process';
 import {IpcHandlersCreator} from './IpcHandlers';
 
 (function () {
@@ -36,15 +36,19 @@ import {IpcHandlersCreator} from './IpcHandlers';
         return;
     }
 
-    function canAutoupdate(): boolean {
+    function canAutoupdate():boolean {
         return !devMode && platform() === "win32";
-    } 
+    }
 
-    function isOSX(): boolean {
+    function isWindows():boolean {
+        return platform() === 'win32';
+    }
+
+    function isOSX():boolean {
         return platform() === "darwin";
     }
-    
-    
+
+
     function setupAutoUpdater():void {
         // Don't even attempt to write the auto update unless we are on a system that supports it. 
         // Which as of the time of this comment only is windows. 
@@ -89,24 +93,46 @@ import {IpcHandlersCreator} from './IpcHandlers';
 
     function unpackBackend(filename:string, cb:any) {
         if (devMode) return cb();
-        var resourcesName = isOSX() ? "Resources" : "resources";
-        var read = createReadStream(join(resourcesName, "app.asar", filename));
+        var asarFile;
+        if (isOSX()) {
+            asarFile = join(__dirname, basename(filename));
+        } else {
+            asarFile = join("resources", "app.asar", filename);
+        }
+        var read = createReadStream(asarFile);
         var write = createWriteStream(filename);
+        console.log("Copying backend outside .asar file");
         read.on("close", function () {
-            cb();
+            console.log("Finished");
+            if (isWindows()) {
+                cb();
+            } else {
+                // Mark the file as executeable, so we can actually start it
+                console.log("Marking backend as executeable");
+                exec("chmod +x \"" + filename + "\"", (error, stdout, stderr) => {
+                    console.log("Backend was marked as executeable");
+                    if (error) {
+                        console.error(error);
+                    }
+                    console.log(`stdout: ${stdout}`);
+                    console.log(`stderr: ${stderr}`);
+                    cb();
+                });
+            }
         });
         read.pipe(write);
     }
 
-    function startGoServer() {
+    function startGoServer(cb: any) {
         let executeable:string;
-        if (platform() === "win32") {
+        if (isWindows()) {
             executeable = "backend.exe";
         } else {
-            executeable = "./backend";
+            executeable = resolve(join(app.getPath("userData"), "backend"));
         }
 
         unpackBackend(executeable, function () {
+            console.log("Spawning backend process");
             // Create the backend service, and tell it where to save data
             var backend = spawn(executeable, [app.getPath("userData")]);
             backend.stdout.on("data", function (data:any) {
@@ -115,52 +141,58 @@ import {IpcHandlersCreator} from './IpcHandlers';
             backend.stderr.on("data", function (data:any) {
                 console.log(data.toString());
             });
+            backend.on('error', function(data:any) {
+                console.log(data.toString());
+            });
+            console.log("Spawned backend process");
+            cb();
         });
     }
 
     function createWindow() {
 
-        // Make sure to open the window where the user closed it, and with the same size
-        var initPath = join(app.getPath("userData"), "init.json");
-        var data:{bounds:Electron.Rectangle};
-        try {
-            data = JSON.parse(readFileSync(initPath, "utf8"));
-        } catch (e) {
-        }
+        startGoServer(function () {
+            // Make sure to open the window where the user closed it, and with the same size
+            var initPath = join(app.getPath("userData"), "init.json");
+            var data:{bounds:Electron.Rectangle};
+            try {
+                data = JSON.parse(readFileSync(initPath, "utf8"));
+            } catch (e) {
+            }
 
-        var bounds: Electron.BrowserWindowOptions = data && data.bounds ? data.bounds : {width: 800, height: 600};
-        bounds.frame = false;
-        bounds.minWidth = 700;
-        bounds.minHeight = 450;
+            var bounds:Electron.BrowserWindowOptions = data && data.bounds ? data.bounds : {width: 800, height: 600};
+            bounds.frame = false;
+            bounds.minWidth = 700;
+            bounds.minHeight = 450;
 
-        // Create the browser window
-        win = new BrowserWindow(bounds);
+            // Create the browser window
+            win = new BrowserWindow(bounds);
 
-        // and load the index.body of the app.
-        win.loadURL(`file://${__dirname}/index.html`);
-        if (devMode) win.webContents.openDevTools();
-        // live reload from electron connect
-        //client.client.create(win);
+            // and load the index.body of the app.
+            win.loadURL(`file://${__dirname}/index.html`);
+            if (devMode || true) win.webContents.openDevTools();
+            // live reload from electron connect
+            //client.client.create(win);
 
-        // Save the window state, so it opens in that place next time
-        win.on("close", function () {
-            var data = {
-                bounds: win.getBounds()
-            };
-            writeFileSync(initPath, JSON.stringify(data));
+            // Save the window state, so it opens in that place next time
+            win.on("close", function () {
+                var data = {
+                    bounds: win.getBounds()
+                };
+                writeFileSync(initPath, JSON.stringify(data));
+            });
+
+            // Emitted when the window is closed
+            win.on("closed", () => {
+                win = null;
+            });
+
+            win.webContents.on("did-finish-load", () => {
+                setupAutoUpdater();
+            });
+
+            IpcHandlersCreator.bindListeners();
         });
-
-        // Emitted when the window is closed
-        win.on("closed", () => {
-            win = null;
-        });
-
-        win.webContents.on("did-finish-load", () => {
-            setupAutoUpdater();
-        });
-
-        IpcHandlersCreator.bindListeners();
-        startGoServer()
     }
 
     // This method will be called when Electron has finished
