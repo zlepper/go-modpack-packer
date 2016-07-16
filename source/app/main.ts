@@ -39,6 +39,10 @@ import {IpcHandlersCreator} from './IpcHandlers';
     function canAutoupdate(): boolean {
         return !devMode && platform() === "win32";
     } 
+
+    function isOSX(): boolean {
+        return platform() === "darwin";
+    }
     
     
     function setupAutoUpdater():void {
@@ -85,7 +89,8 @@ import {IpcHandlersCreator} from './IpcHandlers';
 
     function unpackBackend(filename:string, cb:any) {
         if (devMode) return cb();
-        var read = createReadStream(join("resources", "app.asar", filename));
+        var resourcesName = isOSX() ? "Resources" : "resources";
+        var read = createReadStream(join(resourcesName, "app.asar", filename));
         var write = createWriteStream(filename);
         read.on("close", function () {
             cb();

@@ -336,7 +336,7 @@ gulp.task('build-release:mac', function (cb) {
 });
 
 
-gulp.task("build-release:all", [ "build-release:windows", "build-release:linux"], function () {
+gulp.task("build-release:all", [ "build-release:windows", "build-release:linux", "build-release:mac"], function () {
 
 });
 
