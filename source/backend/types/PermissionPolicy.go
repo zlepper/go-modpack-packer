@@ -1,6 +1,5 @@
 package types
 
-
 type PermissionPolicy string
 
 const (
@@ -11,4 +10,3 @@ const (
 	FTB     PermissionPolicy = "FTB"
 	Closed  PermissionPolicy = "Closed"
 )
-

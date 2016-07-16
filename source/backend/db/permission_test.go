@@ -29,4 +29,3 @@ func TestPermissionsDB_GetPermission(t *testing.T) {
 		t.Error(*permissions)
 	}
 }
-

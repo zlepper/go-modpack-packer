@@ -1,7 +1,7 @@
 package crawlers
 
 type API struct {
-	Api string
+	Api     string
 	Version string
-	Stream string
+	Stream  string
 }

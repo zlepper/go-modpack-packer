@@ -2,35 +2,35 @@ package db
 
 import (
 	"encoding/json"
+	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	"log"
 	"net/http"
 	"strings"
 	"sync"
-	"github.com/zlepper/go-modpack-packer/source/backend/types"
 )
 
 type ftbPermission struct {
-	ModName             string           `json:"modName"`
-	ModAuthors          string           `json:"modAuthors"`
-	LicenseLink         string           `json:"licenseLink"`
-	ModLink             string           `json:"modLink"`
-	PrivateLicenceLink  string           `json:"privateLicenceLink"`
+	ModName             string                 `json:"modName"`
+	ModAuthors          string                 `json:"modAuthors"`
+	LicenseLink         string                 `json:"licenseLink"`
+	ModLink             string                 `json:"modLink"`
+	PrivateLicenceLink  string                 `json:"privateLicenceLink"`
 	PrivateStringPolicy types.PermissionPolicy `json:"privateStringPolicy"`
 	PublicStringPolicy  types.PermissionPolicy `json:"publicStringPolicy"`
-	Modids              string           `json:"modids"`
-	CustomData          string           `json:"customData"`
-	ShortName           string           `json:"shortName"`
+	Modids              string                 `json:"modids"`
+	CustomData          string                 `json:"customData"`
+	ShortName           string                 `json:"shortName"`
 }
 
 type PermissionData struct {
-	ModName            string           `json:"modName"`
-	ModAuthors         string           `json:"modAuthors"`
-	LicenseLink        string           `json:"licenseLink"`
-	ModLink            string           `json:"modLink"`
-	PrivateLicenceLink string           `json:"privateLicenceLink"`
+	ModName            string                 `json:"modName"`
+	ModAuthors         string                 `json:"modAuthors"`
+	LicenseLink        string                 `json:"licenseLink"`
+	ModLink            string                 `json:"modLink"`
+	PrivateLicenceLink string                 `json:"privateLicenceLink"`
 	PrivatePolicy      types.PermissionPolicy `json:"privateStringPolicy"`
 	PublicPolicy       types.PermissionPolicy `json:"publicStringPolicy"`
-	Modids             []string         `json:"modids"`
+	Modids             []string               `json:"modids"`
 }
 
 type PermissionsDB struct {

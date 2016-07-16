@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"github.com/zlepper/go-modpack-packer/source/backend/db"
 	"github.com/zlepper/go-modpack-packer/source/backend/helpers"
@@ -17,7 +18,6 @@ import (
 	"runtime/debug"
 	"strings"
 	"sync"
-	"fmt"
 	"time"
 )
 
@@ -93,7 +93,7 @@ func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnectio
 	var foundInfoFile bool
 	for _, f := range reader.File {
 		// We only need .info and a certain .json file
-		if (strings.HasSuffix(f.Name, ".info") && strings.Index(f.Name, "dependancies") == -1 && strings.Index(f.Name, "dependencies") == -1)|| f.Name == "litemod.json" {
+		if (strings.HasSuffix(f.Name, ".info") && strings.Index(f.Name, "dependancies") == -1 && strings.Index(f.Name, "dependencies") == -1) || f.Name == "litemod.json" {
 			r, err := f.Open()
 			if err != nil {
 				log.Fatal(err)
@@ -104,7 +104,7 @@ func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnectio
 		}
 	}
 	if !foundInfoFile {
-		sendModDataReady(types.Mod{Filename:modfile}, conn)
+		sendModDataReady(types.Mod{Filename: modfile}, conn)
 	}
 	waitGroup.Done()
 }
@@ -125,7 +125,7 @@ func readInfoFile(file io.ReadCloser, conn websocket.WebsocketConnection, size i
 		err = json.Unmarshal(content, &mod)
 		if err != nil {
 			conn.Log(err.Error() + "\n" + string(content) + "\n" + filename)
-			sendModDataReady(types.Mod{Filename:filename}, conn)
+			sendModDataReady(types.Mod{Filename: filename}, conn)
 			return
 		}
 		// Handle version 2 mods

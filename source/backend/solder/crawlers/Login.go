@@ -1,9 +1,9 @@
 package crawlers
 
 import (
-	"net/http"
 	"github.com/PuerkitoBio/goquery"
 	"log"
+	"net/http"
 )
 
 func CrawlLogin(response *http.Response) bool {
