@@ -1,5 +1,5 @@
+go_import_path: github.com/zlepper/go-modpack-packer
 language: go
 go:
   - tip
   - 1.6.2
-go_import_path: github.com/zlepper/go-modpack-packer/source/backend
