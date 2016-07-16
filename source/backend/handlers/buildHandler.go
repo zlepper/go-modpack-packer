@@ -66,7 +66,7 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 	var total int
 
 	var ch chan *types.OutputInfo
-	ch = make(chan *types.OutputInfo, len(mods))
+	ch = make(chan *types.OutputInfo)
 
 	startTime := time.Now()
 	// Handle forge
@@ -83,12 +83,13 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 		}
 	}
 
+	infos := make([]*types.OutputInfo, 0)
 	// Handle mods
 	for _, mod := range mods {
 		// If the mod already is on solder, then we should likely skip it
 		// however the user can override this. If they do we should still pack all files
 		if !modpack.Technic.RepackAllMods && mod.IsOnSolder {
-			ch <- GenerateOutputInfo(mod, "")
+			infos = append(infos, GenerateOutputInfo(mod, ""))
 			continue
 		}
 		go packMod(mod, conn, outputDirectory, &ch)
@@ -96,7 +97,6 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 	}
 	conn.Write("total-to-pack", total)
 
-	infos := make([]*types.OutputInfo, 0)
 
 	// Save the mods to the database
 	d := db.GetModsDb()
