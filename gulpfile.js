@@ -9,6 +9,7 @@ const gulp = require('gulp'),
     merge = require("merge-stream"),
     builder = require('electron-builder'),
     Platform = builder.Platform,
+    fs = require("fs"),
 
     jshint = require('gulp-jshint'),
     sass = require('gulp-sass'),
@@ -347,3 +348,44 @@ gulp.task("build-release:linux", ["build-release:linux:x64",
 
 gulp.task('build-release:windows', ["build-release:windows:x32",
     "build-release:windows:x64"], function(){});
+
+gulp.task('create-new-version', function(cb) {
+    function incrementVersion(location, resolve, reject) {
+        fs.readFile(location, "utf8", function(err, content) {
+            if (err) {
+                return reject(err);
+            }
+            var c = JSON.parse(content);
+            var versionParts = c.version.split('.');
+            var minor = parseInt(versionParts[2], 10);
+            minor++;
+            versionParts[2] = minor;
+            c.version = versionParts.join('.');
+            var newcontent;
+            try {
+                newcontent = JSON.stringify(c, null, "  ");
+            } catch(err) {
+                console.log(content);
+                console.log(c);
+                return reject(err)
+            }
+            fs.writeFile(location, newcontent, "utf8", function (err) {
+                if (err) {
+                    return reject(err);
+                }
+                gutil.log("New version: " + c.version);
+                resolve();
+            })
+        });
+    }
+    var tasks = [];
+    tasks.push(new Promise(function(resolve, reject) {
+        incrementVersion("./package.json", resolve, reject);
+    }));
+    tasks.push(new Promise(function(resolve, reject) {
+        incrementVersion("./source/app/package.json", resolve, reject);
+    }));
+    Promise.all(tasks).then(function() {
+        cb();
+    }).catch(cb);
+});
