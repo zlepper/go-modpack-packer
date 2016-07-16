@@ -55,18 +55,19 @@
                     <strong translate>SERVICE.TECHNIC</strong>
                 </p>
             </md-list-item>
-            <md-list-item flex></md-list-item>
-            <md-list-item role="listitem" ng-show="main.application.updateReady" ng-click="main.restart()">
-                <p>
-                    <strong translate>UPDATE.RESTART_TO_UPDATE</strong>
-                </p>
-            </md-list-item>
-            <md-list-item role="listitem" ui-sref="settings" ui-sref-active="active">
-                <p>
-                    <strong translate>SERVICE.SETTINGS</strong>
-                </p>
-            </md-list-item>
         </md-list>
+        <span flex></span>
+        <md-list-item role="listitem" ng-if="main.application.updateReady" ng-click="main.restart()">
+            <p>
+                <strong translate>UPDATE.RESTART_TO_UPDATE</strong>
+            </p>
+        </md-list-item>
+        <md-list-item role="listitem" ui-sref="settings" ui-sref-active="active">
+            <p>
+                <strong translate>SERVICE.SETTINGS</strong>
+            </p>
+        </md-list-item>
+
     </md-sidenav>
 
     <div class="md-whiteframe-6dp" role="main" flex layout="column">

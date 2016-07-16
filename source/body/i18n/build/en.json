@@ -36,6 +36,16 @@
       "CONTINUE": "Continue"
     },
     "GENERATE_PERMISSIONS": "Generate Permission Text",
-    "PERMISSIONS": "Permissions text"
+    "PERMISSIONS": "Permissions text",
+    "SOLDER": {
+      "LOGGING_IN": "Logging in to solder",
+      "CHECKING_MODPACK_EXISTENCE": "Checking if modpack already exists",
+      "GETTING_MODPACK": "Modpack exists, getting info.",
+      "CREATING_MODPACK": "Modpack does not exist. Creating...",
+      "CHECKING_BUILD_EXISTENCE": "Checking if build exists",
+      "GETTING_BUILD": "Build exists, getting info",
+      "CREATING_BUILD": "Build does not exist. Creating...",
+      "UPDATING_MODS": "Updating mods"
+    }
   }
 }

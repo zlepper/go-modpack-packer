@@ -50,6 +50,7 @@ module BuildController {
         public query:Query = new Query();
         public currentlyCheckingPermissions: { [id: string]: Application.Mod} = {};
         public permissionsText: string;
+        public solderDoing: string;
 
         constructor(protected application:Application.Application,
                     protected $mdDialog:angular.material.IDialogService,
@@ -137,6 +138,10 @@ module BuildController {
                 data.modId = undefined;
                 delete self.currentlyCheckingPermissions[mod.modid];
                 mod.userPermission = data;
+            });
+
+            $rootScope.$on("solder-currently-doing", function(event:angular.IAngularEvent, status:string) {
+                self.solderDoing = status;
             });
 
             this.startBuild(application.modpack);

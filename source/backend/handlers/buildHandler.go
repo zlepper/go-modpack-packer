@@ -53,7 +53,7 @@ func continueRunning(conn websocket.WebsocketConnection, data interface{}) {
 		log.Panic(err)
 	}
 
-	solderclient, buildId := updateSolder(uploadInfo.Modpack)
+	solderclient, buildId := updateSolder(uploadInfo.Modpack, conn)
 	for _, info := range uploadInfo.Infos {
 		go addInfoToSolder(info, buildId, conn, solderclient)
 	}
@@ -97,7 +97,6 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 	}
 	conn.Write("total-to-pack", total)
 
-
 	// Save the mods to the database
 	d := db.GetModsDb()
 	for _, mod := range mods {
@@ -135,8 +134,9 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 	}
 
 	if modpack.Solder.Use {
-		solderclient, buildId := updateSolder(modpack)
+		solderclient, buildId := updateSolder(modpack, conn)
 
+		conn.Write(solderCurrentlyDoingEvent, "BUILD.SOLDER.UPDATING_MODS")
 		for _, info := range infos {
 			go addInfoToSolder(info, buildId, conn, solderclient)
 		}
@@ -144,25 +144,34 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 
 }
 
-func updateSolder(modpack types.Modpack) (*solder.SolderClient, string) {
+const solderCurrentlyDoingEvent string = "solder-currently-doing"
+
+func updateSolder(modpack types.Modpack, conn websocket.WebsocketConnection) (*solder.SolderClient, string) {
 	// Create solder client
+	conn.Write(solderCurrentlyDoingEvent, "BUILD.SOLDER.LOGGING_IN")
 	solderclient := solder.NewSolderClient(modpack.Solder.Url)
 	loginSuccessful := solderclient.Login(modpack.Solder.Username, modpack.Solder.Password)
 	if !loginSuccessful {
 		log.Panic("Could not login to solder with the supplied credentials.")
 	}
 
+	conn.Write(solderCurrentlyDoingEvent, "BUILD.SOLDER.CHECKING_MODPACK_EXISTENCE")
 	var modpackId string
 	if solderclient.IsPackOnline(&modpack) {
+		conn.Write(solderCurrentlyDoingEvent, "BUILD.SOLDER.GETTING_MODPACK")
 		modpackId = solderclient.GetModpackId(modpack.GetSlug())
 	} else {
+		conn.Write(solderCurrentlyDoingEvent, "BUILD.SOLDER.CREATING_MODPACK")
 		modpackId = solderclient.CreatePack(modpack.Name, modpack.GetSlug())
 	}
 
 	var buildId string
+	conn.Write(solderCurrentlyDoingEvent, "BUILD.SOLDER.CHECKING_BUILD_EXISTENCE")
 	if solderclient.IsBuildOnline(&modpack) {
+		conn.Write(solderCurrentlyDoingEvent, "BUILD.SOLDER.GETTING_BUILD")
 		buildId = solderclient.GetBuildId(&modpack)
 	} else {
+		conn.Write(solderCurrentlyDoingEvent, "BUILD.SOLDER.CREATING_BUILD")
 		buildId = solderclient.CreateBuild(&modpack, modpackId)
 	}
 	return solderclient, buildId

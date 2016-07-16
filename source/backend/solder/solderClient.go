@@ -145,12 +145,6 @@ func (s *SolderClient) AddMod(mod *types.OutputInfo) string {
 	form.Add("description", mod.Description)
 	form.Add("link", mod.Url)
 	log.Printf("Adding mod:\n%v\n", form)
-	//form := make(map[string]interface{})
-	//form["pretty_name"] = mod.Name
-	//form["name"] = mod.Id
-	//form["author"] = mod.Author
-	//form["description"] = mod.Description
-	//form["link"] = mod.Url
 
 	response := s.postForm(Url.String(), form)
 	defer response.Body.Close()
@@ -164,11 +158,6 @@ func (s *SolderClient) AddModVersion(modId, md5, version string) {
 	form.Add("add-md5", md5)
 	Url := s.createUrl("mod/add-version")
 	log.Printf("Adding mod version:\n%v\n", form)
-	//form := make(map[string]interface{})
-	//form["mod-id"] = modId
-	//form["add-version"] = version
-	//form["add-md5"] = md5
-	//data, _ := json.Marshal(form)
 
 	res := s.postForm(Url.String(), form)
 	defer res.Body.Close()
@@ -246,11 +235,6 @@ func (s *SolderClient) SetModVersionInBuild(mod *types.OutputInfo, buildId strin
 	modVersionId := s.GetModVersionId(mod)
 	Url := s.createUrl("modpack/build/modify")
 
-	//form := url.Values{}
-	//form.Add("action", "version")
-	//form.Add("build-id", buildId)
-	//form.Add("version", modVersionId)
-	//form.Add("modversion-id", s.GetActiveModversionInBuildId(mod, buildId))
 	form := make(map[string]interface{})
 	form["action"] = "version"
 	form["build-id"] = buildId
@@ -389,12 +373,7 @@ func (s *SolderClient) AddModversionToBuild(mod *types.OutputInfo, modpackBuildI
 	form.Add("mod-name", mod.Id)
 	form.Add("mod-version", mod.GenerateOnlineVersion())
 	form.Add("action", "add")
-	//form := make(map[string]interface{})
-	//form["build"] = modpackBuildId
-	//form["mod-name"] = mod.Id
-	//form["mod-version"] = mod.GenerateOnlineVersion()
-	//form["action"] = "add"
-	//data, _ := json.Marshal(form)
+
 	response := s.postForm(Url.String(), form)
 	defer response.Body.Close()
 

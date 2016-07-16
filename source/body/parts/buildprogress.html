@@ -100,6 +100,7 @@
                         </div>
                         <div>
                             <p>Solder progress {{build.solderNumber}}/{{build.total}}</p>
+                            <p>Currently doing: {{build.solderDoing | translate}}</p>
                             <md-progress-linear md-mode="determinate"
                                                 value="{{(build.solderNumber / build.total) * 100}}"></md-progress-linear>
                         </div>
