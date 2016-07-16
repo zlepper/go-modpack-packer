@@ -93,7 +93,7 @@ import {IpcHandlersCreator} from './IpcHandlers';
 
     function unpackBackend(filename:string, cb:any) {
         if (devMode) return cb();
-        var asarFile;
+        var asarFile: string;
         if (isOSX()) {
             asarFile = join(__dirname, basename(filename));
         } else {

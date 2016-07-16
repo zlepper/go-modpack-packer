@@ -1,6 +1,6 @@
 {
   "name": "go-modpack-packer",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Packs mods for modpacks",
   "main": "main.js",
   "scripts": {
@@ -58,7 +58,5 @@
     },
     "compression": "maximum"
   },
-  "directories": {
-
-  }
+  "directories": {}
 }
