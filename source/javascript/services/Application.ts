@@ -236,7 +236,9 @@ module Application {
             $rootScope.$watch(function () {
                 return self.modpacks;
             }, function () {
-                self.saveModpackData()
+                if(self.modpacks && self.modpacks.length > 0) {
+                    self.saveModpackData()
+                }
             }, true);
             
             $timeout(function wait() {

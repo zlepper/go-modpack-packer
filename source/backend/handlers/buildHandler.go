@@ -66,7 +66,7 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 	var total int
 
 	var ch chan *types.OutputInfo
-	ch = make(chan *types.OutputInfo)
+	ch = make(chan *types.OutputInfo, len(mods))
 
 	startTime := time.Now()
 	// Handle forge
@@ -79,7 +79,7 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 	for _, folder := range modpack.AdditionalFolders {
 		if folder.Include {
 			total++
-			go packAdditionalFolder(modpack, path.Join(modpack.InputDirectory, folder.Name), outputDirectory, conn, &ch)
+			go packAdditionalFolder(modpack, folder.Name, outputDirectory, conn, &ch)
 		}
 	}
 
@@ -259,7 +259,8 @@ func packForgeFolder(modpack types.Modpack, conn websocket.WebsocketConnection, 
 
 func packAdditionalFolder(modpack types.Modpack, folderPath string, outputDirectory string, conn websocket.WebsocketConnection, ch *chan *types.OutputInfo) {
 	conn.Write(packingPartName, folderPath)
-	inputFolderInfo, _ := os.Stat(folderPath)
+	inputFolder := path.Join(modpack.InputDirectory, folderPath)
+	inputFolderInfo, _ := os.Stat(inputFolder)
 	s := safeNormalizeString(modpack.Name + "-" + inputFolderInfo.Name())
 	outputDirectory = path.Join(outputDirectory, "mods", s)
 	os.MkdirAll(outputDirectory, os.ModePerm)
@@ -274,7 +275,7 @@ func packAdditionalFolder(modpack types.Modpack, folderPath string, outputDirect
 	zipWriter := zip.NewWriter(zipfile)
 	defer zipWriter.Close()
 
-	packFolder(zipWriter, folderPath, ".", conn)
+	packFolder(zipWriter, inputFolder, folderPath, conn)
 
 	conn.Write(donePackingPartName, folderPath)
 
@@ -297,7 +298,7 @@ func packFolder(zipWriter *zip.Writer, folder string, parent string, conn websoc
 		if file.IsDir() {
 			packFolder(zipWriter, path.Join(folder, file.Name()), path.Join(parent, file.Name()), conn)
 		} else {
-			zipName := path.Join(parent, file.Name())
+			fileEntry := path.Join(parent, file.Name())
 
 			fileReader, err := os.Open(path.Join(folder, file.Name()))
 			defer fileReader.Close()
@@ -307,7 +308,7 @@ func packFolder(zipWriter *zip.Writer, folder string, parent string, conn websoc
 				return
 			}
 
-			f, err := zipWriter.Create(zipName)
+			f, err := zipWriter.Create(fileEntry)
 			if err != nil {
 				conn.Log("Error while creating zip file content: " + err.Error() + "\n" + folder + "/" + file.Name())
 				return
@@ -382,7 +383,6 @@ func GenerateOutputInfo(mod *types.Mod, outputFile string) *types.OutputInfo {
 		ProgressKey:      mod.Filename,
 		IsOnSolder:       mod.IsOnSolder,
 		Permissions:      mod.Permission,
-
 	}
 	u := mod.Url
 	if len(u) > 0 && strings.Index(u, "http") != 0 {
