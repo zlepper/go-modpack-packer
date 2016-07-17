@@ -25,10 +25,12 @@ import {IpcHandlersCreator} from './IpcHandlers';
 
 
     const shouldQuit:boolean = app.makeSingleInstance(() => {
-        if (win.isMinimized()) {
-            win.restore();
+        if(win) {
+            if (win.isMinimized()) {
+                win.restore();
+            }
+            win.focus();
         }
-        win.focus();
     });
 
     if (shouldQuit) {
@@ -94,8 +96,9 @@ import {IpcHandlersCreator} from './IpcHandlers';
     function unpackBackend(filename:string, cb:any) {
         if (devMode) return cb();
         var asarFile: string;
-        if (isOSX()) {
+        if (!isWindows()) {
             asarFile = join(__dirname, basename(filename));
+            console.log("Path to zipped backend file: " + asarFile);
         } else {
             asarFile = join("resources", "app.asar", filename);
         }
