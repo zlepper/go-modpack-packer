@@ -128,7 +128,11 @@ import {IpcHandlersCreator} from './IpcHandlers';
         if (isWindows()) {
             executeable = "backend.exe";
         } else {
-            executeable = resolve(join(app.getPath("userData"), "backend"));
+            if (devMode) {
+                executeable = "./backend";
+            } else {
+                executeable = resolve(join(app.getPath("userData"), "backend"));
+            }
         }
 
         unpackBackend(executeable, function () {
