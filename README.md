@@ -2,6 +2,7 @@
 Modpack helper for creating Technic Solder packs.
 
 ## How to contribute
+Step 0: DO NOT CLONE THIS DIRECTLY OF GITHUB. FOLLOW THE INSTRUCTIONS HERE CLEARLY!
 
 ### Requirements
 * [NodeJS](https://nodejs.org/)
