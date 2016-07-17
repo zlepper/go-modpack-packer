@@ -14,13 +14,14 @@ Based on electron and go.
 The last 3 can be installed by running `npm install -g typings electron-prebuilt gulp`. 
 
 ### 2. Setup go
-In case go is not installed ( check with `go version`) read up https://golang.org/doc/install
+In case go is not installed _( check with `go version`)_ read up https://golang.org/doc/install
 If you do not already have a setup fully working Go environment and Go workspace, read this: https://golang.org/doc/code.html#Workspace
 
 In short, you need to setup the GOPATH variable, to some folder on your system and `GOPATH/bin` must be included in PATH.
 
 ### 3. Get the Project
 **This project needs no `git clone`!**
+
 Once you have that setup, get the repository by running `go get github.com/zlepper/go-modpack-packer/source/backend`. 
 This will fetch the repo and install all go dependencies. You can now find the code in `GOPATH/src/github.com/zlepper/go-modpack-packer`
 
