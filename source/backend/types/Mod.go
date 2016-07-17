@@ -27,7 +27,7 @@ func (m *Mod) GenerateOnlineVersion() string {
 	return m.MinecraftVersion + "-" + m.Version
 }
 
-func (m *Mod) NormalizeId() {
+func normalize(s string) string {
 	reg := []rune("\\\\|\\/|\\||:|\\*|\\\"|<|>|'|\\?|&|\\$|@|=|;|\\+|\\s|,|{|}|\\^|%|`|\\]|\\[|~|#|_") // Also known as the Fuck You Regex
 	for i := 0; i < 32; i++ {
 		c := rune(i)
@@ -39,8 +39,13 @@ func (m *Mod) NormalizeId() {
 		reg = append(reg, '|')
 		reg = append(reg, c)
 	}
+	s = strings.Replace(s, " ", "-", -1)
 	re := regexp.MustCompile(string(reg))
-	m.ModId = strings.ToLower(re.ReplaceAllString(m.ModId, ""))
+	return strings.ToLower(re.ReplaceAllString(s, ""))
+}
+
+func (m *Mod) NormalizeId() {
+	m.ModId = normalize(m.ModId)
 }
 
 func (m *Mod) GetVersionString() string {
@@ -74,4 +79,10 @@ func (m *Mod) IsValid() bool {
 		!helpers.IgnoreCaseContains(m.MinecraftVersion, "${") &&
 		!helpers.IgnoreCaseContains(m.ModId, "${") &&
 		!helpers.IgnoreCaseContains(m.Version, "@version@")
+}
+
+func (m *Mod) NormalizeAll() {
+	m.NormalizeId()
+	m.Version = normalize(m.Version)
+	m.MinecraftVersion = normalize(m.MinecraftVersion)
 }

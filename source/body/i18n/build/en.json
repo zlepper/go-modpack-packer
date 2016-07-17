@@ -45,7 +45,8 @@
       "CHECKING_BUILD_EXISTENCE": "Checking if build exists",
       "GETTING_BUILD": "Build exists, getting info",
       "CREATING_BUILD": "Build does not exist. Creating...",
-      "UPDATING_MODS": "Updating mods"
+      "UPDATING_MODS": "Updating mods",
+      "DONE": "Done updating"
     }
   }
 }

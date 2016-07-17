@@ -73,7 +73,6 @@ module BuildController {
             });
 
             $rootScope.$on("total-to-pack", function (event:angular.IAngularEvent, total:number) {
-                console.log("Total " + total);
                 self.total = total;
             });
 
@@ -95,17 +94,14 @@ module BuildController {
 
             $rootScope.$on("starting-upload", function (event:angular.IAngularEvent, key:string) {
                 self.uploading = key;
-                console.log("Starting upload of " + key);
             });
 
             $rootScope.$on("finished-uploading", function (event:angular.IAngularEvent, key:string) {
                 self.uploadNumber++;
-                console.log("Finished upload of " + key);
             });
 
             $rootScope.$on("finished-all-uploading", function () {
                 self.uploading = "";
-                console.log("Finished all uploading");
             });
 
             $rootScope.$on("started-uploading-all", function () {
@@ -125,11 +121,13 @@ module BuildController {
                         self.todos.splice(i, 1)
                     }
                     self.solderNumber++;
+                    if (self.todos.length === 0) {
+                        self.solderDoing = "BUILD.SOLDER.DONE";
+                    }
                 });
             });
 
             $rootScope.$on("waiting-for-file-upload", function (event:angular.IAngularEvent, data:UploadWaiting) {
-                console.log(data);
                 self.uploadData = data;
             });
 

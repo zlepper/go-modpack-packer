@@ -188,7 +188,7 @@ func sendModDataReady(mod types.Mod, conn websocket.WebsocketConnection) {
 		}
 		log.Printf("Mod '%s' has permission '%v'", mod.ModId, *mod.Permission)
 	}
-
+	mod.NormalizeAll()
 	conn.Write(modDataReadyEvent, mod)
 }
 

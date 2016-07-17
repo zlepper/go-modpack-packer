@@ -54,6 +54,7 @@ func continueRunning(conn websocket.WebsocketConnection, data interface{}) {
 	}
 
 	solderclient, buildId := updateSolder(uploadInfo.Modpack, conn)
+	conn.Write(solderCurrentlyDoingEvent, "BUILD.SOLDER.UPDATING_MODS")
 	for _, info := range uploadInfo.Infos {
 		go addInfoToSolder(info, buildId, conn, solderclient)
 	}
@@ -86,6 +87,7 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 	infos := make([]*types.OutputInfo, 0)
 	// Handle mods
 	for _, mod := range mods {
+		mod.NormalizeAll()
 		// If the mod already is on solder, then we should likely skip it
 		// however the user can override this. If they do we should still pack all files
 		if !modpack.Technic.RepackAllMods && mod.IsOnSolder {
