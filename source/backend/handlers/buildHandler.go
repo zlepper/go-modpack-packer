@@ -184,11 +184,14 @@ func addInfoToSolder(info *types.OutputInfo, buildId string, conn websocket.Webs
 	var modid string
 	modid = solderclient.GetModId(info.Id)
 	if modid == "" {
+		log.Println("Could not get mod id. Adding mod to solder " + info.Id)
 		modid = solderclient.AddMod(info)
 	}
 	if modid == "" {
+		log.Printf("Something went wrong wehn adding a mod to solder.\n")
 		log.Printf("%v\n", *info)
-		log.Panic("Something went wrong wehn adding a mod to solder.")
+		log.Printf("Application version: %s\n", os.Args[2])
+		log.Panic("Error. See above lines")
 	}
 
 	if info.File != "" {
@@ -379,7 +382,8 @@ func packMod(mod *types.Mod, conn websocket.WebsocketConnection, outputDirectory
 }
 
 func safeNormalizeString(s string) string {
-	return strings.Replace(strings.ToLower(s), " ", "-", -1)
+	s = strings.Replace(strings.ToLower(s), " ", "-", -1)
+	return strings.Replace(s, ".", "", -1)
 }
 
 func GenerateOutputInfo(mod *types.Mod, outputFile string) *types.OutputInfo {

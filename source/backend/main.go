@@ -5,10 +5,12 @@ import (
 	"github.com/zlepper/go-websocket-connection"
 	"log"
 	"os"
+	"path"
 )
 
 func main() {
-	file, err := os.OpenFile("log.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, os.ModePerm)
+	logfilePath := path.Join(os.Args[1], "log.log")
+	file, err := os.OpenFile(logfilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
 		panic(err)
 	}

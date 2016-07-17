@@ -61,6 +61,8 @@ func saveModpacks(conn websocket.WebsocketConnection, data interface{}) {
 		modpack := &modpacks[i]
 		modpack.Technic.Upload.AWS.SecretKey = encryption.EncryptString(modpack.Technic.Upload.AWS.SecretKey)
 		modpack.Technic.Upload.AWS.AccessKey = encryption.EncryptString(modpack.Technic.Upload.AWS.AccessKey)
+		modpack.Technic.Upload.FTP.Password = encryption.EncryptString(modpack.Technic.Upload.FTP.Password)
+		modpack.Technic.Upload.FTP.Username = encryption.EncryptString(modpack.Technic.Upload.FTP.Username)
 		modpack.Solder.Password = encryption.EncryptString(modpack.Solder.Password)
 	}
 	mutex.Lock()
@@ -100,6 +102,8 @@ func loadModpacks(conn websocket.WebsocketConnection) {
 		modpack := &modpacks[i]
 		modpack.Technic.Upload.AWS.SecretKey = encryption.DecryptString(modpack.Technic.Upload.AWS.SecretKey)
 		modpack.Technic.Upload.AWS.AccessKey = encryption.DecryptString(modpack.Technic.Upload.AWS.AccessKey)
+		modpack.Technic.Upload.FTP.Password = encryption.DecryptString(modpack.Technic.Upload.FTP.Password)
+		modpack.Technic.Upload.FTP.Username = encryption.DecryptString(modpack.Technic.Upload.FTP.Username)
 		modpack.Solder.Password = encryption.DecryptString(modpack.Solder.Password)
 	}
 	conn.Write("data-loaded", modpacks)

@@ -145,7 +145,7 @@ import {IpcHandlersCreator} from './IpcHandlers';
         unpackBackend(executeable, function () {
             console.log("Spawning backend process");
             // Create the backend service, and tell it where to save data
-            backend = spawn(executeable, [app.getPath("userData")]);
+            backend = spawn(executeable, [app.getPath("userData"), app.getVersion()]);
             backend.stdout.on("data", function (data:any) {
                 console.log(data.toString());
             });

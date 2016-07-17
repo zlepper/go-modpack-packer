@@ -342,7 +342,9 @@ func (s *SolderClient) GetModpackId(slug string) string {
 
 func (s *SolderClient) GetModId(modid string) string {
 	if id, ok := s.modIdCache[modid]; ok {
-		return id
+		if id != "" {
+			return id
+		}
 	}
 
 	Url := s.createUrl("mod/list")
