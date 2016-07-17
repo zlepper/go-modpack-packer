@@ -251,7 +251,8 @@ func (s *SolderClient) IsPackOnline(modpack *types.Modpack) bool {
 }
 
 func (s *SolderClient) IsBuildOnline(modpack *types.Modpack) bool {
-	return s.GetBuildId(modpack) != ""
+	id := s.GetBuildId(modpack)
+	return id != ""
 }
 
 func (s *SolderClient) GetModVersionId(mod *types.OutputInfo) string {
@@ -309,12 +310,14 @@ func (s *SolderClient) CreateBuild(modpack *types.Modpack, modpackId string) str
 }
 
 func (s *SolderClient) GetBuildId(modpack *types.Modpack) string {
-	Url := s.createUrl("modpack/view/" + modpack.GetSlug())
+	modpackId := s.GetModpackId(modpack.GetSlug())
+	Url := s.createUrl("modpack/view/" + modpackId)
 
 	res := s.doRequest(http.MethodGet, Url.String(), "")
 	builds := crawlers.CrawlBuildList(res)
 
 	for _, build := range builds {
+		log.Println(build.Version)
 		if build.Version == modpack.Version {
 			return build.Id
 		}

@@ -91,8 +91,8 @@ func CrawlBuildList(res *http.Response) []Build {
 	tableRows.Each(func(_ int, row *goquery.Selection) {
 		build := Build{
 			Id:        row.Find("td:nth-child(1)").Text(),
-			Minecraft: row.Find("td:nth-child(2)").Text(),
-			Version:   row.Find("td:nth-child(3)").Text(),
+			Minecraft: row.Find("td:nth-child(3)").Text(),
+			Version:   row.Find("td:nth-child(2)").Text(),
 		}
 		builds = append(builds, build)
 	})
