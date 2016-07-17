@@ -12,7 +12,7 @@ import {
 import {createReadStream, createWriteStream, readFileSync, writeFileSync} from 'fs'
 
 import {join, resolve, basename} from 'path';
-import {spawn, exec} from 'child_process';
+import {spawn, exec, ChildProcess} from 'child_process';
 import {IpcHandlersCreator} from './IpcHandlers';
 
 (function () {
@@ -123,7 +123,11 @@ import {IpcHandlersCreator} from './IpcHandlers';
         read.pipe(write);
     }
 
+    var backend: ChildProcess = null;
     function startGoServer(cb: any) {
+        if(backend) {
+            return cb();
+        }
         let executeable:string;
         if (isWindows()) {
             executeable = "backend.exe";
@@ -138,7 +142,7 @@ import {IpcHandlersCreator} from './IpcHandlers';
         unpackBackend(executeable, function () {
             console.log("Spawning backend process");
             // Create the backend service, and tell it where to save data
-            var backend = spawn(executeable, [app.getPath("userData")]);
+            backend = spawn(executeable, [app.getPath("userData")]);
             backend.stdout.on("data", function (data:any) {
                 console.log(data.toString());
             });
