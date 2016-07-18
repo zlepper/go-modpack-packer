@@ -45,9 +45,11 @@ func CrawlModList(res *http.Response) []Mod {
 
 			// Remove double spaces
 			content = strings.Replace(content, "  ", " ", -1)
+			log.Println(content)
 			// Get matches
 			re = regexp.MustCompile(complexNamePattern)
 			r := re.FindStringSubmatch(content)
+			log.Println(r)
 			if len(r) > 2 {
 				mod.PrettyName = r[1]
 				mod.Name = r[2]

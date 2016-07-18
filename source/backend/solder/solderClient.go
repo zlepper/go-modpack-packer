@@ -194,6 +194,7 @@ func (s *SolderClient) IsModInBuild(mod *types.OutputInfo, buildId string) bool 
 	build := s.GetBuild(buildId)
 
 	for _, m := range build.Mods {
+		//log.Printf("%s === %s\n", m.Name, mod.Id)
 		if m.Name == mod.Id {
 			return true
 		}
@@ -368,6 +369,7 @@ func (s *SolderClient) GetModId(modid string) string {
 
 type addBuildToModpackResponse struct {
 	Status string `json:"status"`
+	Reason string `json:"reason"`
 }
 
 func (s *SolderClient) AddModversionToBuild(mod *types.OutputInfo, modpackBuildId string) {
@@ -395,7 +397,9 @@ func (s *SolderClient) AddModversionToBuild(mod *types.OutputInfo, modpackBuildI
 	}
 
 	if res.Status != "success" {
-		log.Panic("Something went wrong when adding a mod to a build")
+		log.Println(res.Reason)
+		log.Println(*mod)
+		log.Panic("Something went wrong when adding a mod to a build, see above mod details")
 	}
 
 }

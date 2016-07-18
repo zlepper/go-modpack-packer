@@ -209,8 +209,10 @@ func addInfoToSolder(info *types.OutputInfo, buildId string, conn websocket.Webs
 	}
 	if !solderclient.IsModversionActiveInBuild(info, buildId) {
 		if solderclient.IsModInBuild(info, buildId) {
+			log.Println("Mod is already in build, updating")
 			solderclient.SetModVersionInBuild(info, buildId)
 		} else {
+			log.Println("Mod is not in build")
 			solderclient.AddModversionToBuild(info, buildId)
 		}
 	}
