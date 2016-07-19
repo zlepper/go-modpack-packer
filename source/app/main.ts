@@ -181,7 +181,7 @@ import {IpcHandlersCreator} from './IpcHandlers';
 
             // and load the index.body of the app.
             win.loadURL(`file://${__dirname}/index.html`);
-            if (devMode || true) win.webContents.openDevTools();
+            if (devMode) win.webContents.openDevTools();
             // live reload from electron connect
             //client.client.create(win);
 
