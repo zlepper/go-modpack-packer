@@ -233,4 +233,9 @@ import {IpcHandlersCreator} from './IpcHandlers';
             createWindow();
         }
     });
+
+
+    app.on('will-quit', () => {
+        backend.kill();
+    });
 })();
