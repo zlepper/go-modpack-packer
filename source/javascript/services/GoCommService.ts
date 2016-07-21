@@ -27,12 +27,12 @@ module GoCommService {
     }
 
     export class GoCommService {
-        static $inject = ["$websocket", "$rootScope", "$timeout", "$interval"];
+        static $inject = ["$websocket", "$rootScope", "$timeout", "$interval", "$mdToast"];
 
         private dataStream: IWebsocket;
         private ready: boolean;
         private events: Array<IWebsocketOnMessageEvent> = [];
-        constructor(private $websocket: IWebsocketService, protected $rootScope: angular.IRootScopeService, protected $timeout: angular.ITimeoutService, protected $interval: angular.IIntervalService) {
+        constructor(private $websocket: IWebsocketService, protected $rootScope: angular.IRootScopeService, protected $timeout: angular.ITimeoutService, protected $interval: angular.IIntervalService, protected $mdToast: angular.material.IToastService) {
             var t = this;
             this.dataStream = $websocket("ws://localhost:8084/ws");
             this.dataStream.onOpen(function() {
@@ -46,6 +46,8 @@ module GoCommService {
                     // Special logging trick
                     if (message.action === "log") {
                         return console.log(message.data);
+                    } else if(message.action === "notification") {
+                        return $mdToast.showSimple(message.data);
                     }
                     $rootScope.$emit(message.action, message.data);
                 }

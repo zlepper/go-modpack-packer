@@ -6,9 +6,16 @@ import (
 	"log"
 	"os"
 	"path"
+	"fmt"
 )
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println(r)
+		}
+	}()
+
 	logfilePath := path.Join(os.Args[1], "log.log")
 	file, err := os.OpenFile(logfilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {

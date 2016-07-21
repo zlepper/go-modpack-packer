@@ -48,6 +48,7 @@ func NewSolderClient(Url string) *SolderClient {
 }
 
 func TestSolderConnection(conn websocket.WebsocketConnection, data interface{}) {
+	conn.Write("solder-test", "TECHNIC.SOLDER.TESTING_TEST")
 	dict := data.(map[string]interface{})
 
 	var solderInfo types.SolderInfo

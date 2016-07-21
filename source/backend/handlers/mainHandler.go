@@ -8,12 +8,15 @@ import (
 	"github.com/zlepper/go-modpack-packer/source/backend/solder/upload"
 	wc "github.com/zlepper/go-websocket-connection"
 	"runtime/debug"
+	"log"
 )
 
 func HandleMessage(conn wc.WebsocketConnection, messageType int, message []byte) {
 	defer func() {
 		if r := recover(); r != nil {
+			log.Println(fmt.Sprint(r) + "\n" + string(debug.Stack()))
 			conn.Log(fmt.Sprint(r) + "\n" + string(debug.Stack()))
+			conn.Write("notification", "Things just went skyhigh. Check the logs!!")
 		}
 	}()
 	if messageType == websocket.TextMessage {

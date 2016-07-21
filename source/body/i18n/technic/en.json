@@ -20,7 +20,8 @@
       "PASSWORD": "Password",
       "TEST": "Test solder connection",
       "ERROR": "Could not connect to solder and login.",
-      "SUCCESS": "Solder connection seems alright."
+      "SUCCESS": "Solder connection seems alright.",
+      "TESTING_TEST": "Starting solder test"
     },
     "UPLOAD": {
       "TYPE": "Upload type",
