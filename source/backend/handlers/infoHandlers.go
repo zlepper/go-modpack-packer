@@ -107,7 +107,6 @@ func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnectio
 	if !foundInfoFile {
 		sendModDataReady(types.Mod{Filename: modfile}, conn)
 	}
-	log.Println(modfile)
 	waitGroup.Done()
 }
 
@@ -165,7 +164,6 @@ func createModResponse(conn websocket.WebsocketConnection, mod types.ModInfo, fi
 const modDataReadyEvent string = "mod-data-ready"
 
 func sendModDataReady(mod types.Mod, conn websocket.WebsocketConnection) {
-	log.Println(mod.Filename)
 	if checkPermissions {
 		permissionsDb := db.GetPermissionsDb()
 		permission := permissionsDb.GetPermissionPolicy(mod.ModId, checkPublicPermissions)
