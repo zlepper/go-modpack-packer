@@ -34,7 +34,7 @@ module Application {
 
         public upload:UploadConfig = new UploadConfig();
 
-        public repackAllMods: boolean = false;
+        public repackAllMods:boolean = false;
     }
 
     export class SolderInfo {
@@ -84,57 +84,81 @@ module Application {
             return modpack;
         }
 
-        public isValid():boolean {
-            if (!this.name) return false;
-            if (!this.inputDirectory) return false;
-            if (!this.outputDirectory) return false;
-            if (!this.minecraftVersion) return false;
-            if (!this.version) return false;
-            return true;
+        /**
+         * Checks if the basic modpack info is valid.
+         *
+         * Returns an empty string if the basic modpack info is valid, otherwise an error message key.
+         * @returns {string}
+         */
+        public isValid():string {
+            if (!this.name) return "MODPACK.ERRORS.MISSING.NAME";
+            if (!this.inputDirectory) return "MODPACK.ERRORS.MISSING.INPUT_DIRECTORY";
+            if (!this.outputDirectory) return "MODPACK.ERRORS.MISSING.OUTPUT_DIRECTORY";
+            if (!this.minecraftVersion) return "MODPACK.ERRORS.MISSING.MINECRAFT_VERSION";
+            if (!this.version) return "MODPACK.ERRORS.MISSING.VERSION";
+            return "";
         }
 
-        public isValidTechnic():boolean {
+        public isValidTechnic():string {
             var t = this.technic;
             console.log(t.upload.type);
             switch (t.upload.type) {
                 case "s3":
                     var aws = t.upload.aws;
-                    if(!aws.accessKey || !aws.bucket || !aws.region || !aws.secretKey) {
-                        return false;
+                    if (!aws.accessKey) {
+                        return "TECHNIC.ERRORS.MISSING.AWS.ACCESS_KEY";
+                    }
+                    if (!aws.bucket) {
+                        return "TECHNIC.ERRORS.MISSING.AWS.BUCKET";
+                    }
+                    if (!aws.region) {
+                        return "TECHNIC.ERRORS.MISSING.AWS.REGION";
+                    }
+                    if (!aws.secretKey) {
+                        return "TECHNIC.ERRORS.MISSING.AWS.SECRET_KEY";
                     }
                     break;
                 case "ftp":
                     var ftp = t.upload.ftp;
                     // Don't validate password existing, because it's possible to connect to ftp without a password
                     // even though that is a very bad idea. Security and all that.
-                    if(!ftp.url || !ftp.username) {
-                        return false;
+                    if (!ftp.url) {
+                        return "TECHNIC.ERRORS.MISSING.FTP.URL";
+                    }
+                    if (!ftp.username) {
+                        return "TECHNIC.ERRORS.MISSING.FTP.USERNAME";
                     }
                     break;
                 case "none":
                 default:
                     break;
             }
-            if(t.isSolderPack) {
+            if (t.isSolderPack) {
                 var solder = this.solder;
-                if(solder.use) {
-                    if (!solder.url ||!solder.password || !solder.username) {
-                        return false;
+                if (solder.use) {
+                    if (!solder.url) {
+                        return "TECHNIC.ERRORS.MISSING.SOLDER.URL";
+                    }
+                    if (!solder.password) {
+                        return "TECHNIC.ERRORS.MISSING.SOLDER.PASSWORD";
+                    }
+                    if (!solder.username) {
+                        return "TECHNIC.ERRORS.MISSING.SOLDER.USERNAME";
                     }
                 }
             }
-            return true;
+            return "";
         }
     }
 
     export class UserPermission {
-        public licenseLink: string;
-        public modLink: string;
-        public permissionLink: string;
-        public policy: string;
-        public modId: string;
+        public licenseLink:string;
+        public modLink:string;
+        public permissionLink:string;
+        public policy:string;
+        public modId:string;
     }
-    
+
     export class Mod {
         public modid:string;
         public name:string;
@@ -145,11 +169,11 @@ module Application {
         public authors:string;
         public credits:string;
         public filename:string;
-        public md5: string;
+        public md5:string;
         // Naming is totally a hack to make sure the value does not get send to the server
         public $$isDone:boolean;
-        public isOnSolder: boolean;
-        public userPermission: UserPermission;
+        public isOnSolder:boolean;
+        public userPermission:UserPermission;
 
         public static fromJson(data:Mod):Mod {
             var m = new Mod();
@@ -178,39 +202,39 @@ module Application {
             return this.isAdvancedValid();
         }
 
-        private isAdvancedValid(): boolean {
-            if(this.modid.toLowerCase().indexOf("example") > -1) {
+        private isAdvancedValid():boolean {
+            if (this.modid.toLowerCase().indexOf("example") > -1) {
                 return false;
             }
-            if(this.name.toLowerCase().indexOf("example") > -1) {
+            if (this.name.toLowerCase().indexOf("example") > -1) {
                 return false;
             }
-            if(this.version.toLowerCase().indexOf("example") > -1) {
+            if (this.version.toLowerCase().indexOf("example") > -1) {
                 return false;
             }
-            if(this.name.indexOf("${") > -1) {
+            if (this.name.indexOf("${") > -1) {
                 return false;
             }
-            if(this.version.indexOf("${") > -1) {
+            if (this.version.indexOf("${") > -1) {
                 return false;
             }
-            if(this.mcversion.indexOf("${") > -1) {
+            if (this.mcversion.indexOf("${") > -1) {
                 return false;
             }
-            if(this.modid.indexOf("${") > -1) {
+            if (this.modid.indexOf("${") > -1) {
                 return false;
             }
-            if(this.version.toLowerCase().indexOf("@version@") > -1) {
+            if (this.version.toLowerCase().indexOf("@version@") > -1) {
                 return false;
             }
-            if(this.userPermission) {
-                if(this.userPermission.policy !== "Open") {
+            if (this.userPermission) {
+                if (this.userPermission.policy !== "Open") {
                     if (!this.userPermission.licenseLink) return false;
                     if (!this.userPermission.modLink) return false;
                     if (!this.userPermission.permissionLink) return false;
                 }
             }
-            
+
             return true;
         }
     }
@@ -221,33 +245,34 @@ module Application {
         static $inject = ["$rootScope", "goComm", "$state", "$mdToast", "$translate", "$timeout", "languageService"];
         public modpacks:Array<Modpack> = [];
         public modpack:Modpack;
-        public waitingForStoredData: boolean = false;
-        public updateReady: boolean = false;
+        public waitingForStoredData:boolean = false;
+        public updateReady:boolean = false;
+
         constructor(protected $rootScope:angular.IRootScopeService,
                     protected goComm:GoCommService.GoCommService,
                     protected $state:angular.ui.IStateService,
-                    protected $mdToast: angular.material.IToastService,
-                    protected $translate: angular.translate.ITranslateService,
-                    protected $timeout: angular.ITimeoutService,
-                    protected languageService: LanguageService.LanguageService) {
+                    protected $mdToast:angular.material.IToastService,
+                    protected $translate:angular.translate.ITranslateService,
+                    protected $timeout:angular.ITimeoutService,
+                    protected languageService:LanguageService.LanguageService) {
             var self = this;
             goComm.send("load-modpacks", {});
             this.waitingForStoredData = true;
             $rootScope.$watch(function () {
                 return self.modpacks;
             }, function () {
-                if(self.modpacks && self.modpacks.length > 0) {
+                if (self.modpacks && self.modpacks.length > 0) {
                     self.saveModpackData()
                 }
             }, true);
-            
+
             $timeout(function wait() {
-                if(self.waitingForStoredData) {
+                if (self.waitingForStoredData) {
                     goComm.send("load-modpacks", {});
                     $timeout(wait, 5000)
                 }
             }, 5000);
-            
+
             $rootScope.$on("data-loaded", (event:angular.IAngularEvent, modpacks:Array<Modpack>) => {
                 self.waitingForStoredData = false;
                 console.log("Got stored data");
@@ -262,19 +287,19 @@ module Application {
                 }
             });
 
-            $rootScope.$on("error", (event:angular.IAngularEvent, err: string) => {
+            $rootScope.$on("error", (event:angular.IAngularEvent, err:string) => {
                 console.log(err);
                 var self = this;
-                this.$translate(err).then(function(translation: string) {
+                this.$translate(err).then(function (translation:string) {
                     self.$mdToast.showSimple(translation);
                 });
             });
-            
-            electron.ipcRenderer.on("update-info", (event: Electron.IpcRendererEvent, message: string) => {
-                self.$translate(message).then(function(translated) {
+
+            electron.ipcRenderer.on("update-info", (event:Electron.IpcRendererEvent, message:string) => {
+                self.$translate(message).then(function (translated) {
                     $mdToast.showSimple(translated);
                 });
-                
+
                 if (message === "UPDATE.DOWNLOADED") {
                     self.updateReady = true;
                 }
@@ -290,7 +315,7 @@ module Application {
     angular.module("ModpackHelper").service("application", Application);
 
 
-    electron.ipcRenderer.on("update-error", (event: Electron.IpcRendererEvent, message: any) => {
+    electron.ipcRenderer.on("update-error", (event:Electron.IpcRendererEvent, message:any) => {
         console.error(message);
     })
 }

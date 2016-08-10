@@ -2,7 +2,16 @@
   "MODPACK": {
     "NEW": "New Modpack",
     "NONE": "You have not yet created a modpack. Do it by clicking on the New Modpack button to the left.",
-    "DETAILS": "Modpack Details"
+    "DETAILS": "Modpack Details",
+    "ERRORS": {
+      "MISSING": {
+        "NAME": "Modpack name is missing.",
+        "INPUT_DIRECTORY": "Modpack input directory is missing.",
+        "OUTPUT_DIRECTORY": "Modpack output directory is missing.",
+        "MINECRAFT_VERSION": "Modpack minecraft version has not been specified.",
+        "VERSION": "Modpack version is missing."
+      }
+    }
   },
   "SERVICE": {
     "TECHNIC": "Technic",

@@ -47,6 +47,30 @@
           "LIST": "Could not list content. Might be a permission issue."
         }
       }
+    },
+    "ERRORS": {
+      "MISSING": {
+        "AWS": {
+          "ACCESS_KEY": "You have specified aws upload, but haven't provided an accesskey.",
+          "SECREY_KEY": "You have specified aws upload, but haven't provided a secret key.",
+          "BUCKET": "You have specified aws upload, but haven't specified which bucket to upload to. To select a bucket test the aws connection, and then select a bucket from the dropdown.",
+          "REGION": "You have specified aws upload, but haven't specified a region to upload to. "
+        },
+        "FTP": {
+          "URL": "You have specified ftp upload, but haven't specified a url to upload to. ",
+          "USERNAME": "You have specified ftp upload, but haven't specified a username to use during connection."
+        },
+        "SOLDER": {
+          "URL": "You have not provided a url for your solder.",
+          "PASSWORD": "You have not provided a password for your solder. ",
+          "USERNAME": "You have not provided a username for your solder."
+        },
+        "INFO": {
+          "TITLE": "Missing information",
+          "BODY": "The modpack is missing some info before it can be build:",
+          "OK_BUTTON": "I will go fix my mistakes"
+        }
+      }
     }
   }
 }

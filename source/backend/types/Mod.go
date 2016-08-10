@@ -85,4 +85,12 @@ func (m *Mod) NormalizeAll() {
 	m.NormalizeId()
 	m.Version = normalize(m.Version)
 	m.MinecraftVersion = normalize(m.MinecraftVersion)
+
+	// Special check to remove minecraft version in mod version strings
+	if m.Version != m.MinecraftVersion {
+		if strings.Contains(m.Version, m.MinecraftVersion) {
+			m.Version = strings.Replace(m.Version, m.MinecraftVersion, "", -1)
+			m.Version = strings.Trim(m.Version, " -_.+")
+		}
+	}
 }

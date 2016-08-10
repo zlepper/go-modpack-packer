@@ -3,6 +3,7 @@ package upload
 import (
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	//"crypto/tls"
+	"fmt"
 	"github.com/jlaffaye/ftp"
 	"github.com/mitchellh/mapstructure"
 	"github.com/zlepper/go-websocket-connection"
@@ -92,7 +93,9 @@ func TestFtp(conn websocket.WebsocketConnection, data interface{}) {
 	}
 
 	var f *ftp.ServerConn
+	fmt.Println(loginInfo.Url)
 	if f, err = ftp.Connect(loginInfo.Url); err != nil {
+		conn.Log(err.Error())
 		conn.Error("TECHNIC.UPLOAD.FTP.ERROR.CONNECT")
 		return
 	}

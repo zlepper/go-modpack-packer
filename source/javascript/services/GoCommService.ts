@@ -45,9 +45,11 @@ module GoCommService {
                     var message:MessageData = JSON.parse(data.data);
                     // Special logging trick
                     if (message.action === "log") {
-                        return console.log(message.data);
+                        console.log(message.data);
+                        return
                     } else if(message.action === "notification") {
-                        return $mdToast.showSimple(message.data);
+                        $mdToast.showSimple(message.data);
+                        return
                     }
                     $rootScope.$emit(message.action, message.data);
                 }
