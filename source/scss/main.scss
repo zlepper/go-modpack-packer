@@ -36,3 +36,8 @@ md-dialog.md-dialog-fullscreen {
 button {
   -webkit-app-region: no-drag;
 }
+
+.md-dialog-container {
+  padding: 1em;
+  box-sizing: border-box;
+}
