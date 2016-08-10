@@ -91,7 +91,10 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 		// If the mod already is on solder, then we should likely skip it
 		// however the user can override this. If they do we should still pack all files
 		if !modpack.Technic.RepackAllMods && mod.IsOnSolder {
+			conn.Write(packingPartName, mod.Filename)
 			infos = append(infos, GenerateOutputInfo(mod, ""))
+			total++
+			conn.Write(donePackingPartName, mod.Filename)
 			continue
 		}
 		go packMod(mod, conn, outputDirectory, &ch)
