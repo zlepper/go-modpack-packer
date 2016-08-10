@@ -1,6 +1,6 @@
 {
   "name": "ModpackPacker",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "main": "main.js",
   "description": "An application that creates modpacks in correct formats",
   "homepage": "https://github.com/zlepper/go-modpack-packer",
