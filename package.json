@@ -1,6 +1,6 @@
 {
   "name": "go-modpack-packer",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "Packs mods for modpacks",
   "main": "main.js",
   "scripts": {
