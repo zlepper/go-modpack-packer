@@ -110,7 +110,7 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 	}
 	d.Save()
 
-	count := 0
+	count := len(infos)
 	for count < total {
 		info := <-ch
 		infos = append(infos, info)
