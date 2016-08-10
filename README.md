@@ -25,7 +25,7 @@ In short, you need to setup the GOPATH variable, to some folder on your system a
 Once you have that setup, get the repository by running `go get github.com/zlepper/go-modpack-packer/source/backend`. 
 This will fetch the repo and install all go dependencies. You can now find the code in `GOPATH/src/github.com/zlepper/go-modpack-packer`
 
-### 4. Isntall Dependencies
+### 4. Install Dependencies
 Fetch all dependencies by running `npm i` and `typings install`
  
 
