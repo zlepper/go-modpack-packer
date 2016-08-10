@@ -1,4 +1,12 @@
 <div>
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <span flex></span>
+            <md-button ng-click="vm.deletePack($event)" class="md-raised md-warn">
+                {{'DETAILS.DELETE' | translate}}
+            </md-button>
+        </div>
+    </md-toolbar>
     <form name="modpackForm">
         <div layout-gt-sm="row">
             <md-input-container class="md-block" flex>

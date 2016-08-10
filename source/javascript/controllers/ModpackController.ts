@@ -10,7 +10,7 @@ module ModpackController {
 
     import Folder = Application.Folder;
     export class ModpackController {
-        static $inject = ["application", "electron", "$state", "$translatePartialLoader", "goComm", "$rootScope", "forge"];
+        static $inject = ["application", "electron", "$state", "$translatePartialLoader", "goComm", "$rootScope", "forge", "$mdDialog", "$translate"];
 
         constructor(protected application:Application.Application,
                     protected electron:ElectronService.ElectronService,
@@ -18,7 +18,9 @@ module ModpackController {
                     protected $translatePartialLoader:angular.translate.ITranslatePartialLoaderService,
                     protected goComm:GoCommService.GoCommService,
                     protected $rootScope:angular.IRootScopeService,
-                    protected forge:ForgeVersion.ForgeVersionService) {
+                    protected forge:ForgeVersion.ForgeVersionService,
+                    protected $mdDialog: angular.material.IDialogService,
+                    protected $translate: angular.translate.ITranslateService) {
             // Get translations for this page
             var controller = this;
             $translatePartialLoader.addPart("modpack");
@@ -71,6 +73,35 @@ module ModpackController {
 
         public selectOutputDirectory():void {
             this.electron.send('open-output-directory-dialog', null);
+        }
+
+        public deletePack(ev: MouseEvent):void {
+            this.$translate('DETAILS.ARE_YOU_SURE_DELETE').then(t => {
+                this.$translate('DETAILS.YES_DELETE').then(y => {
+                    this.$translate('DETAILS.NO_DELETE').then(n => {
+                        this.$mdDialog.show(
+                            this.$mdDialog.confirm()
+                            .textContent(t)
+                            .ok(y)
+                            .cancel(n)
+                                .targetEvent(ev)
+                        ).then(() => {
+                            for(var i = 0; i < this.application.modpacks.length; i++) {
+                                var mp = this.application.modpacks[i];
+                                if(mp.$$hash === this.application.modpack.$$hash) {
+                                    this.application.modpacks.splice(i, 1);
+                                    this.application.modpack = this.application.modpacks[0];
+                                    if(this.application.modpack.isNew) {
+                                        this.application.modpack.isNew = false;
+                                        this.application.addNewModpack();
+                                    }
+                                    return;
+                                }
+                            }
+                        });
+                    });
+                });
+            });
         }
 
     }

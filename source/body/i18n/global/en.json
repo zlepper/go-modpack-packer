@@ -1,6 +1,7 @@
 {
   "MODPACK": {
     "NEW": "New Modpack",
+    "UNNAMED": "Unnamed Modpack",
     "NONE": "You have not yet created a modpack. Do it by clicking on the New Modpack button to the left.",
     "DETAILS": "Modpack Details",
     "ERRORS": {

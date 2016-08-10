@@ -88,9 +88,10 @@ func loadModpacks(conn websocket.WebsocketConnection) {
 	mutex.Unlock()
 	var modpacks []types.Modpack = make([]types.Modpack, 0)
 	if err != nil {
+		log.Println("Unable to reload data")
+		log.Println(err)
 		conn.Log("Unable to reload data " + err.Error())
-		//conn.Write("data-loaded", modpacks)
-		panic(err)
+		conn.Write("data-loaded", modpacks)
 		return
 	}
 	log.Println(string(modpackData))

@@ -6,6 +6,10 @@
     "OUTPUT": "Output directory",
     "SELECT": "Select",
     "ADDITIONALFOLDERS": "Additional folders to include",
-    "MINECRAFTVERSION": "Minecraft Version"
+    "MINECRAFTVERSION": "Minecraft Version",
+    "DELETE": "Delete Modpack",
+    "ARE_YOU_SURE_DELETE": "Are you sure you want to delete this pack? Once deleted there is no way to recover the settings. ",
+    "YES_DELETE": "Yes. Delete the Modpack. ",
+    "NO_DELETE": "No. Do NOT delete the Modpack"
   }
 }

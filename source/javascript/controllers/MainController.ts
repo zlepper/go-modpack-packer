@@ -2,25 +2,14 @@ module MainController {
     import Modpack = Application.Modpack;
     var remote = require("electron").remote;
     export class MainController {
-        public static $inject = ["application", "$state", "electron"];
+        public static $inject = ["application", "$state", "electron", "$translate"];
         public isMaximized: boolean = false;
 
         constructor(protected application:Application.Application, 
                     protected $state:angular.ui.IStateService,
-                    protected electron: ElectronService.ElectronService) {
+                    protected electron: ElectronService.ElectronService,
+                    protected $translate: angular.translate.ITranslateService) {
                 
-        }
-
-        public createNewModpack():void {
-            var modpack = new Application.Modpack();
-
-            this.application.modpacks.push(modpack);
-
-            this.application.modpack = modpack;
-
-            this.$state.go("modpack");
-            
-            this.isMaximized = remote.getCurrentWindow().isMaximized();
         }
         
         public restart():void {
@@ -42,6 +31,20 @@ module MainController {
 
         public minimize():void {
             remote.getCurrentWindow().minimize();
+        }
+
+        public selectModpack() {
+            var modpack = this.application.modpack;
+            if(modpack.isNew) {
+                modpack.isNew = false;
+                this.$translate("MODPACK.UNNAMED").then(t => {
+                    modpack.name = t;
+                });
+                this.$state.go('modpack');
+
+                this.application.addNewModpack();
+
+            }
         }
     }
 

@@ -64,9 +64,11 @@ module Application {
         public technic:TechnicConfig = new TechnicConfig();
         public ftb:FtbConfig = new FtbConfig();
         public solder:SolderInfo = new SolderInfo();
+        public isNew:boolean = false;
+        public $$hash: number;
 
         constructor() {
-            this.name = "Unnamed modpack";
+            this.$$hash = Math.floor(Math.random() * 100000);
         }
 
         public static fromJson(data:Modpack):Modpack {
@@ -81,6 +83,8 @@ module Application {
             modpack.technic = data.technic;
             modpack.ftb = data.ftb;
             modpack.solder = data.solder;
+            modpack.isNew = data.isNew;
+            modpack.$$hash = Math.floor(Math.random() * 100000);
             return modpack;
         }
 
@@ -274,6 +278,8 @@ module Application {
             }, 5000);
 
             $rootScope.$on("data-loaded", (event:angular.IAngularEvent, modpacks:Array<Modpack>) => {
+                if(!self.waitingForStoredData) return;
+
                 self.waitingForStoredData = false;
                 console.log("Got stored data");
                 modpacks.forEach((modpack:Modpack) => {
@@ -285,6 +291,15 @@ module Application {
                         self.$state.go("modpack");
                     }
                 }
+                console.log(self.modpacks);
+                // If the last modpack in the list is already a "new" pack, then we shouldn't append another.
+                if(self.modpacks[self.modpacks.length - 1].isNew) {
+                    return;
+                }
+
+                this.$translate("MODPACK.NEW").then(t => {
+                    this.addNewModpack();
+                })
             });
 
             $rootScope.$on("error", (event:angular.IAngularEvent, err:string) => {
@@ -308,6 +323,15 @@ module Application {
 
         protected saveModpackData():void {
             this.goComm.send("save-modpacks", this.modpacks);
+        }
+
+        public addNewModpack():void {
+            var modpack = new Modpack();
+            this.$translate("MODPACK.NEW").then(t => {
+                modpack.name = t;
+            });
+            modpack.isNew = true;
+            this.modpacks.push(modpack);
         }
     }
 

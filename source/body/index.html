@@ -32,7 +32,7 @@
                 <form flex>
                     <md-input-container class="md-block">
                         <label>Modpack:</label>
-                        <md-select ng-model="main.application.modpack">
+                        <md-select ng-model="main.application.modpack" md-on-close="main.selectModpack()">
                             <md-option ng-repeat="modpack in main.application.modpacks" ng-value="modpack">
                                 {{modpack.name}}
                             </md-option>
@@ -40,11 +40,11 @@
                     </md-input-container>
                 </form>
             </md-list-item>
-            <md-list-item role="button" ng-click="main.createNewModpack()">
-                <p>
-                    <strong translate>MODPACK.NEW</strong>
-                </p>
-            </md-list-item>
+            <!--<md-list-item role="button" ng-click="main.createNewModpack()">-->
+                <!--<p>-->
+                    <!--<strong translate>MODPACK.NEW</strong>-->
+                <!--</p>-->
+            <!--</md-list-item>-->
             <md-list-item role="listitem" ui-sref="modpack" ui-sref-active="active" ng-show="main.application.modpack">
                 <p>
                     <strong translate>MODPACK.DETAILS</strong>
