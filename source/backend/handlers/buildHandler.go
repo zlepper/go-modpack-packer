@@ -359,8 +359,16 @@ func packMod(mod *types.Mod, conn websocket.WebsocketConnection, outputDirectory
 	zipWriter := zip.NewWriter(zipfile)
 	defer zipWriter.Close()
 
-	fileInfo, _ := os.Stat(mod.Filename)
-	file, _ := os.Open(mod.Filename)
+	fileInfo, err := os.Stat(mod.Filename)
+	if err != nil {
+		log.Println(err)
+		conn.Error(err.Error())
+	}
+	file, err := os.Open(mod.Filename)
+	if err != nil {
+		log.Println(err)
+		conn.Error(err.Error())
+	}
 	defer file.Close()
 
 	zipName := path.Join("mods", fileInfo.Name())
