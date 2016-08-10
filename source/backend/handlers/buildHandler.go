@@ -191,7 +191,7 @@ func addInfoToSolder(info *types.OutputInfo, buildId string, conn websocket.Webs
 		modid = solderclient.AddMod(info)
 	}
 	if modid == "" {
-		log.Printf("Something went wrong wehn adding a mod to solder.\n")
+		log.Println("Something went wrong wehn adding a mod to solder.")
 		log.Printf("%v\n", *info)
 		log.Printf("Application version: %s\n", os.Args[2])
 		log.Panic("Error. See above lines")
