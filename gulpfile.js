@@ -232,9 +232,6 @@ gulp.task('vendor-js', function () {
     return vendorJs();
 });
 
-/* Watch these files for changes and run the task on update */
-gulp.task('watch', watch);
-
 function buildRelease(os, arch, callback) {
     var folder = path.join(releaseBaseOutput, os + "-" + arch);
     var tasks = [];
@@ -274,16 +271,6 @@ function buildRelease(os, arch, callback) {
     }));
 
     Promise.all(tasks).then(function() {
-        // return new Promise(function(resolve, reject) {
-        //     exec("build", {cwd: folder}, function (err, stdout, stderr) {
-        //         !!stdout &&  console.log(stdout);
-        //         !!stderr && console.log(stderr);
-        //         if(err) {
-        //             return reject(err);
-        //         }
-        //         return resolve();
-        //     });
-        // });
         var target;
         switch (os) {
             case 'darwin':

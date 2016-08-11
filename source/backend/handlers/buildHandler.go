@@ -91,7 +91,10 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 		// If the mod already is on solder, then we should likely skip it
 		// however the user can override this. If they do we should still pack all files
 		if !modpack.Technic.RepackAllMods && mod.IsOnSolder {
+			conn.Write(packingPartName, mod.Filename)
 			infos = append(infos, GenerateOutputInfo(mod, ""))
+			total++
+			conn.Write(donePackingPartName, mod.Filename)
 			continue
 		}
 		go packMod(mod, conn, outputDirectory, &ch)
@@ -107,7 +110,7 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 	}
 	d.Save()
 
-	count := 0
+	count := len(infos)
 	for count < total {
 		info := <-ch
 		infos = append(infos, info)
@@ -188,7 +191,7 @@ func addInfoToSolder(info *types.OutputInfo, buildId string, conn websocket.Webs
 		modid = solderclient.AddMod(info)
 	}
 	if modid == "" {
-		log.Printf("Something went wrong wehn adding a mod to solder.\n")
+		log.Println("Something went wrong wehn adding a mod to solder.")
 		log.Printf("%v\n", *info)
 		log.Printf("Application version: %s\n", os.Args[2])
 		log.Panic("Error. See above lines")
@@ -359,8 +362,16 @@ func packMod(mod *types.Mod, conn websocket.WebsocketConnection, outputDirectory
 	zipWriter := zip.NewWriter(zipfile)
 	defer zipWriter.Close()
 
-	fileInfo, _ := os.Stat(mod.Filename)
-	file, _ := os.Open(mod.Filename)
+	fileInfo, err := os.Stat(mod.Filename)
+	if err != nil {
+		log.Println(err)
+		conn.Error(err.Error())
+	}
+	file, err := os.Open(mod.Filename)
+	if err != nil {
+		log.Println(err)
+		conn.Error(err.Error())
+	}
 	defer file.Close()
 
 	zipName := path.Join("mods", fileInfo.Name())

@@ -58,7 +58,7 @@ func GetPermissionsDb() *PermissionsDB {
 }
 
 func UpdatePermissionStore() {
-	res, err := http.Get("http://legacy.feed-the-beast.com/mods/json")
+	res, err := http.Get("http://zlepper.dk:8056")
 	if err != nil {
 		panic(err)
 	}

@@ -34,7 +34,7 @@ module BuildController {
     }
 
     export class BuildController {
-        static $inject = ["application", "$mdDialog", "goComm", "$rootScope", "$translatePartialLoader", "$window", "$document"];
+        static $inject = ["application", "$mdDialog", "goComm", "$rootScope", "$translatePartialLoader", "$window", "$translate", "$mdToast"];
 
         public mods:Array<Application.Mod> = [];
         public todos:Array<string> = [];
@@ -57,7 +57,9 @@ module BuildController {
                     protected goComm:GoCommService.GoCommService,
                     protected $rootScope:angular.IRootScopeService,
                     protected $translatePartialLoader:angular.translate.ITranslatePartialLoaderService,
-                    protected $window:angular.IWindowService) {
+                    protected $window:angular.IWindowService,
+                    protected $translate: angular.translate.ITranslateService,
+                    protected $toast: angular.material.IToastService) {
             var self = this;
             $translatePartialLoader.addPart("build");
 
@@ -175,6 +177,10 @@ module BuildController {
             if (shouldBuild) {
                 this.goComm.send("build", {modpack: this.application.modpack, mods: this.mods});
                 this.state = "building"
+            } else {
+                this.$translate('BUILD.MOD.VALIDATION_FAILED').then((t) => {
+                    this.$toast.showSimple(t)
+                });
             }
         }
 

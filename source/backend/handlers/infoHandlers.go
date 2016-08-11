@@ -71,6 +71,7 @@ func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnectio
 	md5String := hex.EncodeToString(md5)
 	possibleMod := db.GetModsDb().GetModFromMd5(md5String)
 	if possibleMod != nil {
+		possibleMod.Filename = modfile
 		sendModDataReady(*possibleMod, conn)
 		waitGroup.Done()
 		return

@@ -71,6 +71,7 @@ type Modpack struct {
 	Technic              TechnicConfig `json:"technic"`
 	Ftb                  FtbConfig     `json:"ftb"`
 	Solder               SolderInfo    `json:"solder"`
+	IsNew                bool          `json:"isNew"`
 }
 
 func (m *Modpack) GetSlug() string {

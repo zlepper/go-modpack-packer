@@ -4,7 +4,7 @@ module TechnicController {
 
         public buckets: Array<string> = [];
 
-        public ftpPattern: RegExp = /^[\w\.]+:\d+$/;
+        public ftpPattern: RegExp = /^[\d\w.]+(?::(?:\d){1,5})$/;
 
         constructor(protected application: Application.Application,
                     protected $translatePartialLoader: angular.translate.ITranslatePartialLoaderService,
@@ -29,7 +29,11 @@ module TechnicController {
         }
 
         public build(ev: MouseEvent): void {
-            if(this.application.modpack.isValid() && this.application.modpack.isValidTechnic()) {
+            var validation = this.application.modpack.isValid();
+            if(!validation) {
+                validation = this.application.modpack.isValidTechnic();
+            }
+            if(!validation) {
                 this.$mdDialog.show({
                     controller: "BuildController",
                     controllerAs: "build",
@@ -40,15 +44,23 @@ module TechnicController {
                     ariaLabel: "Build progress dialog"
                 });
             } else {
-                this.$mdDialog.show(
-                    this.$mdDialog.alert() // TODO Get translations
-                        .clickOutsideToClose(true)
-                        .title("Missing info")
-                        .textContent("The modpack is missing some info before it can be build.")
-                        .ariaLabel("Missing information")
-                        .ok("I will go fix my mistakes")
-                        .targetEvent(ev)
-                )
+                this.$translate(validation).then(validation => {
+                    this.$translate("TECHNIC.ERRORS.MISSING.INFO.TITLE").then(title => {
+                        this.$translate("TECHNIC.ERRORS.MISSING.INFO.BODY").then(body => {
+                            this.$translate("TECHNIC.ERRORS.MISSING.INFO.OK_BUTTON").then(ok => {
+                                this.$mdDialog.show(
+                                    this.$mdDialog.alert()
+                                        .clickOutsideToClose(true)
+                                        .title(title)
+                                        .textContent(body + "\n" + validation)
+                                        .ariaLabel(title)
+                                        .ok(ok)
+                                        .targetEvent(ev)
+                                )
+                            });
+                        });
+                    });
+                });
             }
         }
         public testFtp(): void {
