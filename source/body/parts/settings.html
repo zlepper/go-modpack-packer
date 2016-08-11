@@ -3,10 +3,11 @@
         <md-input-container class="md-block">
             <label translate>SETTINGS.LANGUAGE</label>
             <md-select ng-model="settings.language.language"  ng-model-options="{trackBy: '$value.key'}" ng-change="settings.setLanguage(settings.language.language)" aria-label="Language">
-                <md-option ng-repeat="lan in settings.language.languages" ng-value="{{lan}}">
+                <md-option ng-repeat="lan in settings.language.languages" ng-value="lan">
                     {{lan.name}}
                 </md-option>
             </md-select>
         </md-input-container>
+        <md-button class="md-raised" ng-click="settings.showDevConsole()">Show Dev Console</md-button>
     </form>
 </div>

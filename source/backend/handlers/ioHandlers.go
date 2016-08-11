@@ -70,12 +70,16 @@ func saveModpacks(conn websocket.WebsocketConnection, data interface{}) {
 	defer f.Close()
 	if err != nil {
 		mutex.Unlock()
-		log.Panic(err)
+		log.Println(err)
+		conn.Error(err.Error())
+		return
 	}
 	err = json.NewEncoder(f).Encode(modpacks)
 	if err != nil {
 		mutex.Unlock()
-		log.Panic(err)
+		log.Println(err)
+		conn.Error(err.Error())
+		return
 	}
 	mutex.Unlock()
 }
@@ -94,10 +98,12 @@ func loadModpacks(conn websocket.WebsocketConnection) {
 		conn.Write("data-loaded", modpacks)
 		return
 	}
-	log.Println(string(modpackData))
 	err = json.Unmarshal(modpackData, &modpacks)
 	if err != nil {
-		panic("Could not parse json data " + err.Error() + "\n" + string(modpackData))
+		log.Println("Could not parse json data " + err.Error() + "\n" + string(modpackData))
+		conn.Error("Could not parse json data. Please check the logs.")
+		conn.Write("data-loaded", modpacks)
+		return
 	}
 	for i := range modpacks {
 		modpack := &modpacks[i]
