@@ -70,12 +70,16 @@ func saveModpacks(conn websocket.WebsocketConnection, data interface{}) {
 	defer f.Close()
 	if err != nil {
 		mutex.Unlock()
-		log.Panic(err)
+		log.Println(err)
+		conn.Error(err.Error())
+		return
 	}
 	err = json.NewEncoder(f).Encode(modpacks)
 	if err != nil {
 		mutex.Unlock()
-		log.Panic(err)
+		log.Println(err)
+		conn.Error(err.Error())
+		return
 	}
 	mutex.Unlock()
 }
