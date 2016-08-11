@@ -35,7 +35,7 @@ module MainController {
 
         public selectModpack() {
             var modpack = this.application.modpack;
-            if(modpack.isNew) {
+            if(modpack && modpack.isNew) {
                 modpack.isNew = false;
                 this.$translate("MODPACK.UNNAMED").then(t => {
                     modpack.name = t;

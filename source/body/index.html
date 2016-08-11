@@ -33,7 +33,7 @@
                     <md-input-container class="md-block">
                         <label>Modpack:</label>
                         <md-select ng-model="main.application.modpack" md-on-close="main.selectModpack()">
-                            <md-option ng-repeat="modpack in main.application.modpacks" ng-value="modpack">
+                            <md-option ng-repeat="modpack in main.application.modpacks track by modpack.$$hash" ng-value="modpack">
                                 {{modpack.name}}
                             </md-option>
                         </md-select>

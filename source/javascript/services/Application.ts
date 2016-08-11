@@ -290,16 +290,24 @@ module Application {
                     if (self.$state.is("home")) {
                         self.$state.go("modpack");
                     }
+                    // If the last modpack in the list is already a "new" pack, then we shouldn't append another.
+                    if(self.modpacks[self.modpacks.length - 1].isNew) {
+                         return;
+                    }
                 }
                 console.log(self.modpacks);
-                // If the last modpack in the list is already a "new" pack, then we shouldn't append another.
-                if(self.modpacks[self.modpacks.length - 1].isNew) {
-                    return;
-                }
+                
+             
+                this.addNewModpack();
+                // Select the newly created modpack
+                this.modpack = this.modpacks[0];
+                this.$translate("MODPACK.UNNAMED").then(t => {
+                    this.modpack.name = t;
+                });
+                this.modpack.isNew = false;
 
-                this.$translate("MODPACK.NEW").then(t => {
-                    this.addNewModpack();
-                })
+                // Add another modpack the user can select to create a new one. 
+                this.addNewModpack();
             });
 
             $rootScope.$on("error", (event:angular.IAngularEvent, err:string) => {
