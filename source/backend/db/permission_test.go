@@ -1,8 +1,12 @@
 package db
 
-import "testing"
+import (
+	"testing"
+	"fmt"
+)
 
 func TestGetPermissionsDb(t *testing.T) {
+	fmt.Println("TestGetPermissionDb")
 	db := GetPermissionsDb()
 	if db == nil {
 		t.Error("DB was not created successfully")
@@ -10,6 +14,7 @@ func TestGetPermissionsDb(t *testing.T) {
 }
 
 func TestDbHasPermissions(t *testing.T) {
+	fmt.Println("TestDbHasPermissions")
 	db := GetPermissionsDb()
 	if len(db.Permissions) < 100 {
 		t.Error("Expected at least 100 permissions in permissionStore")
@@ -17,6 +22,7 @@ func TestDbHasPermissions(t *testing.T) {
 }
 
 func TestPermissionsDB_GetPermission(t *testing.T) {
+	fmt.Println("TestPermissionsDb_GEtPermission")
 	db := GetPermissionsDb()
 	permissions := db.GetPermission(db.Permissions[0].Modids[0])
 	if permissions == nil {

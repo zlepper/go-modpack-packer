@@ -82,9 +82,15 @@ func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnectio
 	if err != nil {
 		if err == zip.ErrFormat {
 			conn.Log("err: " + modfile + " is not a valid zip file")
+			sendModDataReady(types.Mod{Filename: modfile}, conn)
+
+			waitGroup.Done()
 			return
 		} else {
-			log.Panic(err)
+			log.Println(err)
+			conn.Write("notification", "Error when reading " + modfile + "\nPlease check the logs, and open an issue on github. ")
+			waitGroup.Done()
+			return
 		}
 	}
 	defer reader.Close()
