@@ -1,5 +1,7 @@
 module SettingsController {
-    
+
+    var electron = require("electron");
+
     import Language = LanguageService.Language;
     export class SettingsController {
         static $inject = ["languageService"];
@@ -9,6 +11,10 @@ module SettingsController {
 
         public setLanguage(language: Language):void {
             this.language.setLanguage(language);
+        }
+
+        public showDevConsole(): void {
+            electron.remote.getCurrentWebContents().openDevTools('undocked');
         }
     }
 
