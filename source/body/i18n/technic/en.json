@@ -16,7 +16,7 @@
     "SOLDER": {
       "USE": "Use Solder",
       "URL": "Solder url",
-      "USERNAME": "Username/email",
+      "USERNAME": "Email",
       "PASSWORD": "Password",
       "TEST": "Test solder connection",
       "ERROR": "Could not connect to solder and login.",
