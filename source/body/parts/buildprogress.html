@@ -105,7 +105,7 @@
                         </div>
                         <div>
                             <p>Solder progress {{build.solderNumber}}/{{build.total}}</p>
-                            <p>Currently doing: {{build.solderDoing | translate}}</p>
+                            <p ng-show="build.solderDoing">Currently doing: {{build.solderDoing | translate}}</p>
                             <md-progress-linear md-mode="determinate"
                                                 value="{{(build.solderNumber / build.total) * 100}}"></md-progress-linear>
                         </div>
@@ -145,11 +145,11 @@
                                              md-page-select></md-table-pagination>
                     </div>
                 </div>
-                <md-list role="list">
-                    <md-list-item role="listitem" ng-repeat="todo in build.todos track by $index">
-                        <p>{{todo}}</p>
-                    </md-list-item>
-                </md-list>
+                <!--<md-list role="list">-->
+                    <!--<md-list-item role="listitem" ng-repeat="todo in build.todos track by $index">-->
+                        <!--<p>{{todo}}</p>-->
+                    <!--</md-list-item>-->
+                <!--</md-list>-->
                 <div ng-if="::build.application.modpack.technic.checkPermissions">
                     <h4 translate>BUILD.PERMISSIONS</h4>
                     <div  ng-click="build.copyInput($event)">
