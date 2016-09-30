@@ -121,7 +121,7 @@ func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnectio
 func readInfoFile(file io.ReadCloser, conn websocket.WebsocketConnection, size int64, filename string) {
 	content := make([]byte, size)
 	_, err := file.Read(content)
-	content = []byte(strings.Replace(string(content), "\n", " ", -1))
+	content = []byte(strings.Replace(strings.Replace(string(content), "\n", " ", -1), "\r", "", -1))
 	if err != nil {
 		// For some reason the zip file reader in GO 1.7 gives io.EOF when reaching the end of the
 		// file, which means the file.read will return an error, even though it read the content successfully...
