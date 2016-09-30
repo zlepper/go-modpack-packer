@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/getsentry/raven-go"
 	"github.com/mitchellh/mapstructure"
 	"github.com/zlepper/go-modpack-packer/source/backend/db"
 	"github.com/zlepper/go-modpack-packer/source/backend/helpers"
@@ -19,6 +20,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -50,6 +52,7 @@ func continueRunning(conn websocket.WebsocketConnection, data interface{}) {
 	var uploadInfo uploadWaiting
 	err := mapstructure.Decode(dict, &uploadInfo)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		log.Panic(err)
 	}
 
@@ -70,6 +73,13 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 	ch = make(chan *types.OutputInfo)
 
 	startTime := time.Now()
+	var solderClient *solder.SolderClient
+	// Only create the solder client if we actually have to use solder
+	if modpack.Solder.Use {
+		solderClient = solder.NewSolderClient(modpack.Solder.Url)
+		solderClient.Login(modpack.Solder.Username, modpack.Solder.Password)
+	}
+
 	// Handle forge
 	if modpack.Technic.CreateForgeZip {
 		total++
@@ -85,27 +95,37 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 	}
 
 	infos := make([]*types.OutputInfo, 0)
+	var wg sync.WaitGroup
+	var lock sync.Mutex
 	// Handle mods
 	for _, mod := range mods {
 		mod.NormalizeAll()
-		// If the mod already is on solder, then we should likely skip it
-		// however the user can override this. If they do we should still pack all files
-		if !modpack.Technic.RepackAllMods && mod.IsOnSolder {
-			conn.Write(packingPartName, mod.Filename)
-			infos = append(infos, GenerateOutputInfo(mod, ""))
-			total++
-			conn.Write(donePackingPartName, mod.Filename)
-			continue
-		}
-		go packMod(mod, conn, outputDirectory, &ch)
-		total++
+		wg.Add(1)
+		go func() {
+			// If the mod already is on solder, then we should likely skip it
+			// however the user can override this. If they do we should still pack all files
+			if !modpack.Technic.RepackAllMods && solder.IsOnSolder(solderClient, mod) {
+				conn.Write(packingPartName, mod.Filename)
+				conn.Write(donePackingPartName, mod.Filename)
+				lock.Lock()
+				infos = append(infos, GenerateOutputInfo(mod, ""))
+				total++
+			} else {
+				go packMod(mod, conn, outputDirectory, &ch)
+				lock.Lock()
+				total++
+			}
+			lock.Unlock()
+			wg.Done()
+			conn.Write("total-to-pack", total)
+		}()
 	}
-	conn.Write("total-to-pack", total)
+	wg.Wait()
 
 	// Save the mods to the database
 	d := db.GetModsDb()
 	for _, mod := range mods {
-		mod.IsOnSolder = true
+		mod.SetSolderStatus(true)
 		d.AddMod(mod)
 	}
 	d.Save()
@@ -201,6 +221,7 @@ func addInfoToSolder(info *types.OutputInfo, buildId string, conn websocket.Webs
 		md5, err := helpers.ComputeMd5(info.File)
 		if !solderclient.IsModversionOnline(info) {
 			if err != nil {
+				raven.CaptureError(err, nil)
 				log.Panic(err)
 			}
 			solderclient.AddModVersion(modid, hex.EncodeToString(md5), info.GenerateOnlineVersion())
@@ -232,6 +253,7 @@ func packForgeFolder(modpack types.Modpack, conn websocket.WebsocketConnection, 
 
 	zipfile, err := os.Create(outputFile)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		conn.Log("Error when creating zip file: " + err.Error() + "\n" + outputFile)
 		return
 	}
@@ -242,6 +264,7 @@ func packForgeFolder(modpack types.Modpack, conn websocket.WebsocketConnection, 
 
 	resp, err := http.Get(modpack.Technic.ForgeVersion.DownloadUrl)
 	if err != nil {
+		raven.CaptureError(err, map[string]string{"error": "Error downloading forge file: '" + modpack.Technic.ForgeVersion.DownloadUrl + "'"})
 		conn.Log("Error downloading forge file: " + err.Error() + "\n" + modpack.Technic.ForgeVersion.DownloadUrl)
 		return
 	}
@@ -249,12 +272,14 @@ func packForgeFolder(modpack types.Modpack, conn websocket.WebsocketConnection, 
 
 	f, err := zipWriter.Create("bin/modpack.jar")
 	if err != nil {
+		raven.CaptureError(err, nil)
 		conn.Log("Error while creating zip file content: " + err.Error())
 		return
 	}
 
 	_, err = io.Copy(f, resp.Body)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		conn.Log("Error white writing content to zip file: " + err.Error())
 		return
 	}
@@ -280,12 +305,13 @@ func packAdditionalFolder(modpack types.Modpack, folderPath string, outputDirect
 	conn.Write(packingPartName, folderPath)
 	inputFolder := path.Join(modpack.InputDirectory, folderPath)
 	inputFolderInfo, _ := os.Stat(inputFolder)
-	s := safeNormalizeString(modpack.Name + "-" + inputFolderInfo.Name())
+	s := types.SafeNormalizeString(modpack.Name + "-" + inputFolderInfo.Name())
 	outputDirectory = path.Join(outputDirectory, "mods", s)
 	os.MkdirAll(outputDirectory, os.ModePerm)
 	outputFile := path.Join(outputDirectory, s+"-"+modpack.GetVersionString()+".zip")
 	zipfile, err := os.Create(outputFile)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		conn.Log("Error when creating zip file: " + err.Error() + "\n" + outputFile)
 		return
 	}
@@ -323,18 +349,21 @@ func packFolder(zipWriter *zip.Writer, folder string, parent string, conn websoc
 			defer fileReader.Close()
 
 			if err != nil {
+				raven.CaptureError(err, nil)
 				conn.Log(err.Error())
 				return
 			}
 
 			f, err := zipWriter.Create(fileEntry)
 			if err != nil {
+				raven.CaptureError(err, nil)
 				conn.Log("Error while creating zip file content: " + err.Error() + "\n" + folder + "/" + file.Name())
 				return
 			}
 
 			_, err = io.Copy(f, fileReader)
 			if err != nil {
+				raven.CaptureError(err, nil)
 				conn.Log("Error white writing content to zip file: " + err.Error() + "\n" + folder + "/" + file.Name())
 				return
 			}
@@ -354,6 +383,7 @@ func packMod(mod *types.Mod, conn websocket.WebsocketConnection, outputDirectory
 	outputFile := path.Join(outputDirectory, mod.GetVersionString()+".zip")
 	zipfile, err := os.Create(outputFile)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		conn.Log("Error when creating zip file: " + err.Error() + "\n" + outputFile)
 		return
 	}
@@ -364,11 +394,13 @@ func packMod(mod *types.Mod, conn websocket.WebsocketConnection, outputDirectory
 
 	fileInfo, err := os.Stat(mod.Filename)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		log.Println(err)
 		conn.Error(err.Error())
 	}
 	file, err := os.Open(mod.Filename)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		log.Println(err)
 		conn.Error(err.Error())
 	}
@@ -378,12 +410,14 @@ func packMod(mod *types.Mod, conn websocket.WebsocketConnection, outputDirectory
 
 	f, err := zipWriter.Create(zipName)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		conn.Log("Error while creating zip file content: " + err.Error() + "\n" + outputFile)
 		return
 	}
 
 	_, err = io.Copy(f, file)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		conn.Log("Error white writing content to zip file: " + err.Error() + "\n" + outputFile)
 	}
 
@@ -394,16 +428,11 @@ func packMod(mod *types.Mod, conn websocket.WebsocketConnection, outputDirectory
 	}
 }
 
-func safeNormalizeString(s string) string {
-	s = strings.Replace(strings.ToLower(s), " ", "-", -1)
-	return strings.Replace(s, ".", "", -1)
-}
-
 func GenerateOutputInfo(mod *types.Mod, outputFile string) *types.OutputInfo {
 	info := types.OutputInfo{
 		File:             outputFile,
 		Name:             mod.Name,
-		Id:               safeNormalizeString(mod.ModId),
+		Id:               types.SafeNormalizeString(mod.ModId),
 		Version:          mod.Version,
 		MinecraftVersion: mod.MinecraftVersion,
 		Description:      mod.Description,

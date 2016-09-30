@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"github.com/getsentry/raven-go"
 	"github.com/zlepper/go-modpack-packer/source/backend/encryption"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	"github.com/zlepper/go-websocket-connection"
@@ -30,7 +31,10 @@ func createInputDirData(data map[string]interface{}) inputDirData {
 
 func findAdditionalFolders(conn websocket.WebsocketConnection, data interface{}) {
 	dir := createInputDirData(data.(map[string]interface{}))
-	files, _ := ioutil.ReadDir(dir.InputDir)
+	files, err := ioutil.ReadDir(dir.InputDir)
+	if err != nil {
+		raven.CaptureError(err, nil)
+	}
 	folders := []string{}
 	// Iterate the files
 	for _, file := range files {
@@ -72,6 +76,7 @@ func saveModpacks(conn websocket.WebsocketConnection, data interface{}) {
 		mutex.Unlock()
 		log.Println(err)
 		conn.Error(err.Error())
+		raven.CaptureError(err, nil)
 		return
 	}
 	err = json.NewEncoder(f).Encode(modpacks)
@@ -79,6 +84,7 @@ func saveModpacks(conn websocket.WebsocketConnection, data interface{}) {
 		mutex.Unlock()
 		log.Println(err)
 		conn.Error(err.Error())
+		raven.CaptureError(err, nil)
 		return
 	}
 	mutex.Unlock()
@@ -100,6 +106,7 @@ func loadModpacks(conn websocket.WebsocketConnection) {
 	}
 	err = json.Unmarshal(modpackData, &modpacks)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		log.Println("Could not parse json data " + err.Error() + "\n" + string(modpackData))
 		conn.Error("Could not parse json data. Please check the logs.")
 		conn.Write("data-loaded", modpacks)

@@ -57,7 +57,9 @@ const gulp = require('gulp'),
             nodesource + "angular-websocket/dist/angular-websocket.js",
             nodesource + "angular-material-data-table/dist/md-data-table.js",
             nodesource + "gsap/src/uncompressed/TweenLite.js",
-            nodesource + "gsap/src/uncompressed/plugins/CSSPlugin.js"
+            nodesource + "gsap/src/uncompressed/plugins/CSSPlugin.js",
+            nodesource + "raven-js/dist/raven.js",
+            nodesource + "raven-js/dist/plugins/angular.js"
         ]
     },
 

@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/getsentry/raven-go"
 	"github.com/mitchellh/mapstructure"
 	"github.com/zlepper/go-modpack-packer/source/backend/db"
 	"github.com/zlepper/go-modpack-packer/source/backend/helpers"
@@ -33,7 +34,10 @@ func gatherInformation(conn websocket.WebsocketConnection, data interface{}) {
 
 func gatherInformationAboutMods(inputDirectory string, conn websocket.WebsocketConnection) {
 	t1 := time.Now()
-	filesAndDirectories, _ := ioutil.ReadDir(inputDirectory)
+	filesAndDirectories, err := ioutil.ReadDir(inputDirectory)
+	if err != nil {
+		raven.CaptureError(err, nil)
+	}
 	files := make([]os.FileInfo, 0)
 	for _, f := range filesAndDirectories {
 		if f.IsDir() {
@@ -65,6 +69,7 @@ func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnectio
 	// instead of working through the zip file and calculating everything again.
 	md5, err := helpers.ComputeMd5(modfile)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		log.Println(err.Error())
 		return
 	}
@@ -83,8 +88,10 @@ func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnectio
 	if err != nil {
 		if err == zip.ErrFormat {
 			conn.Log("err: " + modfile + " is not a valid zip file")
+			sendModDataReady(types.Mod{Filename: modfile}, conn)
 			return
 		} else {
+			raven.CaptureError(err, nil)
 			log.Panic(err)
 		}
 	}
@@ -97,6 +104,7 @@ func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnectio
 		if (strings.HasSuffix(f.Name, ".info") && strings.Index(f.Name, "dependancies") == -1 && strings.Index(f.Name, "dependencies") == -1) || f.Name == "litemod.json" {
 			r, err := f.Open()
 			if err != nil {
+				raven.CaptureError(err, nil)
 				log.Fatal(err)
 			}
 			readInfoFile(r, conn, f.FileInfo().Size(), modfile)
@@ -115,8 +123,14 @@ func readInfoFile(file io.ReadCloser, conn websocket.WebsocketConnection, size i
 	_, err := file.Read(content)
 	content = []byte(strings.Replace(string(content), "\n", " ", -1))
 	if err != nil {
-		conn.Log(err.Error() + "\n" + string(debug.Stack()))
-		return
+		// For some reason the zip file reader in GO 1.7 gives io.EOF when reaching the end of the
+		// file, which means the file.read will return an error, even though it read the content successfully...
+		// Because why the f**k not?!
+		if err != io.EOF {
+			raven.CaptureError(err, nil)
+			conn.Log(err.Error() + "\n" + filename + "\n" + string(debug.Stack()))
+			return
+		}
 	}
 	var mod types.ModInfo
 	normalMod := make([]types.ModInfo, 0)
@@ -125,6 +139,7 @@ func readInfoFile(file io.ReadCloser, conn websocket.WebsocketConnection, size i
 		// Try with mod version 2, or with litemod
 		err = json.Unmarshal(content, &mod)
 		if err != nil {
+			raven.CaptureError(err, nil)
 			conn.Log(err.Error() + "\n" + string(content) + "\n" + filename)
 			sendModDataReady(types.Mod{Filename: filename}, conn)
 			return

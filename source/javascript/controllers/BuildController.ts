@@ -170,12 +170,12 @@ module BuildController {
             for (var i = 0; i < this.mods.length; i++) {
                 var mod = this.mods[i];
                 mod.$$isDone = mod.isValid();
-                if (!mod.$$isDone) {
+                if (!mod.$$isDone && !mod.skip) {
                     shouldBuild = false;
                 }
             }
             if (shouldBuild) {
-                this.goComm.send("build", {modpack: this.application.modpack, mods: this.mods});
+                this.goComm.send("build", {modpack: this.application.modpack, mods: this.mods.filter((m) => !m.skip)});
                 this.state = "building"
             } else {
                 this.$translate('BUILD.MOD.VALIDATION_FAILED').then((t) => {

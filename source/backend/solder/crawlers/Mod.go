@@ -24,13 +24,15 @@ const complexNamePattern string = `(.+?) ?\((.+?)\)(?:.+)`
 
 func CrawlModList(res *http.Response) []Mod {
 	doc := makeDoc(res)
-
+	log.Println(doc.Html())
 	mods := make([]Mod, 0)
 
 	tableRows := doc.Find("table > tbody > tr")
+	log.Println(tableRows.Length())
 
 	c := make(chan Mod)
 	tableRows.Each(func(_ int, r *goquery.Selection) {
+		log.Println("Over row")
 		go func(row *goquery.Selection) {
 
 			var mod Mod

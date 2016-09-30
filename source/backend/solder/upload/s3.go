@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/getsentry/raven-go"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	"github.com/zlepper/go-websocket-connection"
 	"log"
@@ -63,6 +64,7 @@ func UploadFilesToS3(modpack *types.Modpack, infos []*types.OutputInfo, conn web
 
 		file, err := os.Open(info.File)
 		if err != nil {
+			raven.CaptureError(err, nil)
 			log.Panic(err)
 		}
 		_, err = uploader.Upload(&s3manager.UploadInput{
@@ -71,6 +73,7 @@ func UploadFilesToS3(modpack *types.Modpack, infos []*types.OutputInfo, conn web
 			Key:    keyString,
 		})
 		if err != nil {
+			raven.CaptureError(err, nil)
 			log.Panic(err)
 		}
 		conn.Write("finished-uploading", info.ProgressKey)

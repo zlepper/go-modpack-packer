@@ -178,6 +178,7 @@ module Application {
         public $$isDone:boolean;
         public isOnSolder:boolean;
         public userPermission:UserPermission;
+        public skip:boolean;
 
         public static fromJson(data:Mod):Mod {
             var m = new Mod();

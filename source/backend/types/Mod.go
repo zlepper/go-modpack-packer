@@ -94,3 +94,26 @@ func (m *Mod) NormalizeAll() {
 		}
 	}
 }
+
+func (m *Mod) SetSolderStatus(status bool) {
+	m.IsOnSolder = status
+}
+
+func SafeNormalizeString(s string) string {
+	s = strings.Replace(strings.ToLower(s), " ", "-", -1)
+	return strings.Replace(s, ".", "", -1)
+}
+
+func (m *Mod) GenerateSimpleOutputInfo() *OutputInfo {
+	return &OutputInfo{
+		Name:             m.Name,
+		Id:               SafeNormalizeString(m.ModId),
+		Version:          m.Version,
+		MinecraftVersion: m.MinecraftVersion,
+		Description:      m.Description,
+		Author:           m.Authors,
+		ProgressKey:      m.Filename,
+		IsOnSolder:       m.IsOnSolder,
+		Permissions:      m.Permission,
+	}
+}

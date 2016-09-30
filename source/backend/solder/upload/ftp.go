@@ -4,6 +4,7 @@ import (
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	//"crypto/tls"
 	"fmt"
+	"github.com/getsentry/raven-go"
 	"github.com/jlaffaye/ftp"
 	"github.com/mitchellh/mapstructure"
 	"github.com/zlepper/go-websocket-connection"
@@ -21,12 +22,14 @@ func UploadFilesToFtp(modpack *types.Modpack, infos []*types.OutputInfo, conn we
 	ftpDetails := modpack.Technic.Upload.FTP
 
 	if f, err = ftp.Connect(ftpDetails.Url); err != nil {
+		raven.CaptureError(err, nil)
 		panic(err)
 	}
 
 	defer f.Quit()
 
 	if err = f.Login(ftpDetails.Username, ftpDetails.Password); err != nil {
+		raven.CaptureError(err, nil)
 		panic(err)
 	}
 	outDir := path.Join(modpack.OutputDirectory, modpack.Name)
@@ -39,10 +42,12 @@ func UploadFilesToFtp(modpack *types.Modpack, infos []*types.OutputInfo, conn we
 		conn.Write("starting-upload", info.Name)
 		err = f.ChangeDir("/")
 		if err != nil {
+			raven.CaptureError(err, nil)
 			panic(err)
 		}
 		file, err := os.Open(info.File)
 		if err != nil {
+			raven.CaptureError(err, nil)
 			panic(err)
 		}
 		key := strings.Replace(info.File, outDir, "", -1)
@@ -53,17 +58,20 @@ func UploadFilesToFtp(modpack *types.Modpack, infos []*types.OutputInfo, conn we
 				if !doesDirectoryExist(f, part) {
 					err = f.MakeDir(part)
 					if err != nil {
+						raven.CaptureError(err, nil)
 						panic(err)
 					}
 				}
 				err = f.ChangeDir(part)
 				if err != nil {
+					raven.CaptureError(err, nil)
 					panic(err)
 				}
 			}
 		}
 
 		if err = f.Stor(key, file); err != nil {
+			raven.CaptureError(err, nil)
 			panic(err)
 		}
 		conn.Write("finished-uploading", info.Name)
@@ -74,6 +82,7 @@ func UploadFilesToFtp(modpack *types.Modpack, infos []*types.OutputInfo, conn we
 func doesDirectoryExist(f *ftp.ServerConn, dir string) bool {
 	entries, err := f.NameList("")
 	if err != nil {
+		raven.CaptureError(err, nil)
 		panic(err)
 	}
 	for _, entry := range entries {
@@ -89,6 +98,7 @@ func TestFtp(conn websocket.WebsocketConnection, data interface{}) {
 	var loginInfo types.FtpConfig
 	err := mapstructure.Decode(dict, &loginInfo)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		log.Panic(err)
 	}
 

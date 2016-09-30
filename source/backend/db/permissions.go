@@ -2,6 +2,7 @@ package db
 
 import (
 	"encoding/json"
+	"github.com/getsentry/raven-go"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	"log"
 	"net/http"
@@ -60,6 +61,7 @@ func GetPermissionsDb() *PermissionsDB {
 func UpdatePermissionStore() {
 	res, err := http.Get("http://zlepper.dk:8056")
 	if err != nil {
+		raven.CaptureError(err, nil)
 		panic(err)
 	}
 	defer res.Body.Close()

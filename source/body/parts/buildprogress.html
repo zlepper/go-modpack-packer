@@ -75,6 +75,11 @@
                                 <md-button ng-click="build.checkDbForPermissions(mod)">{{'BUILD.MOD.PERMISSIONS.CHECK_STORE' | translate}}</md-button>
                             </div>
                         </div>
+                        <md-input-container class="md-block">
+                            <md-checkbox ng-model="mod.skip">
+                                <span translate>BUILD.MOD.SKIP</span>
+                            </md-checkbox>
+                        </md-input-container>
                     </div>
                 </div>
             </section>

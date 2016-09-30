@@ -3,6 +3,7 @@ package db
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/getsentry/raven-go"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	"os"
 	"path/filepath"
@@ -78,11 +79,13 @@ func (m *modsDb) Save() {
 	modsFile := filepath.Join(dataDirectory, "mods.json")
 	f, err := os.Create(modsFile)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		panic(err)
 	}
 
 	err = json.NewEncoder(f).Encode(m.Mods)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		panic(err)
 	}
 	fmt.Println("Wrote " + strconv.Itoa(len(m.Mods)) + " mods to the mods database")
@@ -106,7 +109,9 @@ func (m *modsDb) AddMod(mod *types.Mod) {
 	}
 
 	// We couldn't find the mod, so we'll just add it
+	m.m.Lock()
 	m.Mods = append(m.Mods, mod)
+	m.m.Unlock()
 	fmt.Println("Adding mod: " + mod.Name)
 }
 

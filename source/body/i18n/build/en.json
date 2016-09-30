@@ -15,6 +15,7 @@
       "AUTHORS": "Authors",
       "FILENAME": "Filename",
       "URL": "Url",
+      "SKIP": "Skip mod",
       "PERMISSIONS": {
         "LICENSE": "Link to license",
         "LINK": "Link to mod",

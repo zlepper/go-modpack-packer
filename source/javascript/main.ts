@@ -1,3 +1,4 @@
+declare var Raven: any;
 module ModpackHelper{
     var app = angular.module("ModpackHelper", ["ngMaterial", "ui.router", "ngResource", "ngAnimate", "pascalprecht.translate", "ngMessages", "ngWebSocket", "ngSanitize", "md.data.table"]);
 

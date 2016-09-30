@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/getsentry/raven-go"
 	"github.com/mitchellh/mapstructure"
 	"github.com/zlepper/go-modpack-packer/source/backend/solder/crawlers"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
@@ -35,6 +36,7 @@ func NewSolderClient(Url string) *SolderClient {
 
 	u, err := url.Parse(Url)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		log.Panic(err)
 	}
 
@@ -54,6 +56,7 @@ func TestSolderConnection(conn websocket.WebsocketConnection, data interface{}) 
 	var solderInfo types.SolderInfo
 	err := mapstructure.Decode(dict, &solderInfo)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		log.Panic(err)
 	}
 
@@ -69,15 +72,20 @@ func TestSolderConnection(conn websocket.WebsocketConnection, data interface{}) 
 func (s *SolderClient) createUrl(after string) url.URL {
 	url := *s.Url
 	url.Path = path.Join(url.Path, after)
+	log.Println(url.Path)
 	return url
 }
 
 func (s *SolderClient) postForm(url string, data url.Values) *http.Response {
-	req, _ := http.NewRequest(http.MethodPost, url, strings.NewReader(data.Encode()))
+	req, err := http.NewRequest(http.MethodPost, url, strings.NewReader(data.Encode()))
+	if err != nil {
+		raven.CaptureError(err, nil)
+	}
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("X-Requested-With", "XMLHttpRequest")
 	resp, err := s.Client.Do(req)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		log.Panic(err)
 	}
 	return resp
@@ -88,11 +96,15 @@ func (s *SolderClient) doRequest(method, url, data string) *http.Response {
 	if data != "" {
 		body = strings.NewReader(data)
 	}
-	req, _ := http.NewRequest(method, url, body)
+	req, err := http.NewRequest(method, url, body)
+	if err != nil {
+		raven.CaptureError(err, nil)
+	}
 	// Yes, this request is totally an ajax request...
 	req.Header.Add("X-Requested-With", "XMLHttpRequest")
 	response, err := s.Client.Do(req)
 	if err != nil {
+		raven.CaptureError(err, nil)
 		log.Panic(err)
 	}
 	return response
@@ -109,6 +121,21 @@ func (s *SolderClient) Login(email string, password string) bool {
 	defer response.Body.Close()
 
 	return crawlers.CrawlLogin(response)
+}
+
+func IsOnSolder(client *SolderClient, m *types.Mod) bool {
+	if client == nil {
+		return m.IsOnSolder
+	}
+	id := client.GetModId(m.ModId)
+	if id == "" {
+		return false
+	}
+	id = client.GetModVersionId(m.GenerateSimpleOutputInfo())
+	if id == "" {
+		return false
+	}
+	return true
 }
 
 func (s *SolderClient) CreatePack(name, slug string) string {
@@ -242,7 +269,10 @@ func (s *SolderClient) SetModVersionInBuild(mod *types.OutputInfo, buildId strin
 	form["build-id"] = buildId
 	form["version"] = modVersionId
 	form["modversion-id"] = s.GetActiveModversionInBuildId(mod, buildId)
-	data, _ := json.Marshal(form)
+	data, err := json.Marshal(form)
+	if err != nil {
+		raven.CaptureError(err, nil)
+	}
 
 	res := s.doRequest(http.MethodPost, Url.String(), string(data))
 	res.Body.Close()
@@ -266,7 +296,6 @@ func (s *SolderClient) GetModVersionId(mod *types.OutputInfo) string {
 			return id
 		}
 	}
-
 	solderModId := s.GetModId(modId)
 	Url := s.createUrl("mod/view/" + solderModId)
 	res := s.doRequest(http.MethodGet, Url.String(), "")
@@ -355,6 +384,7 @@ func (s *SolderClient) GetModId(modid string) string {
 	defer response.Body.Close()
 	mods := crawlers.CrawlModList(response)
 	//log.Panic(mods)
+	log.Println(mods)
 	for _, mod := range mods {
 		if strings.ToLower(mod.Name) == strings.ToLower(modid) {
 			id := mod.Id
@@ -394,6 +424,7 @@ func (s *SolderClient) AddModversionToBuild(mod *types.OutputInfo, modpackBuildI
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(response.Body)
 		log.Println(buf.String())
+		raven.CaptureError(err, nil)
 		log.Panic(err)
 	}
 

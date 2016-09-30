@@ -1,27 +1,25 @@
 package main
 
 import (
+	"github.com/getsentry/raven-go"
 	"github.com/zlepper/go-modpack-packer/source/backend/handlers"
 	"github.com/zlepper/go-websocket-connection"
 	"log"
 	"os"
 	"path"
-	"fmt"
 )
 
 func main() {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println(r)
-		}
-	}()
+	raven.SetDSN("https://68c8787167d940b1b2bd2e6a8308f242@app.getsentry.com/92966")
 
-	logfilePath := path.Join(os.Args[1], "log.log")
-	file, err := os.OpenFile(logfilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, os.ModePerm)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-	log.SetOutput(file)
-	websocket.Run(handlers.HandleMessage)
+	raven.CapturePanic(func() {
+		logfilePath := path.Join(os.Args[1], "log.log")
+		file, err := os.OpenFile(logfilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, os.ModePerm)
+		if err != nil {
+			panic(err)
+		}
+		defer file.Close()
+		log.SetOutput(file)
+		websocket.Run(handlers.HandleMessage)
+	}, nil)
 }
