@@ -2,14 +2,19 @@ module MainController {
     import Modpack = Application.Modpack;
     var remote = require("electron").remote;
     export class MainController {
-        public static $inject = ["application", "$state", "electron", "$translate"];
+        public static $inject = ["application", "$state", "electron", "$translate", "$mdToast"];
         public isMaximized: boolean = false;
 
         constructor(protected application:Application.Application, 
                     protected $state:angular.ui.IStateService,
                     protected electron: ElectronService.ElectronService,
-                    protected $translate: angular.translate.ITranslateService) {
-                
+                    protected $translate: angular.translate.ITranslateService,
+                    protected $mdToast: angular.material.IToastService) {
+
+            this.electron.on('error', (_, err) => {
+                console.log(err[0]);
+                this.$mdToast.showSimple("Background process crashed. Please report an issue on the bugtracker.");
+            });
         }
         
         public restart():void {

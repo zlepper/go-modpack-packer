@@ -6,7 +6,8 @@ import {
 import {
     app,
     BrowserWindow,
-    autoUpdater
+    autoUpdater,
+    ipcMain
 } from 'electron'
 
 import {createReadStream, createWriteStream, readFileSync, writeFileSync} from 'fs'
@@ -151,9 +152,11 @@ import {IpcHandlersCreator} from './IpcHandlers';
             });
             backend.stderr.on("data", function (data:any) {
                 console.log(data.toString());
+                win.webContents.send('error', data.toString());
             });
             backend.on('error', function(data:any) {
                 console.log(data.toString());
+                win.webContents.send('error', data.toString());
             });
             console.log("Spawned backend process");
             cb();
