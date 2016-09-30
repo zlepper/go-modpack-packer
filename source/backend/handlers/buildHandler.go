@@ -163,7 +163,9 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 
 		conn.Write(solderCurrentlyDoingEvent, "BUILD.SOLDER.UPDATING_MODS")
 		for _, info := range infos {
-			go addInfoToSolder(info, buildId, conn, solderclient)
+			localInfo := *info
+			log.Println(localInfo)
+			go addInfoToSolder(&localInfo, buildId, conn, solderclient)
 		}
 	}
 

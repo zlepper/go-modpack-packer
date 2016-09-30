@@ -175,7 +175,8 @@ module BuildController {
                 }
             }
             if (shouldBuild) {
-                this.goComm.send("build", {modpack: this.application.modpack, mods: this.mods.filter((m) => !m.skip)});
+                var ms = this.mods.filter((m) => !m.skip);
+                this.goComm.send("build", {modpack: this.application.modpack, mods: ms});
                 this.state = "building"
             } else {
                 this.$translate('BUILD.MOD.VALIDATION_FAILED').then((t) => {

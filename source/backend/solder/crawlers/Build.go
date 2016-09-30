@@ -48,7 +48,6 @@ func CrawlBuild(res *http.Response) Build {
 			// Use regex to calculate modname and slug
 			firstPart := row.Find("td:first-child").First().Text()
 			matches := re.FindStringSubmatch(firstPart)
-			log.Println(matches)
 			mod.PrettyName = matches[1]
 			mod.Name = matches[2]
 

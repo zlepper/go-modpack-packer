@@ -24,15 +24,12 @@ const complexNamePattern string = `(.+?) ?\((.+?)\)(?:.+)`
 
 func CrawlModList(res *http.Response) []Mod {
 	doc := makeDoc(res)
-	log.Println(doc.Html())
 	mods := make([]Mod, 0)
 
 	tableRows := doc.Find("table > tbody > tr")
-	log.Println(tableRows.Length())
 
 	c := make(chan Mod)
 	tableRows.Each(func(_ int, r *goquery.Selection) {
-		log.Println("Over row")
 		go func(row *goquery.Selection) {
 
 			var mod Mod
@@ -47,11 +44,9 @@ func CrawlModList(res *http.Response) []Mod {
 
 			// Remove double spaces
 			content = strings.Replace(content, "  ", " ", -1)
-			log.Println(content)
 			// Get matches
 			re = regexp.MustCompile(complexNamePattern)
 			r := re.FindStringSubmatch(content)
-			log.Println(r)
 			if len(r) > 2 {
 				mod.PrettyName = r[1]
 				mod.Name = r[2]

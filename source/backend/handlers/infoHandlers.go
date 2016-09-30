@@ -19,6 +19,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"github.com/getsentry/raven-go"
 )
 
 var checkPermissions bool

@@ -17,6 +17,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type SolderClient struct {
@@ -25,6 +26,7 @@ type SolderClient struct {
 	modVersionIdCache map[string]map[string]string
 	modIdCache        map[string]string
 	buildCache        map[string]crawlers.Build
+	lock sync.Mutex
 }
 
 func NewSolderClient(Url string) *SolderClient {
@@ -319,6 +321,7 @@ func (s *SolderClient) GetModVersionId(mod *types.OutputInfo) string {
 		l[modVersion] = id
 	}
 
+
 	return id
 }
 
@@ -383,13 +386,13 @@ func (s *SolderClient) GetModId(modid string) string {
 	response := s.doRequest(http.MethodGet, Url.String(), "")
 	defer response.Body.Close()
 	mods := crawlers.CrawlModList(response)
-	//log.Panic(mods)
-	log.Println(mods)
 	for _, mod := range mods {
 		if strings.ToLower(mod.Name) == strings.ToLower(modid) {
 			id := mod.Id
 			if strings.Trim(id, " ") != "" {
+				s.lock.Lock()
 				s.modIdCache[modid] = id
+				s.lock.Unlock()
 			}
 			return id
 		}
