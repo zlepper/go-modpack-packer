@@ -26,7 +26,7 @@ type SolderClient struct {
 	modVersionIdCache map[string]map[string]string
 	modIdCache        map[string]string
 	buildCache        map[string]crawlers.Build
-	lock sync.Mutex
+	lock              sync.Mutex
 }
 
 func NewSolderClient(Url string) *SolderClient {
@@ -321,7 +321,6 @@ func (s *SolderClient) GetModVersionId(mod *types.OutputInfo) string {
 		l[modVersion] = id
 	}
 
-
 	return id
 }
 
@@ -432,9 +431,13 @@ func (s *SolderClient) AddModversionToBuild(mod *types.OutputInfo, modpackBuildI
 	}
 
 	if res.Status != "success" {
-		log.Println(res.Reason)
-		log.Println(*mod)
-		log.Panic("Something went wrong when adding a mod to a build, see above mod details")
+		if res.Reason == "Duplicate Modversion found" {
+			log.Println(*mod, "was already added to the build. For some reason")
+		} else {
+			log.Println(res.Reason)
+			log.Println(*mod)
+			log.Panic("Something went wrong when adding a mod to a build, see above mod details")
+		}
 	}
 
 }
