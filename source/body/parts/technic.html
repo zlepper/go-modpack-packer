@@ -29,7 +29,7 @@
         <div ng-show="vm.application.modpack.technic.createForgeZip" class="collapsible clearfix">
             <md-input-container class="md-block">
                 <label translate>TECHNIC.FORGEVERSION</label>
-                <md-select ng-model="vm.application.modpack.technic.forgeVersion">
+                <md-select ng-model="vm.application.modpack.technic.forgeVersion" ng-model-options="{trackBy: '$value.build' }">
                     <md-option
                             ng-repeat="version in vm.forge.forgeVersions | filter:vm.application.modpack.minecraftVersion:vm.filterByMcVersion track by version.build"
                             ng-value="version">{{version.build}}
