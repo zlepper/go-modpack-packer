@@ -54,9 +54,9 @@ func TestSolderClient_IsModversionOnline(t *testing.T) {
 	client := getClient()
 
 	exists := client.IsModversionOnline(&types.OutputInfo{
-		Id:               "agricraft",
+		Id:               "ae2stuff",
 		MinecraftVersion: "1.7.10",
-		Version:          "1.5.0",
+		Version:          "0.5.1.9",
 	})
 
 	if !exists {
@@ -64,7 +64,7 @@ func TestSolderClient_IsModversionOnline(t *testing.T) {
 	}
 
 	exists = client.IsModversionOnline(&types.OutputInfo{
-		Id:               "acricraft",
+		Id:               "ae2stuff",
 		MinecraftVersion: "1.7.10",
 		Version:          "1.4.0",
 	})
