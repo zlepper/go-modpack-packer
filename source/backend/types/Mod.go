@@ -27,25 +27,18 @@ func (m *Mod) GenerateOnlineVersion() string {
 	return m.MinecraftVersion + "-" + m.Version
 }
 
+const (
+	validChars = `[^\w\d-_ ']`
+)
+
+var re = regexp.MustCompile(validChars)
+
 func normalize(s string) string {
-	reg := []rune("\\\\|\\/|\\||:|\\*|\\\"|<|>|'|\\?|&|\\$|@|=|;|\\+|\\s|,|{|}|\\^|%|`|\\]|\\[|~|#|_") // Also known as the Fuck You Regex
-	for i := 0; i < 32; i++ {
-		c := rune(i)
-		reg = append(reg, '|')
-		reg = append(reg, c)
-	}
-	for i := 127; i < 256; i++ {
-		c := rune(i)
-		reg = append(reg, '|')
-		reg = append(reg, c)
-	}
-	s = strings.Replace(s, " ", "-", -1)
-	re := regexp.MustCompile(string(reg))
-	return strings.ToLower(re.ReplaceAllString(s, ""))
+	return re.ReplaceAllString(s, "")
 }
 
 func (m *Mod) NormalizeId() {
-	m.ModId = strings.Replace(normalize(m.ModId), ".", "", -1)
+	m.ModId = strings.ToLower(strings.Replace(strings.Replace(normalize(m.ModId), ".", "", -1), " ", "-", -1))
 }
 
 func (m *Mod) GetVersionString() string {
@@ -85,6 +78,10 @@ func (m *Mod) NormalizeAll() {
 	m.NormalizeId()
 	m.Version = normalize(m.Version)
 	m.MinecraftVersion = normalize(m.MinecraftVersion)
+	m.Name = normalize(m.Name)
+	m.Description = normalize(m.Description)
+	m.Url = normalize(m.Url)
+	m.Authors = normalize(m.Authors)
 
 	// Special check to remove minecraft version in mod version strings
 	if m.Version != m.MinecraftVersion {

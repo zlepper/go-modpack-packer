@@ -81,3 +81,11 @@ func TestIsValid(t *testing.T) {
 		}
 	}
 }
+
+func TestNormlizeString(t *testing.T) {
+	expectedResult := "9MrCrayfish's Furniture Mod"
+	actualResult := normalize("§9MrCrayfish's Furniture Mod")
+	if expectedResult != actualResult {
+		t.Error("Didn't replace string correctly", actualResult)
+	}
+}
