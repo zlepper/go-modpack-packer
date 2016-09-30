@@ -28,7 +28,7 @@ func (m *Mod) GenerateOnlineVersion() string {
 }
 
 const (
-	validChars = `[^\w\d-_ ']`
+	validChars = `[^\w\d-_ '"\./` + "`]"
 )
 
 var re = regexp.MustCompile(validChars)
