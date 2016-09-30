@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/getsentry/raven-go"
 	"github.com/mitchellh/mapstructure"
 	"github.com/zlepper/go-modpack-packer/source/backend/db"
 	"github.com/zlepper/go-modpack-packer/source/backend/helpers"
@@ -104,7 +103,6 @@ func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnectio
 		if (strings.HasSuffix(f.Name, ".info") && strings.Index(f.Name, "dependancies") == -1 && strings.Index(f.Name, "dependencies") == -1) || f.Name == "litemod.json" {
 			r, err := f.Open()
 			if err != nil {
-				raven.CaptureError(err, nil)
 				log.Fatal(err)
 			}
 			readInfoFile(r, conn, f.FileInfo().Size(), modfile)

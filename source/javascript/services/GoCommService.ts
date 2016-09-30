@@ -39,7 +39,7 @@ module GoCommService {
                 t.ready = true;
             });
 
-            this.$interval(function() {
+            this.$interval(function(): void {
                 if(t.events.length > 0) {
                     var data = t.events.shift();
                     var message:MessageData = JSON.parse(data.data);
@@ -49,7 +49,7 @@ module GoCommService {
                         return
                     } else if(message.action === "notification") {
                         $mdToast.showSimple(message.data);
-                        return
+                        return;
                     }
                     $rootScope.$emit(message.action, message.data);
                 }
