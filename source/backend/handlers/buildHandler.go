@@ -83,7 +83,7 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 	// Handle forge
 	if modpack.Technic.CreateForgeZip {
 		total++
-		go packForgeFolder(modpack, conn, outputDirectory, &ch)
+		go packForgeFolder(modpack, conn, outputDirectory, &ch, solderClient)
 	}
 
 	// Handle any additional folder
@@ -109,16 +109,14 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 				conn.Write(donePackingPartName, m.Filename)
 				lock.Lock()
 				infos = append(infos, GenerateOutputInfo(m, ""))
-				total++
+				lock.Unlock()
 			} else {
 				go packMod(m, conn, outputDirectory, &ch)
-				lock.Lock()
-				total++
 			}
-			lock.Unlock()
 			wg.Done()
-			conn.Write("total-to-pack", total)
 		}(mod)
+		total++
+		conn.Write("total-to-pack", total)
 	}
 	wg.Wait()
 
@@ -247,45 +245,60 @@ func addInfoToSolder(info *types.OutputInfo, buildId string, conn websocket.Webs
 	conn.Write("done-updating-solder", info.ProgressKey)
 }
 
-func packForgeFolder(modpack types.Modpack, conn websocket.WebsocketConnection, outputDirectory string, ch *chan *types.OutputInfo) {
+func packForgeFolder(modpack types.Modpack, conn websocket.WebsocketConnection, outputDirectory string, ch *chan *types.OutputInfo, sc *solder.SolderClient) {
 	const minecraftForge string = "Minecraft Forge"
-	outputDirectory = path.Join(outputDirectory, "mods", "forge")
-	os.MkdirAll(outputDirectory, os.ModePerm)
 	version := fmt.Sprintf("%v", modpack.Technic.ForgeVersion.Build)
-	outputFile := path.Join(outputDirectory, "forge-"+modpack.MinecraftVersion+"-"+version+".zip")
 	conn.Write(packingPartName, minecraftForge)
-
-	zipfile, err := os.Create(outputFile)
-	if err != nil {
-		raven.CaptureError(err, nil)
-		conn.Log("Error when creating zip file: " + err.Error() + "\n" + outputFile)
-		return
+	isOnSolder := false
+	if sc != nil {
+		isOnSolder = solder.IsOnSolder(sc, &types.Mod{
+			Name:             minecraftForge,
+			ModId:            "forge",
+			Version:          version,
+			MinecraftVersion: modpack.MinecraftVersion,
+			Description:      "The core of everything modded minecraft.",
+			Url:              "http://www.minecraftforge.net/",
+			Authors:          "LexManos, cpw",
+		})
 	}
-	defer zipfile.Close()
+	var outputFile string
+	if !isOnSolder {
+		outputDirectory = path.Join(outputDirectory, "mods", "forge")
+		os.MkdirAll(outputDirectory, os.ModePerm)
+		outputFile = path.Join(outputDirectory, "forge-"+modpack.MinecraftVersion+"-"+version+".zip")
 
-	zipWriter := zip.NewWriter(zipfile)
-	defer zipWriter.Close()
+		zipfile, err := os.Create(outputFile)
+		if err != nil {
+			raven.CaptureError(err, nil)
+			conn.Log("Error when creating zip file: " + err.Error() + "\n" + outputFile)
+			return
+		}
+		defer zipfile.Close()
 
-	resp, err := http.Get(modpack.Technic.ForgeVersion.DownloadUrl)
-	if err != nil {
-		raven.CaptureError(err, map[string]string{"error": "Error downloading forge file: '" + modpack.Technic.ForgeVersion.DownloadUrl + "'"})
-		conn.Log("Error downloading forge file: " + err.Error() + "\n" + modpack.Technic.ForgeVersion.DownloadUrl)
-		return
-	}
-	defer resp.Body.Close()
+		zipWriter := zip.NewWriter(zipfile)
+		defer zipWriter.Close()
 
-	f, err := zipWriter.Create("bin/modpack.jar")
-	if err != nil {
-		raven.CaptureError(err, nil)
-		conn.Log("Error while creating zip file content: " + err.Error())
-		return
-	}
+		resp, err := http.Get(modpack.Technic.ForgeVersion.DownloadUrl)
+		if err != nil {
+			raven.CaptureError(err, map[string]string{"error": "Error downloading forge file: '" + modpack.Technic.ForgeVersion.DownloadUrl + "'"})
+			conn.Log("Error downloading forge file: " + err.Error() + "\n" + modpack.Technic.ForgeVersion.DownloadUrl)
+			return
+		}
+		defer resp.Body.Close()
 
-	_, err = io.Copy(f, resp.Body)
-	if err != nil {
-		raven.CaptureError(err, nil)
-		conn.Log("Error white writing content to zip file: " + err.Error())
-		return
+		f, err := zipWriter.Create("bin/modpack.jar")
+		if err != nil {
+			raven.CaptureError(err, nil)
+			conn.Log("Error while creating zip file content: " + err.Error())
+			return
+		}
+
+		_, err = io.Copy(f, resp.Body)
+		if err != nil {
+			raven.CaptureError(err, nil)
+			conn.Log("Error white writing content to zip file: " + err.Error())
+			return
+		}
 	}
 	conn.Write(donePackingPartName, minecraftForge)
 
