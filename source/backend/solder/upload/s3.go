@@ -55,8 +55,11 @@ func UploadFilesToS3(modpack *types.Modpack, infos []*types.OutputInfo, conn web
 		// If the filename is empty it indicates that the file was not actually repacked, but
 		// is assumed to already be on solder
 		if info.File == "" {
+			conn.Write("starting-upload", info.ProgressKey)
+			conn.Write("finished-uploading", info.ProgressKey)
 			continue
 		}
+		log.Println(info.File)
 		conn.Write("starting-upload", info.ProgressKey)
 		key := strings.Replace(info.File, outDir, "", -1)
 		log.Println("Key: " + key)

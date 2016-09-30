@@ -101,24 +101,24 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 	for _, mod := range mods {
 		mod.NormalizeAll()
 		wg.Add(1)
-		go func() {
+		go func(m *types.Mod) {
 			// If the mod already is on solder, then we should likely skip it
 			// however the user can override this. If they do we should still pack all files
-			if !modpack.Technic.RepackAllMods && solder.IsOnSolder(solderClient, mod) {
-				conn.Write(packingPartName, mod.Filename)
-				conn.Write(donePackingPartName, mod.Filename)
+			if !modpack.Technic.RepackAllMods && solder.IsOnSolder(solderClient, m) {
+				conn.Write(packingPartName, m.Filename)
+				conn.Write(donePackingPartName, m.Filename)
 				lock.Lock()
-				infos = append(infos, GenerateOutputInfo(mod, ""))
+				infos = append(infos, GenerateOutputInfo(m, ""))
 				total++
 			} else {
-				go packMod(mod, conn, outputDirectory, &ch)
+				go packMod(m, conn, outputDirectory, &ch)
 				lock.Lock()
 				total++
 			}
 			lock.Unlock()
 			wg.Done()
 			conn.Write("total-to-pack", total)
-		}()
+		}(mod)
 	}
 	wg.Wait()
 
@@ -226,8 +226,10 @@ func addInfoToSolder(info *types.OutputInfo, buildId string, conn websocket.Webs
 				raven.CaptureError(err, nil)
 				log.Panic(err)
 			}
+			log.Println("Adding mod version to solder for " + info.Name)
 			solderclient.AddModVersion(modid, hex.EncodeToString(md5), info.GenerateOnlineVersion())
 		} else {
+			log.Println("Rehashing mod version for " + info.Name)
 			id := solderclient.GetModVersionId(info)
 			solderclient.RehashModVersion(id, hex.EncodeToString(md5))
 		}

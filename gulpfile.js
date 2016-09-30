@@ -199,7 +199,7 @@ function goCompile(os, arch, cb, output) {
     });
 
 }
-gulp.task("go-compile", ["go-test"], function (cb) {
+gulp.task("go-compile", function (cb) {
     // var command;
     // if (process.platform === "win32") {
     //     command = "go build -o ./app/backend.exe ./source/backend"

@@ -37,6 +37,8 @@ func UploadFilesToFtp(modpack *types.Modpack, infos []*types.OutputInfo, conn we
 	for _, info := range infos {
 		// If the file variable is empty, it indicates that the mod was not actually repacked
 		if info.File == "" {
+			conn.Write("starting-upload", info.Name)
+			conn.Write("finished-uploading", info.Name)
 			continue
 		}
 		conn.Write("starting-upload", info.Name)

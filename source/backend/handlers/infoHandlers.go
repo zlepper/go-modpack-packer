@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/getsentry/raven-go"
 	"github.com/mitchellh/mapstructure"
 	"github.com/zlepper/go-modpack-packer/source/backend/db"
 	"github.com/zlepper/go-modpack-packer/source/backend/helpers"
@@ -19,7 +20,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"github.com/getsentry/raven-go"
 )
 
 var checkPermissions bool
@@ -48,6 +48,7 @@ func gatherInformationAboutMods(inputDirectory string, conn websocket.WebsocketC
 		if strings.HasPrefix(f.Name(), ".") {
 			continue
 		}
+
 		files = append(files, f)
 	}
 	fmt.Println(len(files))
