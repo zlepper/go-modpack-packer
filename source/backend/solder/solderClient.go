@@ -26,7 +26,8 @@ type SolderClient struct {
 	modVersionIdCache map[string]map[string]string
 	modIdCache        map[string]string
 	buildCache        map[string]crawlers.Build
-	lock              sync.Mutex
+	lock              sync.RWMutex
+	modVersionIdLock  sync.RWMutex
 }
 
 func NewSolderClient(Url string) *SolderClient {
@@ -207,16 +208,21 @@ func (s *SolderClient) IsModversionOnline(mod *types.OutputInfo) bool {
 }
 
 func (s *SolderClient) GetBuild(buildId string) crawlers.Build {
-	if build, ok := s.buildCache[buildId]; ok {
+	s.lock.RLock()
+	build, ok := s.buildCache[buildId]
+	s.lock.RUnlock()
+	if ok {
 		return build
 	}
 
 	Url := s.createUrl("modpack/build/" + buildId)
 	res := s.doRequest(http.MethodGet, Url.String(), "")
 	defer res.Body.Close()
-	build := crawlers.CrawlBuild(res)
+	build = crawlers.CrawlBuild(res)
 
+	s.lock.Lock()
 	s.buildCache[buildId] = build
+	s.lock.Unlock()
 	return build
 }
 
@@ -291,7 +297,9 @@ func (s *SolderClient) IsBuildOnline(modpack *types.Modpack) bool {
 
 func (s *SolderClient) GetModVersionId(mod *types.OutputInfo) string {
 	modId, modVersion := mod.Id, mod.GenerateOnlineVersion()
+	s.modVersionIdLock.RLock()
 	l, ok := s.modVersionIdCache[modId]
+	s.modVersionIdLock.RUnlock()
 	if ok {
 		id, ok := l[modVersion]
 		if ok {
@@ -313,12 +321,14 @@ func (s *SolderClient) GetModVersionId(mod *types.OutputInfo) string {
 	}
 
 	if id != "" {
+		s.modVersionIdLock.Lock()
 		l, contains := s.modVersionIdCache[modId]
 		if !contains {
 			l = make(map[string]string, 0)
 			s.modVersionIdCache[modId] = l
 		}
 		l[modVersion] = id
+		s.modVersionIdLock.Unlock()
 	}
 
 	return id
@@ -374,11 +384,15 @@ func (s *SolderClient) GetModpackId(slug string) string {
 }
 
 func (s *SolderClient) GetModId(modid string) string {
+	s.lock.RLock()
 	if id, ok := s.modIdCache[modid]; ok {
+		s.lock.RUnlock()
 		if id != "" {
+
 			return id
 		}
 	}
+	s.lock.RUnlock()
 
 	Url := s.createUrl("mod/list")
 

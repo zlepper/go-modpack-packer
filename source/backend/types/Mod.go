@@ -28,7 +28,7 @@ func (m *Mod) GenerateOnlineVersion() string {
 }
 
 const (
-	validChars = `[^\w\d-_ '"\./` + "`]"
+	validChars = `[^\w\d-_ '"\./:` + "`]"
 )
 
 var re = regexp.MustCompile(validChars)
@@ -42,7 +42,7 @@ func (m *Mod) NormalizeId() {
 }
 
 func (m *Mod) GetVersionString() string {
-	return m.ModId + "-" + m.MinecraftVersion + "-" + m.Version
+	return strings.Replace(m.ModId+"-"+m.MinecraftVersion+"-"+m.Version, " ", "-", -1)
 }
 
 func (m *Mod) GetMd5() string {
@@ -76,7 +76,7 @@ func (m *Mod) IsValid() bool {
 
 func (m *Mod) NormalizeAll() {
 	m.NormalizeId()
-	m.Version = normalize(m.Version)
+	m.Version = strings.Replace(normalize(m.Version), " ", "-", -1)
 	m.MinecraftVersion = normalize(m.MinecraftVersion)
 	m.Name = normalize(m.Name)
 	m.Description = normalize(m.Description)
