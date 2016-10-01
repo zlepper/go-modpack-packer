@@ -4,6 +4,7 @@ import (
 	"github.com/getsentry/raven-go"
 	"github.com/zlepper/go-modpack-packer/source/backend/handlers"
 	"github.com/zlepper/go-websocket-connection"
+	"io"
 	"log"
 	"os"
 	"path"
@@ -19,7 +20,7 @@ func main() {
 			panic(err)
 		}
 		defer file.Close()
-		log.SetOutput(file)
+		log.SetOutput(io.MultiWriter(file, os.Stdout))
 		websocket.Run(handlers.HandleMessage)
 	}, nil)
 }
