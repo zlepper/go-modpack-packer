@@ -13,7 +13,10 @@ module MainController {
 
             this.electron.on('error', (_, err) => {
                 console.log(err[0]);
-                this.$mdToast.showSimple("Background process crashed. Please report an issue on the bugtracker.");
+                this.$mdToast.show(
+                    this.$mdToast.simple().textContent("Background process crashed. Please report an issue on the bugtracker.")
+                        .hideDelay(0)
+                );
             });
         }
         

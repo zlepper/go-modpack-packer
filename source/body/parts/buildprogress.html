@@ -8,7 +8,7 @@
         <md-dialog-content class="md-dialog-content">
             <section ng-show="build.state == 'info'">
                 <h2 translate>BUILD.MOD.DETAILS</h2>
-                <div ng-repeat="mod in build.mods | orderBy:'name'" ng-init="showDetails = false"
+                <div ng-repeat="mod in build.mods" ng-init="showDetails = false"
                      ng-show="!mod.$$isDone || build.showDone">
                     <md-button class="mod-button" ng-click="showDetails = !showDetails">{{!!mod.name ? mod.name :
                         mod.filename}}
