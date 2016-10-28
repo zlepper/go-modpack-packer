@@ -2,6 +2,8 @@
 Modpack helper for creating Technic Solder packs.
 Based on electron and go.
 
+====
+
 ## Build it yourself
 
 ### 1. Requirements
