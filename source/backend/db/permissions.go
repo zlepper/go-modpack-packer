@@ -59,10 +59,11 @@ func GetPermissionsDb() *PermissionsDB {
 }
 
 func UpdatePermissionStore() {
-	res, err := http.Get("http://zlepper.dk:8056")
+	res, err := http.Get("http://permissions.zlepper.dk/")
 	if err != nil {
 		raven.CaptureError(err, nil)
-		panic(err)
+		log.Println(err)
+		return
 	}
 	defer res.Body.Close()
 
