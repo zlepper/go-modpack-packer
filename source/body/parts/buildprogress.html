@@ -168,6 +168,7 @@
             <md-checkbox ng-hide="build.state == 'building'" class="mod-checkbox" ng-model="build.showDone">
                 {{'BUILD.SHOWDONE' | translate}}
             </md-checkbox>
+            <md-button ng-hide="build.state == 'building'" class="mod-checkbox" ng-click="build.skipAll()">Skip all non-finished</md-button>
             <span flex></span>
             <md-button ng-disabled="!build.readyToBuild" class="md-primary md-raised" ng-click="build.build()"
                        ng-hide="build.state == 'building'">{{'BUILD.BUILD'|translate}}

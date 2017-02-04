@@ -431,16 +431,17 @@ func (s *SolderClient) AddModversionToBuild(mod *types.OutputInfo, modpackBuildI
 	response := s.postForm(Url.String(), form)
 	defer response.Body.Close()
 
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(response.Body)
+
 	var res addBuildToModpackResponse
-	err := json.NewDecoder(response.Body).Decode(&res)
+	err := json.NewDecoder(buf).Decode(&res)
 
 	if err != nil {
 		log.Println(Url.String())
 		log.Printf("%v", form)
-		buf := new(bytes.Buffer)
-		buf.ReadFrom(response.Body)
 		log.Println(buf.String())
-		raven.CaptureError(err, nil)
+		raven.CaptureErrorAndWait(err, nil)
 		log.Panic(err)
 	}
 

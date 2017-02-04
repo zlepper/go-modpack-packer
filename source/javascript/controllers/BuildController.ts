@@ -152,6 +152,15 @@ module BuildController {
             this.goComm.send("gather-information", modpack);
         }
 
+        public skipAll() {
+            for(let i = 0; i < this.mods.length; i++) {
+                let mod = this.mods[i];
+                if(!mod.isValid()) {
+                    mod.skip = true;
+                }
+            }
+        }
+
         public addModData(mod:Application.Mod):void {
             var m = Application.Mod.fromJson(mod);
             if (!m.mcversion) {

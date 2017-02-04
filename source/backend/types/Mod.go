@@ -38,7 +38,11 @@ func normalize(s string) string {
 }
 
 func (m *Mod) NormalizeId() {
-	m.ModId = strings.ToLower(strings.Replace(strings.Replace(normalize(m.ModId), ".", "", -1), " ", "-", -1))
+	s := normalize(m.ModId)
+	s = strings.Replace(s, ".", "", -1)
+	s = strings.Replace(s, " ", "-", -1)
+	s = strings.Replace(s, "_", "-", -1)
+	m.ModId = strings.ToLower(s)
 }
 
 func (m *Mod) GetVersionString() string {
