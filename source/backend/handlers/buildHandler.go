@@ -99,9 +99,9 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 	var lock sync.Mutex
 	// Handle mods
 	for _, mod := range mods {
-		mod.NormalizeAll()
 		wg.Add(1)
 		go func(m *types.Mod) {
+			mod.NormalizeAll()
 			// If the mod already is on solder, then we should likely skip it
 			// however the user can override this. If they do we should still pack all files
 			if !modpack.Technic.RepackAllMods && solder.IsOnSolder(solderClient, m) {
@@ -116,8 +116,8 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 			wg.Done()
 		}(mod)
 		total++
-		conn.Write("total-to-pack", total)
 	}
+	conn.Write("total-to-pack", total)
 	wg.Wait()
 
 	// Save the mods to the database
