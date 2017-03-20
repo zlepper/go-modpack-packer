@@ -49,6 +49,7 @@
       }
     },
     "ERRORS": {
+      "SOLDER_URL_SHOULD_NOT_CONTAIN_API": "The solder url provided should not end with /api/, but should be the url you hit when you browser through your browser.",
       "MISSING": {
         "AWS": {
           "ACCESS_KEY": "You have specified aws upload, but haven't provided an accesskey.",

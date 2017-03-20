@@ -67,7 +67,14 @@ module TechnicController {
             this.goComm.send("test-ftp", this.application.modpack.technic.upload.ftp)
         }
         public testSolder(): void {
-            this.goComm.send("test-solder", this.application.modpack.solder)
+            let re = /.*\/api\/?$/;
+            if(re.test(this.application.modpack.solder.url)) {
+                this.$translate("TECHNIC.ERRORS.SOLDER_URL_SHOULD_NOT_CONTAIN_API").then(t => {
+                    this.$mdToast.showSimple(t)
+                });
+            } else {
+                this.goComm.send("test-solder", this.application.modpack.solder)
+            }
         }
         
         public filterByMcVersion(input: ForgeVersion.ForgeVersion, minecraftVersion: string) {

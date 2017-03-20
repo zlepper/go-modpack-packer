@@ -143,6 +143,10 @@ module Application {
                     if (!solder.url) {
                         return "TECHNIC.ERRORS.MISSING.SOLDER.URL";
                     }
+                    let re = /.*\/api\/?$/;
+                    if(re.test(solder.url)) {
+                        return "TECHNIC.ERRORS.SOLDER_URL_SHOULD_NOT_CONTAIN_API"
+                    }
                     if (!solder.password) {
                         return "TECHNIC.ERRORS.MISSING.SOLDER.PASSWORD";
                     }
