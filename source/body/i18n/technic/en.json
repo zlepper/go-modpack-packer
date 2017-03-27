@@ -41,6 +41,8 @@
         "USERNAME": "Username",
         "PASSWORD": "Password",
         "TEST": "Test ftp connection",
+        "SUCCESS": "ftp connection test was successful",
+        "PATH": "Path (Optional)",
         "ERROR": {
           "LOGIN": "Could not login with the supplied credentials",
           "CONNECT": "Could not connect to the provided address",

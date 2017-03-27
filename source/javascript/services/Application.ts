@@ -11,6 +11,7 @@ module Application {
         public url:string = "";
         public username:string = "";
         public password:string = "";
+        public path:string = "";
     }
 
     export class UploadConfig {

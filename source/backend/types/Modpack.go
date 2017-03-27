@@ -24,6 +24,7 @@ type FtpConfig struct {
 	Url      string `json:"url"`
 	Username string `json:"username"`
 	Password string `json:"password"`
+	Path     string `json:"path"`
 }
 
 type UploadConfig struct {

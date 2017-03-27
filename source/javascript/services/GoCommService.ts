@@ -53,9 +53,10 @@ module GoCommService {
                     }
                     $rootScope.$emit(message.action, message.data);
                 }
-            }, 5);
+            }, 2);
 
             this.dataStream.onMessage(function(data: IWebsocketOnMessageEvent) {
+                console.log('on message', data);
                 t.events.push(data);
             });
         }

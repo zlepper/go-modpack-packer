@@ -87,6 +87,10 @@
                     <label translate>TECHNIC.UPLOAD.FTP.PASSWORD</label>
                     <input type="password" ng-model="vm.application.modpack.technic.upload.ftp.password">
                 </md-input-container>
+                <md-input-container class="md-block">
+                    <label translate>TECHNIC.UPLOAD.FTP.PATH</label>
+                    <input type="text" ng-model="vm.application.modpack.technic.upload.ftp.path">
+                </md-input-container>
                 <md-button class="md-raised md-primary" ng-click="vm.testFtp()">
                     {{'TECHNIC.UPLOAD.FTP.TEST' | translate }}
                 </md-button>

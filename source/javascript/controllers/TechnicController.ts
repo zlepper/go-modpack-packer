@@ -17,23 +17,30 @@ module TechnicController {
                     protected $mdToast: angular.material.IToastService) {
             $translatePartialLoader.addPart("technic");
             var controller = this;
-            $rootScope.$on("found-aws-buckets", function(event: angular.IAngularEvent, buckets: Array<string>) {
+            $rootScope.$on("found-aws-buckets", function (event: angular.IAngularEvent, buckets: Array<string>) {
                 controller.buckets = buckets;
             });
-            $rootScope.$on("solder-test", function(event: angular.IAngularEvent, result: string) {
-                $translate(result).then(function(translated) {
+            $rootScope.$on("solder-test", function (event: angular.IAngularEvent, result: string) {
+                $translate(result).then(function (translated) {
                     $mdToast.showSimple(translated);
                 });
+            });
+
+            $rootScope.$on('ftp-test', (event, result) => {
+                console.log('ftp test result', result);
+                $translate(result).then(translated => {
+                    $mdToast.showSimple(translated);
+                }).catch(err => console.error(err));
             });
 
         }
 
         public build(ev: MouseEvent): void {
             var validation = this.application.modpack.isValid();
-            if(!validation) {
+            if (!validation) {
                 validation = this.application.modpack.isValidTechnic();
             }
-            if(!validation) {
+            if (!validation) {
                 this.$mdDialog.show({
                     controller: "BuildController",
                     controllerAs: "build",
@@ -63,12 +70,14 @@ module TechnicController {
                 });
             }
         }
+
         public testFtp(): void {
             this.goComm.send("test-ftp", this.application.modpack.technic.upload.ftp)
         }
+
         public testSolder(): void {
             let re = /.*\/api\/?$/;
-            if(re.test(this.application.modpack.solder.url)) {
+            if (re.test(this.application.modpack.solder.url)) {
                 this.$translate("TECHNIC.ERRORS.SOLDER_URL_SHOULD_NOT_CONTAIN_API").then(t => {
                     this.$mdToast.showSimple(t)
                 });
@@ -76,12 +85,12 @@ module TechnicController {
                 this.goComm.send("test-solder", this.application.modpack.solder)
             }
         }
-        
+
         public filterByMcVersion(input: ForgeVersion.ForgeVersion, minecraftVersion: string) {
             return input.minecraftVersion === minecraftVersion;
         }
 
-        public getAwsBuckets():void {
+        public getAwsBuckets(): void {
             console.log("GEt aws buckets");
             this.goComm.send("get-aws-buckets", this.application.modpack)
         }

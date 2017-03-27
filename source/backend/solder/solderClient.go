@@ -10,6 +10,7 @@ import (
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	"github.com/zlepper/go-websocket-connection"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
@@ -28,6 +29,7 @@ type SolderClient struct {
 	buildCache        map[string]crawlers.Build
 	lock              sync.RWMutex
 	modVersionIdLock  sync.RWMutex
+	sema              chan struct{}
 }
 
 func NewSolderClient(Url string) *SolderClient {
@@ -49,6 +51,7 @@ func NewSolderClient(Url string) *SolderClient {
 		modVersionIdCache: make(map[string]map[string]string),
 		modIdCache:        make(map[string]string),
 		buildCache:        make(map[string]crawlers.Build),
+		sema:              make(chan struct{}, 20),
 	}
 }
 
@@ -80,6 +83,9 @@ func (s *SolderClient) createUrl(after string) url.URL {
 }
 
 func (s *SolderClient) postForm(url string, data url.Values) *http.Response {
+	s.sema <- struct{}{}
+	defer func() { <-s.sema }()
+
 	req, err := http.NewRequest(http.MethodPost, url, strings.NewReader(data.Encode()))
 	if err != nil {
 		raven.CaptureError(err, nil)
@@ -95,6 +101,9 @@ func (s *SolderClient) postForm(url string, data url.Values) *http.Response {
 }
 
 func (s *SolderClient) doRequest(method, url, data string) *http.Response {
+	s.sema <- struct{}{}
+	defer func() { <-s.sema }()
+
 	var body io.Reader
 	if data != "" {
 		body = strings.NewReader(data)
@@ -179,6 +188,13 @@ func (s *SolderClient) AddMod(mod *types.OutputInfo) string {
 
 	response := s.postForm(Url.String(), form)
 	defer response.Body.Close()
+
+	b, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		panic(err)
+	}
+	log.Println(string(b))
+
 	return s.GetModId(mod.Id)
 }
 
