@@ -51,6 +51,7 @@ module BuildController {
         public currentlyCheckingPermissions: { [id: string]: Application.Mod} = {};
         public permissionsText: string;
         public solderDoing: string;
+        public totalToScan: number;
 
         constructor(protected application:Application.Application,
                     protected $mdDialog:angular.material.IDialogService,
@@ -65,13 +66,15 @@ module BuildController {
 
 
             $rootScope.$on("mod-data-ready", function (event:angular.IAngularEvent, mod:Application.Mod) {
-                self.$window.requestAnimationFrame(function () {
-                    self.addModData(mod)
-                })
+                self.addModData(mod)
             });
 
             $rootScope.$on("all-mod-files-scanned", function () {
                 self.readyToBuild = true;
+            });
+
+            $rootScope.$on('total-mod-files', (event, total) => {
+               self.totalToScan = total;
             });
 
             $rootScope.$on("total-to-pack", function (event:angular.IAngularEvent, total:number) {
@@ -79,19 +82,15 @@ module BuildController {
             });
 
             $rootScope.$on("packing-part", function (event:angular.IAngularEvent, todo:string) {
-                self.$window.requestAnimationFrame(function () {
-                    self.todos.push(todo)
-                })
+                self.todos.push(todo)
             });
 
             $rootScope.$on("done-packing-part", function (event:angular.IAngularEvent, doneTodo:string) {
-                self.$window.requestAnimationFrame(function () {
-                    var i = self.todos.indexOf(doneTodo);
-                    if (i > -1) {
-                        self.todos.splice(i, 1)
-                    }
-                    self.progressNumber++;
-                });
+                var i = self.todos.indexOf(doneTodo);
+                if (i > -1) {
+                    self.todos.splice(i, 1)
+                }
+                self.progressNumber++;
             });
 
             $rootScope.$on("starting-upload", function (event:angular.IAngularEvent, key:string) {

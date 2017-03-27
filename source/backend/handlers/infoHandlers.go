@@ -70,8 +70,8 @@ func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnectio
 	// instead of working through the zip file and calculating everything again.
 	md5, err := helpers.ComputeMd5(modfile)
 	if err != nil {
-		raven.CaptureError(err, nil)
-		log.Println(err.Error())
+		raven.CaptureErrorAndWait(err, nil)
+		log.Println(err)
 		return
 	}
 	md5String := hex.EncodeToString(md5)
@@ -82,7 +82,6 @@ func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnectio
 		waitGroup.Done()
 		return
 	}
-	fmt.Println("File was not in db " + modfile)
 
 	// The mod was not in the database, so time for some data crunching
 	reader, err := zip.OpenReader(modfile)
@@ -90,9 +89,10 @@ func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnectio
 		if err == zip.ErrFormat {
 			conn.Log("err: " + modfile + " is not a valid zip file")
 			sendModDataReady(types.Mod{Filename: modfile}, conn)
+			waitGroup.Done()
 			return
 		} else {
-			raven.CaptureError(err, nil)
+			raven.CaptureErrorAndWait(err, nil)
 			log.Panic(err)
 		}
 	}
