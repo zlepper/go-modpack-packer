@@ -7,12 +7,13 @@ import {
     app,
     BrowserWindow,
     autoUpdater,
-    ipcMain
+    ipcMain,
+    protocol
 } from 'electron'
 
 import {createReadStream, createWriteStream, readFileSync, writeFileSync} from 'fs'
 
-import {join, resolve, basename} from 'path';
+import {join, resolve, basename, normalize} from 'path';
 import {spawn, exec, ChildProcess} from 'child_process';
 import {IpcHandlersCreator} from './IpcHandlers';
 
@@ -183,7 +184,7 @@ import {IpcHandlersCreator} from './IpcHandlers';
             win = new BrowserWindow(bounds);
 
             // and load the index.body of the app.
-            win.loadURL(`file://${__dirname}/index.html`);
+            win.loadURL(`file:///${__dirname}/public/index.html`);
             if (devMode) win.webContents.openDevTools('undocked');
             // live reload from electron connect
             //client.client.create(win);

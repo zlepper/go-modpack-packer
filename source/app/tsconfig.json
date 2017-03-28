@@ -4,6 +4,6 @@
     "noImplicitAny": true
   },
   "files": [
-    "main.d.ts"
+    "main.ts"
   ]
 }

@@ -4,12 +4,11 @@
   "description": "Packs mods for modpacks",
   "main": "main.js",
   "scripts": {
-    "pack": "build --target dir",
-    "dist": "build",
+    "pack": "gulp build-release:all",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "typings install && echo To run the app please run npm start",
     "start": "cd app && electron . --dev",
-    "prestart": "gulp"
+    "prestart": "gulp && gulp frontend-build:prod",
+    "watch": "gulp build-watch"
   },
   "keywords": [
     "Technic",
@@ -20,25 +19,14 @@
   "author": "Zlepper",
   "license": "MIT",
   "dependencies": {
-    "angular": "^1.5.5",
-    "angular-animate": "^1.5.5",
-    "angular-aria": "^1.5.5",
-    "angular-material": "^1.0.9",
-    "angular-material-data-table": "^0.10.9",
-    "angular-messages": "^1.5.5",
-    "angular-resource": "^1.5.5",
-    "angular-sanitize": "^1.5.6",
-    "angular-translate": "^2.11.0",
-    "angular-translate-loader-partial": "^2.11.0",
-    "angular-ui-router": "^0.3.0",
-    "angular-websocket": "^2.0.0",
     "electron-builder": "^5.11.2",
     "electron-prebuilt": "^1.2.6",
     "electron-squirrel-startup": "^1.0.0",
-    "gsap": "^1.18.5",
     "gulp-uglify": "^1.5.4"
   },
   "devDependencies": {
+    "@types/electron": "^1.4.35",
+    "@types/node": "^7.0.12",
     "electron-builder": "^5.2.1",
     "electron-connect": "^0.4.2",
     "gulp": "^3.9.1",
@@ -47,11 +35,12 @@
     "gulp-jshint": "^2.0.1",
     "gulp-sass": "^2.3.1",
     "gulp-sourcemaps": "^1.6.0",
-    "gulp-typescript": "2.12.1",
+    "gulp-typescript": "3.1.6",
     "gulp-uglify": "^1.5.3",
     "gulp-util": "^3.0.7",
     "jshint": "^2.9.2",
-    "merge-stream": "^1.0.0"
+    "merge-stream": "^1.0.0",
+    "typescript": "^2.2.2"
   },
   "build": {
     "appId": "dk.zlepper.modpackpacker",
