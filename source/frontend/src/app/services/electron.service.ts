@@ -2,7 +2,21 @@ import {Injectable} from "@angular/core";
 import {BehaviorSubject, Observable, Subject} from "rxjs";
 
 declare var electron;
-const remote = electron.remote;
+let remote;
+if(typeof electron === 'undefined') {
+    remote = {
+      getCurrentWindow() {
+        return {
+          isMaximized() {
+            return false;
+          }
+        }
+      }
+    };
+} else {
+  remote = electron.remote;
+}
+
 
 @Injectable()
 export class ElectronService {

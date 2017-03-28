@@ -17,6 +17,12 @@ import {NoModpackSelectedComponent} from "./no-modpack-selected/no-modpack-selec
 import {SettingsComponent} from "./settings/settings.component";
 import {TechnicComponent} from "./technic/technic.component";
 import { BodyComponent } from './main-app/body/body.component';
+import {ModpackService} from "app/services/modpack.service";
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import {ForgeVersionService} from "app/services/forge-version.service";
+import {NetworkService} from "app/services/network.service";
+import { ModpackHeaderComponent } from './modpack/modpack-header/modpack-header.component';
+import { ModpackEditorComponent } from './modpack/modpack-editor/modpack-editor.component';
 
 
 @NgModule({
@@ -28,7 +34,9 @@ import { BodyComponent } from './main-app/body/body.component';
     ModpackComponent,
     TechnicComponent,
     HeaderComponent,
-    BodyComponent
+    BodyComponent,
+    ModpackHeaderComponent,
+    ModpackEditorComponent
   ],
   imports: [
     BrowserModule,
@@ -36,16 +44,21 @@ import { BodyComponent } from './main-app/body/body.component';
     HttpModule,
     MaterialModule,
     FlexLayoutModule,
-    routes
+    routes,
+    BrowserAnimationsModule
   ],
   providers: [
     {
       provide: APP_BASE_HREF,
       useValue: '/'
     },
-    ElectronService
+    ElectronService,
+    ModpackService,
+    ForgeVersionService,
+    NetworkService
   ],
   bootstrap: [AppComponent]
 })
 export class AppModule {
 }
+

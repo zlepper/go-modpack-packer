@@ -1,0 +1,24 @@
+<div *ngIf="modpack !== null">
+  <md-input-container>
+    <input mdInput placeholder="Modpack name" [(ngModel)]="modpack.name">
+  </md-input-container>
+  <md-input-container>
+    <input mdInput placeholder="Modpack version" [(ngModel)]="modpack.version">
+  </md-input-container>
+  <div fxLayout="row" class="input-with-button">
+    <md-input-container fxFlex>
+      <input mdInput placeholder="Input directory" [(ngModel)]="modpack.inputDirectory"/>
+    </md-input-container>
+    <button md-button (click)="selectInputDirectory()">Select</button>
+  </div>
+  <div fxLayout="row" class="input-with-button">
+    <md-input-container fxFlex>
+      <input mdInput placeholder="Output directory" [(ngModel)]="modpack.outputDirectory"/>
+    </md-input-container>
+    <button md-button (click)="selectOutputDirectory()">Select</button>
+  </div>
+  <md-select placeholder="minecraftVersion" [(ngModel)]="modpack.minecraftVersion">
+    <md-option *ngFor="let version of forgeVersionService.minecraftVersions|async" [value]="version">{{version}}
+    </md-option>
+  </md-select>
+</div>

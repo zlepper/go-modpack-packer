@@ -1,0 +1,15 @@
+md-input-container {
+  display: block;
+  margin-top: 2rem;
+  margin-right: 1rem;
+}
+
+.input-with-button {
+  md-input-container {
+    margin-top: 0;
+  }
+}
+
+md-select {
+  @extend md-input-container;
+}

@@ -2,7 +2,13 @@
   <md-sidenav-container fxFlex fxLayout="column">
     <md-sidenav mode="side" opened="true">
       <div fxLayout="column" class="container">
-        <md-nav-list>
+        <div class="select-wrapper">
+          <md-select placeholser="Modpack" #selectModpack [(ngModel)]="selectedModpackId" (change)="selectedModpackChanged(selectedModpackId)">
+            <md-option *ngFor="let modpack of modpackService.modpacks|async" [value]="modpack.id">{{modpack.name}}</md-option>
+            <md-option [value]="-1">New modpack</md-option>
+          </md-select>
+        </div>
+        <md-nav-list *ngIf="(modpackService.selectedModpack|async) !== null">
           <a md-list-item [routerLink]="['/modpack']">Modpack Details</a>
           <a md-list-item [routerLink]="['/technic']">Technic</a>
         </md-nav-list>
