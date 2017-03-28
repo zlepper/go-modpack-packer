@@ -184,7 +184,7 @@ import {IpcHandlersCreator} from './IpcHandlers';
             win = new BrowserWindow(bounds);
 
             // and load the index.body of the app.
-            win.loadURL(`file:///${__dirname}/public/index.html`);
+            win.loadURL(`file://${__dirname}/public/index.html`);
             if (devMode) win.webContents.openDevTools('undocked');
             // live reload from electron connect
             //client.client.create(win);
@@ -210,7 +210,7 @@ import {IpcHandlersCreator} from './IpcHandlers';
         });
     }
 
-    // This method will be called when Electron has finished
+    // This method will be called when ElectronService has finished
     // initialization and is ready to create browser windows.
     // Some APIs can only be used after this event occurs.
     app.on('ready', function () {
