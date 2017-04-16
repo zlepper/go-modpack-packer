@@ -1,0 +1,12 @@
+<p>Upload type</p>
+<div>
+  <md-radio-group [(ngModel)]="modpack.technic.upload.type">
+    <md-radio-button value="ftp">FTP</md-radio-button>
+    <md-radio-button value="s3">AWS S3</md-radio-button>
+    <md-radio-button value="none">No automatic upload</md-radio-button>
+  </md-radio-group>
+</div>
+<div>
+  <app-ftp-options *ngIf="modpack.technic.upload.type === 'ftp'" [modpack]="modpack"></app-ftp-options>
+  <app-s3-options *ngIf="modpack.technic.upload.type === 's3'" [modpack]="modpack"></app-s3-options>
+</div>

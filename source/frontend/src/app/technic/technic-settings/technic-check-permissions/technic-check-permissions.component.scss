@@ -1,0 +1,9 @@
+md-radio-group.split-lines {
+  md-radio-button {
+    display: block;
+
+    &:not(:first-child) {
+      margin-top: 0.6em;
+    }
+  }
+}

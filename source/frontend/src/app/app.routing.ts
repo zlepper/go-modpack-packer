@@ -1,9 +1,10 @@
 import {RouterModule, Routes} from "@angular/router";
+import {FtbComponent} from "app/ftb/ftb.component";
+import {HasModpackSelectedGuard} from "app/guards/has-modpack-selected.guard";
+import {ModpackComponent} from "app/modpack/modpack.component";
+import {TechnicComponent} from "app/technic/technic.component";
 import {NoModpackSelectedComponent} from "./no-modpack-selected/no-modpack-selected.component";
 import {SettingsComponent} from "./settings/settings.component";
-import {TechnicComponent} from "app/technic/technic.component";
-import {FtbComponent} from "app/ftb/ftb.component";
-import {ModpackComponent} from "app/modpack/modpack.component";
 
 const appRoutes: Routes = [
   {
@@ -16,15 +17,24 @@ const appRoutes: Routes = [
   },
   {
     path: 'technic',
-    component: TechnicComponent
+    component: TechnicComponent,
+    canActivate: [
+      HasModpackSelectedGuard
+    ]
   },
   {
     path: 'ftb',
-    component: FtbComponent
+    component: FtbComponent,
+    canActivate: [
+      HasModpackSelectedGuard
+    ]
   },
   {
     path: 'modpack',
-    component: ModpackComponent
+    component: ModpackComponent,
+    canActivate: [
+      HasModpackSelectedGuard
+    ]
   },
 ];
 

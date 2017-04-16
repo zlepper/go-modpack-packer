@@ -33,7 +33,7 @@ func GetAwsBuckets(conn websocket.WebsocketConnection, d interface{}) {
 	result, err := svc.ListBuckets(&s3.ListBucketsInput{})
 
 	if err != nil {
-		conn.Error("TECHNIC.UPLOAD.AWS.UNABLE_TO_LIST_BUCKETS")
+		conn.Error("Unable to list buckets.")
 		return
 	}
 

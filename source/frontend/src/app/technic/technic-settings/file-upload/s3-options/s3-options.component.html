@@ -1,0 +1,27 @@
+<md-input-container>
+  <input type="password" [(ngModel)]="modpack.technic.upload.aws.accessKey" placeholder="Access key" mdInput/>
+</md-input-container>
+<md-input-container>
+  <input type="password" [(ngModel)]="modpack.technic.upload.aws.secretKey" placeholder="Secret key" mdInput/>
+</md-input-container>
+<md-select [(ngModel)]="modpack.technic.upload.aws.region" placeholder="Region">
+  <md-option value="us-east-1">US East - N. Virginia (us-east-1)</md-option>
+  <md-option value="us-west-2">US West - Oregon (us-west-2)</md-option>
+  <md-option value="us-west-1">US West - N. California (us-west-1)</md-option>
+  <md-option value="eu-west-1">EU - Ireland (eu-west-1)</md-option>
+  <md-option value="eu-central-1">EU - Frankfurt (eu-central-1)</md-option>
+  <md-option value="ap-southeast-1">Asia Pacific - Singapore (ap-southeast-1)</md-option>
+  <md-option value="ap-northeast-1">Asia Pacific - Tokyo (ap-northeast-1)</md-option>
+  <md-option value="ap-southeast-2">Asia Pacific - Sydney (ap-southeast-2)</md-option>
+  <md-option value="ap-northeast-2">Asia Pacific - Seoul (ap-northeast-2)</md-option>
+  <md-option value="sa-east-1">South America - São Paulo (sa-east-1)</md-option>
+</md-select>
+<button md-raised-button class="get-buckets" (click)="getBuckets()">Get buckets</button>
+<md-select *ngIf="hasBuckets|async; else noBuckets" placeholder="Buckets"
+           [(ngModel)]="modpack.technic.upload.aws.bucket">
+  <md-option *ngFor="let bucket of buckets|async" [value]="bucket">{{bucket}}</md-option>
+</md-select>
+<ng-template #noBuckets>
+  <p>If you are seeing this message, then you either haven't clicked the "Get buckets"
+    button above, or there are no buckets that can be accessed using the above keys in the given region. </p>
+</ng-template>

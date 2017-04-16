@@ -3,6 +3,7 @@ package upload
 import (
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	//"crypto/tls"
+	"errors"
 	"fmt"
 	"github.com/getsentry/raven-go"
 	"github.com/jlaffaye/ftp"
@@ -100,7 +101,12 @@ func doesDirectoryExist(f *ftp.ServerConn, dir string) bool {
 	return false
 }
 
-func TestFtp(conn websocket.WebsocketConnection, data interface{}) {
+type FtpTestResult struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+
+func testFtp(conn websocket.WebsocketConnection, data interface{}) error {
 	dict := data.(map[string]interface{})
 	var loginInfo types.FtpConfig
 	err := mapstructure.Decode(dict, &loginInfo)
@@ -109,37 +115,47 @@ func TestFtp(conn websocket.WebsocketConnection, data interface{}) {
 		log.Panic(err)
 	}
 
-	log.Println("Connected to ftp", loginInfo.Url)
+	log.Println("Connecting to ftp", loginInfo.Url)
 
 	var f *ftp.ServerConn
 	fmt.Println(loginInfo.Url)
 	if f, err = ftp.Connect(loginInfo.Url); err != nil {
 		conn.Log(err.Error())
-		conn.Error("TECHNIC.UPLOAD.FTP.ERROR.CONNECT")
-		return
+		return errors.New("Could not connect to the provided address")
 	}
 
 	defer f.Quit()
 	log.Println("Logging in to ftp")
 
 	if err = f.Login(loginInfo.Username, loginInfo.Password); err != nil {
-		conn.Error("TECHNIC.UPLOAD.FTP.ERROR.LOGIN")
-		return
+		return errors.New("Could not login with the supplied credentials")
 	}
 
 	log.Println("Attempting ftp directory listing")
 
-	remotePath := "/"
+	remotePath := "~/"
 	if loginInfo.Path != "" {
 		remotePath = loginInfo.Path
 	}
 
 	_, err = f.List(remotePath)
 	if err != nil {
-		conn.Error("TECHNIC.UPLOAD.FTP.ERROR.LIST")
-		return
+		return errors.New("Could not list content. Might be a permission issue.")
 	}
 
 	log.Println("Ftp connection succesful")
-	conn.Write("ftp-test", "TECHNIC.UPLOAD.FTP.SUCCESS")
+	return nil
+}
+
+func TestFtp(conn websocket.WebsocketConnection, data interface{}) {
+	err := testFtp(conn, data)
+	testResult := FtpTestResult{
+		Success: err == nil,
+	}
+	if err == nil {
+		testResult.Message = "ftp connection test was successful"
+	} else {
+		testResult.Message = err.Error()
+	}
+	conn.Write("ftp-test", testResult)
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from "@angular/core";
 import {ForgeMaven, ForgeVersion} from "app/models/forgeversion";
 import {NetworkService} from "app/services/network.service";
 import {BehaviorSubject, Observable, Subject} from "rxjs";
@@ -8,6 +8,7 @@ export class ForgeVersionService {
 
   private _forgeVersions: Subject<ForgeVersion[]>;
   private _minecraftVersions: Subject<string[]>;
+  private _ready: Subject<boolean>;
 
   public get forgeVersions(): Observable<ForgeVersion[]> {
     return this._forgeVersions;
@@ -17,20 +18,30 @@ export class ForgeVersionService {
     return this._minecraftVersions;
   }
 
+  public get ready(): Observable<boolean> {
+    return this._ready;
+  }
+
   constructor(protected networkService: NetworkService) {
     this.getForgeVersions();
     this._forgeVersions = new BehaviorSubject<ForgeVersion[]>([]);
     this._minecraftVersions = new BehaviorSubject<string[]>([]);
+    this._ready = new BehaviorSubject<boolean>(false);
+  }
+
+  public getForgeVersionsForMCVersion(mcVersion: string): Observable<ForgeVersion[]> {
+    return this._forgeVersions.map(forgeVersions => forgeVersions.filter(forgeVersion => forgeVersion.minecraftVersion === mcVersion));
   }
 
   private isNullOrWhiteSpace(s) {
-    return s === null || s.match(/^ *$/) !== null;
+    return s === null || s.match(/^\s*$/) !== null;
   }
 
-  public getForgeVersions() {
+  private getForgeVersions() {
     this.networkService.get<ForgeMaven>('http://files.minecraftforge.net/maven/net/minecraftforge/forge/json')
       .subscribe(data => {
         this.buildForgeDb(data);
+        this._ready.next(true);
       })
   }
 

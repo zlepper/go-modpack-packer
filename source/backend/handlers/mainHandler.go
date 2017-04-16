@@ -21,7 +21,11 @@ func HandleMessage(conn wc.WebsocketConnection, messageType int, message []byte)
 	}()
 	if messageType == websocket.TextMessage {
 		var m wc.Message
-		json.Unmarshal(message, &m)
+		err := json.Unmarshal(message, &m)
+		if err != nil {
+			panic(err)
+		}
+		log.Println(m.Action)
 		switch m.Action {
 		case "find-additional-folders":
 			{
@@ -62,6 +66,11 @@ func HandleMessage(conn wc.WebsocketConnection, messageType int, message []byte)
 		case "check-permission-store":
 			{
 				CheckPermissionStore(conn, m.Data)
+			}
+
+		default:
+			{
+				log.Println("Unknown action", m.Action)
 			}
 		}
 	}

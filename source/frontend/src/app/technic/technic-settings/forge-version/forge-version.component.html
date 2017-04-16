@@ -1,0 +1,12 @@
+<div>
+  <md-checkbox [(ngModel)]="modpack.technic.createForgeZip">Include forge version</md-checkbox>
+</div>
+<div class="select-wrapper" *ngIf="modpack.technic.createForgeZip">
+  <md-select *ngIf="ready|async; else notDoneFetchingForge" placeholder="Forge build"
+             [(ngModel)]="modpack.technic.forgeVersion">
+    <md-option *ngFor="let version of forgeVersions|async" [value]="version">{{version.build}}</md-option>
+  </md-select>
+  <ng-template #notDoneFetchingForge>
+    <p>Currently fetching forge versions, please wait a moment...</p>
+  </ng-template>
+</div>

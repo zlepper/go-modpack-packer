@@ -1,5 +1,7 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from "@angular/core";
+import {Router} from "@angular/router";
 import {Modpack} from "app/models/modpack";
+import {BackendCommunicationService} from "app/services/backend-communication.service";
 import {BehaviorSubject, Observable, Subject} from "rxjs";
 
 @Injectable()
@@ -8,9 +10,23 @@ export class ModpackService {
   private _modpacks: Subject<Modpack[]>;
   private _selectedModpack: Subject<Modpack>;
 
-  constructor() {
+  constructor(protected backendCommunication: BackendCommunicationService, protected router: Router) {
     this._modpacks = new BehaviorSubject([]);
     this._selectedModpack = new BehaviorSubject(null);
+
+    console.log('requesting load');
+    backendCommunication.send('load-modpacks', {});
+
+    backendCommunication.getMessages<Modpack[]>('data-loaded')
+      .map(modpacks => modpacks.map(modpack => Modpack.fromJson(modpack)))
+      .subscribe(modpacks => {
+        console.log('data-loaded', modpacks);
+        this._modpacks.next(modpacks);
+        if (modpacks.length) {
+          this._selectedModpack.next(modpacks[0]);
+          this.router.navigate(['modpack']);
+        }
+      });
   }
 
   public get modpacks(): Observable<Modpack[]> {

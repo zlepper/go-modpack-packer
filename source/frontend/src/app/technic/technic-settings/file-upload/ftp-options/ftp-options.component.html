@@ -1,0 +1,18 @@
+<md-input-container>
+  <input type="url" [(ngModel)]="modpack.technic.upload.ftp.url" placeholder="Url (E.g. ftp://example.com:21)" required
+         mdInput/>
+</md-input-container>
+<md-input-container>
+  <input type="text" [(ngModel)]="modpack.technic.upload.ftp.username" placeholder="Username" required mdInput/>
+</md-input-container>
+<md-input-container>
+  <input type="password" [(ngModel)]="modpack.technic.upload.ftp.password" placeholder="Password" required mdInput/>
+</md-input-container>
+<md-input-container>
+  <input type="text" [(ngModel)]="modpack.technic.upload.ftp.path" placeholder="Path (Optional)" mdInput/>
+</md-input-container>
+<button *ngIf="!(testing|async); else testingFtpLogin" md-raised-button (click)="testFtp()">Test ftp Connection</button>
+<ng-template #testingFtpLogin>
+  <md-progress-bar mode="indeterminate"></md-progress-bar>
+</ng-template>
+

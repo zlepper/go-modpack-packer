@@ -1,0 +1,24 @@
+<div>
+  <md-checkbox [(ngModel)]="modpack.solder.use">Use Solder</md-checkbox>
+</div>
+<div *ngIf="modpack.solder.use">
+  <div class="solder-url" fxLayout="row">
+    <md-input-container fxFlex>
+      <input mdInput placeholder="Solder url (E.g. http://solder.example.com)" [(ngModel)]="modpack.solder.url"
+             type="url" required #urlInput>
+      <md-hint *ngIf="!isSolderUrlValid()" class="mock-error" align="start">The solder url provided should not end with
+        /api/, but should be the url you hit when you browser through your browser.
+      </md-hint>
+    </md-input-container>
+  </div>
+  <div fxLayout="column" fxLayout.lt-sm="row">
+    <md-input-container fxFlex="50" fxFlex.lt-sm="100">
+      <input mdInput placeholder="Email" [(ngModel)]="modpack.solder.username" type="text" required #emailInput/>
+    </md-input-container>
+    <md-input-container fxFlex="50" fxFlex.lt-sm="100">
+      <input mdInput placeholder="Password" [(ngModel)]="modpack.solder.password" type="password" required
+             #passwordInput/>
+    </md-input-container>
+  </div>
+  <button type="submit" md-raised-button (click)="testSolder()">Test solder connection</button>
+</div>

@@ -1,0 +1,9 @@
+.solder-url {
+  display: block;
+  margin-bottom: 0.6em;
+}
+
+// md-error is currently not working when using template-driven forms, see https://github.com/angular/material2/issues/4027
+.mock-error {
+  color: red;
+}

@@ -1,0 +1,11 @@
+<div>
+  <md-checkbox [(ngModel)]="modpack.technic.checkPermissions">Check Permissions</md-checkbox>
+</div>
+<div *ngIf="modpack.technic.checkPermissions">
+  <p>Permission level</p>
+
+  <md-radio-group [(ngModel)]="modpack.technic.isPublicPack" class="split-lines">
+    <md-radio-button [value]="true">Public pack</md-radio-button>
+    <md-radio-button [value]="false">Private pack</md-radio-button>
+  </md-radio-group>
+</div>

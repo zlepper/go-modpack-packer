@@ -1,4 +1,7 @@
 import {Component, OnInit} from "@angular/core";
+import {Modpack} from "app/models/modpack";
+import {ModpackService} from "app/services/modpack.service";
+import {Observable} from "rxjs/Observable";
 
 @Component({
   selector: 'app-technic',
@@ -7,10 +10,13 @@ import {Component, OnInit} from "@angular/core";
 })
 export class TechnicComponent implements OnInit {
 
-  constructor() {
+  protected selectedModpack: Observable<Modpack>;
+
+  constructor(protected modpackService: ModpackService) {
   }
 
   ngOnInit() {
+    this.selectedModpack = this.modpackService.selectedModpack;
   }
 
 }

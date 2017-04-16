@@ -1,0 +1,28 @@
+<md-toolbar color="primary">
+  <button md-button>Build</button>
+  <span fxFlex></span>
+</md-toolbar>
+
+<div class="options">
+  <div>
+    <app-pack-type [modpack]="modpack"></app-pack-type>
+  </div>
+  <div>
+    <md-checkbox [(ngModel)]="modpack.technic.repackAllMods">Repack all found mods</md-checkbox>
+  </div>
+  <div>
+    <app-forge-version [modpack]="modpack"></app-forge-version>
+  </div>
+  <div>
+    <app-technic-check-permissions [modpack]="modpack"></app-technic-check-permissions>
+  </div>
+  <div>
+    <app-java-version [modpack]="modpack"></app-java-version>
+  </div>
+  <div>
+    <app-file-upload [modpack]="modpack"></app-file-upload>
+  </div>
+  <div>
+    <app-solder-options [modpack]="modpack"></app-solder-options>
+  </div>
+</div>

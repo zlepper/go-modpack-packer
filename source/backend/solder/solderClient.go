@@ -56,7 +56,7 @@ func NewSolderClient(Url string) *SolderClient {
 }
 
 func TestSolderConnection(conn websocket.WebsocketConnection, data interface{}) {
-	conn.Write("solder-test", "TECHNIC.SOLDER.TESTING_TEST")
+	conn.Write("solder-test", "Starting solder test")
 	dict := data.(map[string]interface{})
 
 	var solderInfo types.SolderInfo
@@ -69,9 +69,9 @@ func TestSolderConnection(conn websocket.WebsocketConnection, data interface{}) 
 	client := NewSolderClient(solderInfo.Url)
 	loginSuccess := client.Login(solderInfo.Username, solderInfo.Password)
 	if loginSuccess {
-		conn.Write("solder-test", "TECHNIC.SOLDER.SUCCESS")
+		conn.Write("solder-test", "Solder connection seems alright")
 	} else {
-		conn.Write("solder-test", "TECHNIC.SOLDER.ERROR")
+		conn.Write("solder-test", "Could not connect to solder and login")
 	}
 }
 
