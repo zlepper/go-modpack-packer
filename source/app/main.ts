@@ -58,20 +58,20 @@ import {IpcHandlersCreator} from './IpcHandlers';
         // Which as of the time of this comment only is windows. 
         if (!canAutoupdate()) return;
         autoUpdater.addListener("update-available", function () {
-            win.webContents.send("update-info", "UPDATE.AVAILABLE");
+            win.webContents.send("update-info", "A new update is available. Downloading now...");
         });
         autoUpdater.addListener("update-downloaded", function () {
-            win.webContents.send("update-info", "UPDATE.DOWNLOADED");
+            win.webContents.send("update-info", "A new update has been downloaded. Restart the application to update.");
         });
         autoUpdater.addListener("error", function (error:any) {
             console.log(error);
             win.webContents.send("update-error", error);
         });
         autoUpdater.addListener("checking-for-update", function () {
-            win.webContents.send("update-info", "UPDATE.CHECKING_FOR_UPDATE");
+            win.webContents.send("update-info", "Checking for updates.");
         });
         autoUpdater.addListener("update-not-available", function () {
-            win.webContents.send("update-info", "UPDATE.NOT_AVAILABLE");
+            win.webContents.send("update-info", "Not updates available, running latest version.");
         });
 
         var feedUrl:string = "";

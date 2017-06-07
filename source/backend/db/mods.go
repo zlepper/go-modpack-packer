@@ -133,7 +133,7 @@ func (m *modsDb) MarkModAsOnSolder(md5 string) {
 func (m *modsDb) GetModPermission(modId string) *types.UserPermission {
 	for _, mod := range m.Mods {
 		if mod.ModId == modId {
-			if *mod.Permission != (types.UserPermission{}) {
+			if mod.Permission != nil && *mod.Permission != (types.UserPermission{}) {
 				return mod.Permission
 			}
 		}

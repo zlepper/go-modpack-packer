@@ -60,10 +60,6 @@ export class WebSocketService {
         return {};
       });
 
-    this.messageStream.subscribe(message => {
-      console.info('Got message from websocket', message);
-    });
-
     this.connection.events
       .filter(e => e.type === 'error')
       .subscribe(e => console.error(e));
@@ -88,7 +84,6 @@ export class WebSocketService {
    * @param message - The message to send
    */
   public send(message: IWebsocketMessage): void {
-    console.log("Sending websocket message (next)", message);
     this.messagesToSendSubject.next(message);
   }
 

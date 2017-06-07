@@ -1,0 +1,39 @@
+<div>
+  <p>Packing progress {{progressNumber}}/{{total}}</p>
+  <md-progress-bar type="determinate" [value]="(progressNumber/total) * 100"></md-progress-bar>
+</div>
+
+<div *ngIf="modpack.technic.upload.type !== 'none'">
+  <p>Upload progress {{uploadNumber}}/{{total}}</p>
+  <p *ngIf="uploading !== ''">Currently uploading: {{uploading}}</p>
+  <md-progress-bar mode="determinate" [value]="(uploadNumber/total) * 100"></md-progress-bar>
+</div>
+
+<div *ngIf="modpack.technic.isSolderPack === true">
+  <div *ngIf="modpack.solder.use; else notUsingSolder">
+    <div *ngIf="uploadData !== null">
+      <p>Please upload the files manually, and click continue once all files are ready to be consumed by solder. Do NOT delete the source files in the output folder yet.</p>
+      <button md-raised-button>Continue</button>
+    </div>
+    <p>Solder progress {{solderNumber}}/{{total}}</p>
+    <p *ngIf="solderDoing">Currently doing {{solderDoing}}</p>
+    <md-progress-bar mode="determinate" [value]="(solderNumber/total) * 100"></md-progress-bar>
+  </div>
+
+  <ng-template #notUsingSolder>
+    <blockquote>A data table is supposed to be here, sadly it isn't yet :/</blockquote>
+  </ng-template>
+</div>
+
+<div *ngIf="modpack.technic.checkPermissions">
+  <h4>Permissions</h4>
+  <div>
+    <p *ngFor="let info of uploadData.infos">
+      <span>{{info.name}}{{info.id}} by {{info.author}}</span>
+      <span><br />Permissions are '{{info.permissions.policy}}'</span>
+      <span><br />Link to mod: <a [href]="info.url || info.permissions.modLink">{{info.url || info.permissions.modLink}}</a></span>
+      <span *ngIf="info.permissions.licenseLink"><br />Link to license: <a [href]="info.permissions.licenseLink">{{info.permissions.licenseLink}}</a></span>
+      <span *ngIf="info.permissions.policy !== 'open'"><br/>Link to permissions: <a [href]="info.permissions.permissionLink">{{info.permissions.permissionLink}}</a></span>
+    </p>
+  </div>
+</div>

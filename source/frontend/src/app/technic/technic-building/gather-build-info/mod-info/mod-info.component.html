@@ -1,0 +1,42 @@
+<button md-button (click)="showDetails = !showDetails" class="open-button">{{mod.name ? mod.name : mod.filename}}</button>
+<div *ngIf="showDetails">
+  <div fxLayout="row">
+    <md-input-container fxFlex>
+      <input mdInput disabled [value]="mod.filename" placeholder="Filename">
+    </md-input-container>
+  </div>
+  <div fxLayout="row" fxLayoutAlign="space-between">
+    <md-input-container fxFlex="49">
+      <input mdInput [(ngModel)]="mod.name" placeholder="Mod name">
+    </md-input-container>
+    <md-input-container fxFlex="49">
+      <input mdInput [(ngModel)]="mod.modid" placeholder="Modid">
+    </md-input-container>
+  </div>
+
+  <div fxLayout="row" fxLayoutAlign="space-between">
+    <md-input-container fxFlex="49">
+      <input mdInput [(ngModel)]="mod.version" placeholder="Mod version">
+    </md-input-container>
+    <md-input-container fxFlex="49">
+      <input mdInput [(ngModel)]="mod.mcversion" placeholder="Minecraft version">
+    </md-input-container>
+  </div>
+  <div fxLayout="row" fxLayoutAlign="space-between">
+    <md-input-container fxFlex="49">
+      <input mdInput [(ngModel)]="mod.authors" placeholder="Mod authors">
+    </md-input-container>
+    <md-input-container fxFlex="49">
+      <input mdInput [(ngModel)]="mod.url" placeholder="Mod url">
+    </md-input-container>
+  </div>
+
+  <div fxLayout="row">
+    <md-input-container fxFlex>
+      <textarea mdInput [(ngModel)]="mod.description" placeholder="Mod description"></textarea>
+    </md-input-container>
+  </div>
+
+  <app-technic-mod-permissions *ngIf="modpack.technic.checkPermissions" [mod]="mod"></app-technic-mod-permissions>
+  <md-checkbox [(ngModel)]="mod.skip">Skip</md-checkbox>
+</div>

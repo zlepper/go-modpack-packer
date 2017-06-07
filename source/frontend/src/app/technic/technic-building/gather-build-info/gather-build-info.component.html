@@ -1,0 +1,4 @@
+<h2>Mod details <small>{{(mods|async)?.length}}/{{totalToScan}}</small></h2>
+<div *ngFor="let mod of modsToShow|async">
+<app-mod-info [mod]="mod" [modpack]="modpack|async"></app-mod-info>
+</div>

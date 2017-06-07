@@ -3,7 +3,6 @@ import {MdSnackBar} from "@angular/material";
 import {Modpack} from "app/models/modpack";
 import {BackendCommunicationService} from "app/services/backend-communication.service";
 
-const END_WITH_API_REGEX = /.*\/api\/?$/;
 
 @Component({
   selector: 'app-solder-options',
@@ -27,14 +26,6 @@ export class SolderOptionsComponent implements OnInit {
   }
 
   testSolder() {
-    if (this.isSolderUrlValid()) {
-      this.backendCommunicationService.send('test-solder', this.modpack.solder);
-    }
-
+    this.backendCommunicationService.send('test-solder', this.modpack.solder);
   }
-
-  isSolderUrlValid(): boolean {
-    return !END_WITH_API_REGEX.test(this.modpack.solder.url);
-  }
-
 }

@@ -5,10 +5,10 @@
   <div class="solder-url" fxLayout="row">
     <md-input-container fxFlex>
       <input mdInput placeholder="Solder url (E.g. http://solder.example.com)" [(ngModel)]="modpack.solder.url"
-             type="url" required #urlInput>
-      <md-hint *ngIf="!isSolderUrlValid()" class="mock-error" align="start">The solder url provided should not end with
+             type="url" required noApi #urlInput="ngModel">
+      <md-error *ngIf="urlInput.errors">The solder url provided should not end with
         /api/, but should be the url you hit when you browser through your browser.
-      </md-hint>
+      </md-error>
     </md-input-container>
   </div>
   <div fxLayout="column" fxLayout.lt-sm="row">

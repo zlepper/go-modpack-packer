@@ -36,6 +36,11 @@ import {SolderOptionsComponent} from "./technic/technic-settings/solder-options/
 import {TechnicCheckPermissionsComponent} from "./technic/technic-settings/technic-check-permissions/technic-check-permissions.component";
 import {TechnicSettingsComponent} from "./technic/technic-settings/technic-settings.component";
 import {TechnicComponent} from "./technic/technic.component";
+import { GatherBuildInfoComponent } from './technic/technic-building/gather-build-info/gather-build-info.component';
+import { BuildBuildingComponent } from './technic/technic-building/build-building/build-building.component';
+import { ModInfoComponent } from './technic/technic-building/gather-build-info/mod-info/mod-info.component';
+import { TechnicModPermissionsComponent } from './technic/technic-building/gather-build-info/mod-info/technic-mod-permissions/technic-mod-permissions.component';
+import {NoApiValidator} from "app/technic/technic-settings/solder-options/NoApiValidator";
 
 
 @NgModule({
@@ -59,7 +64,12 @@ import {TechnicComponent} from "./technic/technic.component";
     FtpOptionsComponent,
     S3OptionsComponent,
     JavaVersionComponent,
-    TechnicBuildingComponent
+    TechnicBuildingComponent,
+    GatherBuildInfoComponent,
+    BuildBuildingComponent,
+    ModInfoComponent,
+    TechnicModPermissionsComponent,
+    NoApiValidator
   ],
   imports: [
     BrowserModule,
@@ -84,7 +94,10 @@ import {TechnicComponent} from "./technic/technic.component";
     WebSocketService,
     HasModpackSelectedGuard
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  entryComponents: [
+    TechnicBuildingComponent
+  ]
 })
 export class AppModule {
 }

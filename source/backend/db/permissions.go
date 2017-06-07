@@ -36,6 +36,7 @@ type PermissionData struct {
 
 type PermissionsDB struct {
 	Permissions []*PermissionData
+	lock        sync.RWMutex
 }
 
 func init() {
@@ -76,6 +77,7 @@ func UpdatePermissionStore() {
 		return
 	}
 
+	permissionDBInstance.lock.Lock()
 	for _, permission := range permissions {
 		data := PermissionData{
 			ModName:            permission.ModName,
@@ -91,24 +93,31 @@ func UpdatePermissionStore() {
 
 		permissionDBInstance.Permissions = append(permissionDBInstance.Permissions, &data)
 	}
+	permissionDBInstance.lock.Unlock()
 	ready.Done()
 	log.Println("Done updating permission store")
 }
 
 var permissionCache = make(map[string]*PermissionData)
+var permissionsCacheLock = new(sync.RWMutex)
 
 func (db *PermissionsDB) GetPermission(modId string) *PermissionData {
 	if permission, ok := permissionCache[modId]; ok {
 		return permission
 	}
+	db.lock.RLock()
 	for _, p := range db.Permissions {
 		for _, id := range p.Modids {
 			if id == modId {
+				permissionsCacheLock.Lock()
 				permissionCache[modId] = p
+				permissionsCacheLock.Unlock()
+				db.lock.RUnlock()
 				return p
 			}
 		}
 	}
+	db.lock.RUnlock()
 	return nil
 }
 

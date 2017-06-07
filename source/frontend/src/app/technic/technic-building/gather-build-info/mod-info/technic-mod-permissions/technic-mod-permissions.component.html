@@ -1,0 +1,19 @@
+<div fxLayout="row" fxLayoutAlign="space-between">
+  <md-input-container fxFlex="49">
+    <input mdInput [value]="mod.userPermission.policy" disabled placeholder="Permission type for mod">
+  </md-input-container>
+  <md-input-container fxFlex="49">
+    <input mdInput [(ngModel)]="mod.userPermission.licenseLink" placeholder="Link to license">
+  </md-input-container>
+</div>
+<div fxLayout="row" fxLayoutAlign="space-between">
+  <md-input-container fxFlex="49">
+    <input mdInput [(ngModel)]="mod.userPermission.modLink" placeholder="Link to mod">
+  </md-input-container>
+  <md-input-container fxFlex="49">
+    <input mdInput [(ngModel)]="mod.userPermission.permissionLink" placeholder="Link to proof of additional permission">
+  </md-input-container>
+</div>
+<div>
+  <button md-button (click)="checkDBForPermissions()">Check database for permission information</button>
+</div>

@@ -158,3 +158,21 @@ export class UserPermission {
   public policy: string;
   public modId: string;
 }
+
+export class ModInfo {
+  file:string;
+  name:string;
+  id:string;
+  version:string;
+  minecraftVersion:string;
+  description:string;
+  author:string;
+  url:string;
+  progressKey:string;
+  permissions:UserPermission;
+}
+
+export class UploadWaiting {
+  public modpack:Modpack;
+  public infos:ModInfo[];
+}
