@@ -67,3 +67,23 @@ func CrawlModList(res *http.Response) []Mod {
 
 	return mods
 }
+
+func CrawlMod(res *http.Response) Mod {
+	doc := makeDoc(res)
+
+	mod := Mod{}
+
+	mod.PrettyName = doc.Find("#pretty_name").AttrOr("value", "")
+	mod.Name = doc.Find("#name").AttrOr("value", "")
+	mod.Author = doc.Find("#author").AttrOr("value", "")
+	mod.Description = doc.Find("#description").Text()
+	mod.Link = doc.Find("#link").Text()
+	mod.Donate = doc.Find("#donatelink").AttrOr("value", "")
+
+	mod.Id = doc.Find(`#add-row > input[name="mod-id"]`).AttrOr("value", "")
+	doc.Find("#versions > table > tbody > tr.version > td.version").Each(func(index int, s *goquery.Selection) {
+		mod.Versions = append(mod.Versions, s.Text())
+	})
+
+	return mod
+}
