@@ -1,9 +1,12 @@
 import IAugmentedJQuery = angular.IAugmentedJQuery;
+
+declare var TweenLite: any;
+
 angular.module("ModpackHelper").animation(".collapsible", function () {
 
     return {
         removeClass: function (elements:IAugmentedJQuery, className: string, done:Function) {
-            var tweens: Array<TweenLite> = []
+            var tweens: Array<any> = [];
             for(var i = 0; i < elements.length; i++) {
                 var element = elements[i];
                 var height = element.style.height || 0;

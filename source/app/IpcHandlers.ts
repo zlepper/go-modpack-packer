@@ -1,12 +1,6 @@
-import {
-    ipcMain,
-    dialog,
-    autoUpdater,
-    app
-} from 'electron';
+import {app, autoUpdater, dialog, ipcMain} from "electron";
+import {readFile, writeFile} from "fs";
 import {join} from "path";
-import {writeFile, readFile} from "fs";
-
 
 export class IpcHandlersCreator {
     constructor() {
@@ -14,7 +8,7 @@ export class IpcHandlersCreator {
     }
     
     public static bindListeners():void {
-        ipcMain.on("open-input-directory-dialog", (event:Electron.IpcMainEvent) => {
+        ipcMain.on("open-input-directory-dialog", (event: Electron.IpcMessageEvent) => {
                 dialog.showOpenDialog({
                     properties: ["openDirectory"]
                 }, function (dirs:string[]) {
@@ -25,7 +19,7 @@ export class IpcHandlersCreator {
             }
         );
 
-        ipcMain.on("open-output-directory-dialog", (event:Electron.IpcMainEvent) => {
+        ipcMain.on("open-output-directory-dialog", (event: Electron.IpcMessageEvent) => {
                 dialog.showOpenDialog({
                     properties: ["openDirectory"]
                 }, function (dirs:string[]) {
@@ -40,7 +34,7 @@ export class IpcHandlersCreator {
             autoUpdater.quitAndInstall();
         });
 
-        ipcMain.on("save-languages", (event:Electron.IpcMainEvent, languages: any) => {
+        ipcMain.on("save-languages", (event: Electron.IpcMessageEvent, languages: any) => {
             console.log("Saving languages");
             var folder = app.getPath("userData");
             var file = join(folder, "languages.json");
@@ -51,7 +45,7 @@ export class IpcHandlersCreator {
             });
         });
 
-        ipcMain.on("get-languages", (event: Electron.IpcMainEvent) => {
+        ipcMain.on("get-languages", (event: Electron.IpcMessageEvent) => {
             var folder = app.getPath("userData");
             var file = join(folder, "languages.json");
 

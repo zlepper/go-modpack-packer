@@ -1,20 +1,12 @@
-import {
-    platform,
-    arch
-} from "os"
+import {ChildProcess, exec, spawn} from "child_process";
 
-import {
-    app,
-    BrowserWindow,
-    autoUpdater,
-    ipcMain
-} from 'electron'
+import {app, autoUpdater, BrowserWindow, ipcMain} from "electron";
 
-import {createReadStream, createWriteStream, readFileSync, writeFileSync} from 'fs'
+import {createReadStream, createWriteStream, readFileSync, writeFileSync} from "fs";
+import {arch, platform} from "os";
 
-import {join, resolve, basename} from 'path';
-import {spawn, exec, ChildProcess} from 'child_process';
-import {IpcHandlersCreator} from './IpcHandlers';
+import {basename, join, resolve} from "path";
+import {IpcHandlersCreator} from "./IpcHandlers";
 
 (function () {
     if (platform() == "win32") {
@@ -174,7 +166,10 @@ import {IpcHandlersCreator} from './IpcHandlers';
             } catch (e) {
             }
 
-            var bounds:Electron.BrowserWindowOptions = data && data.bounds ? data.bounds : {width: 800, height: 600};
+            var bounds: Electron.BrowserWindowConstructorOptions = data && data.bounds ? data.bounds : {
+                width: 800,
+                height: 600
+            };
             bounds.frame = false;
             bounds.minWidth = 700;
             bounds.minHeight = 450;
@@ -184,7 +179,9 @@ import {IpcHandlersCreator} from './IpcHandlers';
 
             // and load the index.body of the app.
             win.loadURL(`file://${__dirname}/index.html`);
-            if (devMode) win.webContents.openDevTools('undocked');
+            if (devMode) win.webContents.openDevTools({
+                mode: "undocked"
+            });
             // live reload from electron connect
             //client.client.create(win);
 

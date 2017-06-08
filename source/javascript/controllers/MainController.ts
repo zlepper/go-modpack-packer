@@ -11,7 +11,7 @@ module MainController {
                     protected $translate: angular.translate.ITranslateService,
                     protected $mdToast: angular.material.IToastService) {
 
-            this.electron.on('error', (_, err) => {
+            this.electron.on('error', (_: any, err: any) => {
                 console.log(err[0]);
                 this.$mdToast.show(
                     this.$mdToast.simple().textContent("Background process crashed. Please report an issue on the bugtracker.")

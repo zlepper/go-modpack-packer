@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "noImplicitAny": true
-  },
-  "files": [
-    "main.d.ts"
-  ]
+    "noImplicitAny": true,
+    "types": [
+      "node"
+    ]
+  }
 }

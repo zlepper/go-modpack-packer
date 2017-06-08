@@ -27,13 +27,11 @@ const gulp = require('gulp'),
         ],
 
         typescript: [
-            "typings/browser.d.ts",
             "source/javascript/main.ts",
             ownScripts
         ],
 
         mainTypescript: [
-            "typings/main.d.ts",
             "source/app/**/*.ts"
         ],
 
@@ -52,7 +50,7 @@ const gulp = require('gulp'),
             nodesource + "angular-material/angular-material.js",
             nodesource + "angular-translate/dist/angular-translate.js",
             nodesource + "angular-translate-loader-partial/angular-translate-loader-partial.js",
-            nodesource + "angular-ui-router/release/angular-ui-router.js",
+            nodesource + "@uirouter/angularjs/release/angular-ui-router.js",
             nodesource + "angular-local-storage/dist/angular-local-storage.js",
             nodesource + "angular-websocket/dist/angular-websocket.js",
             nodesource + "angular-material-data-table/dist/md-data-table.js",
@@ -89,10 +87,10 @@ function buildCss(output) {
         output = defaultOutputLocation;
     }
     return gulp.src(input.sass)
-        .pipe(sourcemaps.init())
+    // .pipe(sourcemaps.init())
         .pipe(sass())
         .pipe(concat("bundle.css"))
-        .pipe(sourcemaps.write())
+        // .pipe(sourcemaps.write())
         .pipe(gulp.dest(output));
 }
 
@@ -109,7 +107,7 @@ function buildTs(output) {
     const tsClientProject = ts.createProject("source/javascript/tsconfig.json");
     return gulp.src(input.typescript)
         .pipe(sourcemaps.init())
-        .pipe(ts(tsClientProject))
+        .pipe(tsClientProject())
         .pipe(concat('bundle.js'))
         //only uglify if gulp is ran with '--type production'
         .pipe(gutil.env.type === 'production' ? uglify() : gutil.noop())
@@ -129,7 +127,7 @@ function electron(output) {
     const tsElectronProject = ts.createProject("source/app/tsconfig.json");
     var tsTask = gulp.src(input.mainTypescript)
         .pipe(sourcemaps.init())
-        .pipe(ts(tsElectronProject))
+        .pipe(tsElectronProject())
         .pipe(sourcemaps.write())
         .pipe(gulp.dest(output));
     var packageTask = gulp.src("source/app/package.json")
@@ -289,9 +287,11 @@ function buildRelease(os, arch, callback) {
             devMetadata: {
                 build: {
                     appId: "dk.zlepper.modpackpacker",
-                    "app-category-type": "public.app-category.developer-tools",
+                    productName: "Modpack packer",
+                    mac: {
+                        category: "public.app-category.developer-tools",
+                    },
                     win: {
-                        iconUrl: "https://raw.githubusercontent.com/zlepper/TechnicSolderHelper/master/TechnicSolderHelper/modpackhelper.ico",
                         icon: path.join(__dirname, "build", "icon.ico")
                     },
                     compression: "maximum"
@@ -302,7 +302,12 @@ function buildRelease(os, arch, callback) {
                 }
             }
         });
-    }).then(callback).catch(callback);
+    }).then((res) => {
+        callback();
+    }).catch((err) => {
+        console.error(err);
+        callback(err);
+    });
 }
 
 gulp.task("build-release:windows:x32", function (cb) {
