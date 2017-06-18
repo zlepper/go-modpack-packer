@@ -9,9 +9,9 @@ import {ModpackService} from "app/services/modpack.service";
 })
 export class BodyComponent implements OnInit {
 
-  selectedModpackId: number;
+  public selectedModpackId: number;
 
-  constructor(protected modpackService: ModpackService) {
+  constructor(public modpackService: ModpackService) {
 
   }
 
@@ -25,7 +25,7 @@ export class BodyComponent implements OnInit {
       });
   }
 
-  selectedModpackChanged(id: number) {
+  public selectedModpackChanged(id: number) {
     if (id === -1) {
       const pack = this.modpackService.addModpack("Unnamed modpack");
       id = this.selectedModpackId = pack.id;

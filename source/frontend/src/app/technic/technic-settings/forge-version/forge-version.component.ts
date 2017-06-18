@@ -12,9 +12,9 @@ import {Observable} from "rxjs/Observable";
 export class ForgeVersionComponent implements OnInit, OnChanges {
 
   @Input()
-  protected modpack: Modpack;
-  protected forgeVersions: Observable<ForgeVersion[]>;
-  protected ready: Observable<boolean>;
+  public modpack: Modpack;
+  public forgeVersions: Observable<ForgeVersion[]>;
+  public ready: Observable<boolean>;
 
   constructor(protected forgeVersionService: ForgeVersionService) {
   }

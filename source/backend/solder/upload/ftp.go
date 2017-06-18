@@ -1,21 +1,19 @@
 package upload
 
 import (
-	"github.com/zlepper/go-modpack-packer/source/backend/types"
-	//"crypto/tls"
 	"errors"
 	"fmt"
 	"github.com/getsentry/raven-go"
 	"github.com/jlaffaye/ftp"
 	"github.com/mitchellh/mapstructure"
-	"github.com/zlepper/go-websocket-connection"
+	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	"log"
 	"os"
 	"path"
 	"strings"
 )
 
-func UploadFilesToFtp(modpack *types.Modpack, infos []*types.OutputInfo, conn websocket.WebsocketConnection) {
+func UploadFilesToFtp(modpack *types.Modpack, infos []*types.OutputInfo, conn types.WebsocketConnection) {
 	conn.Write("started-uploading-all", "")
 	var err error
 	var f *ftp.ServerConn
@@ -106,7 +104,7 @@ type FtpTestResult struct {
 	Message string `json:"message"`
 }
 
-func testFtp(conn websocket.WebsocketConnection, data interface{}) error {
+func testFtp(conn types.WebsocketConnection, data interface{}) error {
 	dict := data.(map[string]interface{})
 	var loginInfo types.FtpConfig
 	err := mapstructure.Decode(dict, &loginInfo)
@@ -147,7 +145,7 @@ func testFtp(conn websocket.WebsocketConnection, data interface{}) error {
 	return nil
 }
 
-func TestFtp(conn websocket.WebsocketConnection, data interface{}) {
+func TestFtp(conn types.WebsocketConnection, data interface{}) {
 	err := testFtp(conn, data)
 	testResult := FtpTestResult{
 		Success: err == nil,

@@ -13,7 +13,7 @@ import {BackendCommunicationService} from "app/services/backend-communication.se
 export class SolderOptionsComponent implements OnInit {
 
   @Input()
-  protected modpack: Modpack;
+  public modpack: Modpack;
 
   constructor(protected snackBar: MdSnackBar, protected backendCommunicationService: BackendCommunicationService) {
   }
@@ -25,7 +25,7 @@ export class SolderOptionsComponent implements OnInit {
       });
   }
 
-  testSolder() {
+  public testSolder() {
     this.backendCommunicationService.send('test-solder', this.modpack.solder);
   }
 }

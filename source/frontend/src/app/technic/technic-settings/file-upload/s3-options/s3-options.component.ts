@@ -1,8 +1,8 @@
 import {Component, Input, OnInit} from "@angular/core";
 import {Modpack} from "app/models/modpack";
+import "app/operators/behaviorSubject";
 import {BackendCommunicationService} from "app/services/backend-communication.service";
 import {Observable} from "rxjs/Observable";
-import 'app/operators/behaviorSubject';
 
 @Component({
   selector: 'app-s3-options',
@@ -12,9 +12,9 @@ import 'app/operators/behaviorSubject';
 export class S3OptionsComponent implements OnInit {
 
   @Input()
-  protected modpack: Modpack;
-  protected buckets: Observable<string[]>;
-  protected hasBuckets: Observable<boolean>;
+  public modpack: Modpack;
+  public buckets: Observable<string[]>;
+  public hasBuckets: Observable<boolean>;
 
   constructor(protected backendCommunicationService: BackendCommunicationService) {
   }
@@ -24,7 +24,7 @@ export class S3OptionsComponent implements OnInit {
     this.hasBuckets = this.buckets.map(buckets => buckets.length > 0);
   }
 
-  getBuckets() {
+  public getBuckets() {
     this.backendCommunicationService.send('get-aws-buckets', this.modpack);
   }
 

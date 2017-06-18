@@ -2,8 +2,9 @@
 <module type="GO_MODULE" version="4">
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
-    <content url="file://$MODULE_DIR$/source/app" />
-    <content url="file://$MODULE_DIR$/source/backend" />
+    <content url="file://$MODULE_DIR$/source/backend">
+      <excludeFolder url="file://$MODULE_DIR$/source/backend/vendor" />
+    </content>
     <content url="file://$MODULE_DIR$/source/frontend">
       <excludeFolder url="file://$MODULE_DIR$/source/frontend/dist" />
       <excludeFolder url="file://$MODULE_DIR$/source/frontend/tmp" />

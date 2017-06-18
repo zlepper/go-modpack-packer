@@ -1,9 +1,0 @@
-{
-  "compilerOptions": {
-    "target": "es5",
-    "noImplicitAny": true
-  },
-  "files": [
-    "browser.d.ts"
-  ]
-}

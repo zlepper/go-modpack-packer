@@ -3,9 +3,9 @@ package handlers
 import (
 	"encoding/json"
 	"github.com/getsentry/raven-go"
+	"github.com/zlepper/go-modpack-packer/source/backend/consts"
 	"github.com/zlepper/go-modpack-packer/source/backend/encryption"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
-	"github.com/zlepper/go-websocket-connection"
 	"io/ioutil"
 	"log"
 	"os"
@@ -29,7 +29,7 @@ func createInputDirData(data map[string]interface{}) inputDirData {
 	return res
 }
 
-func findAdditionalFolders(conn websocket.WebsocketConnection, data interface{}) {
+func findAdditionalFolders(conn types.WebsocketConnection, data interface{}) {
 	dir := createInputDirData(data.(map[string]interface{}))
 	files, err := ioutil.ReadDir(dir.InputDir)
 	if err != nil {
@@ -56,9 +56,9 @@ func findAdditionalFolders(conn websocket.WebsocketConnection, data interface{})
 	conn.Write("found-folders", folders)
 }
 
-func saveModpacks(conn websocket.WebsocketConnection, data interface{}) {
+func saveModpacks(conn types.WebsocketConnection, data interface{}) {
 	// Get the appData directory, since go doesn't expose it, electron passes it as a parameter
-	dataDirectory := os.Args[1]
+	dataDirectory := consts.DataDirectory
 	modpackFile := filepath.Join(dataDirectory, "modpacks.json")
 	modpacks := types.CreateModpackData(data)
 	for i := range modpacks {
@@ -90,8 +90,8 @@ func saveModpacks(conn websocket.WebsocketConnection, data interface{}) {
 	mutex.Unlock()
 }
 
-func loadModpacks(conn websocket.WebsocketConnection) {
-	dataDirectory := os.Args[1]
+func loadModpacks(conn types.WebsocketConnection) {
+	dataDirectory := consts.DataDirectory
 	modpackFile := filepath.Join(dataDirectory, "modpacks.json")
 	mutex.Lock()
 	modpackData, err := ioutil.ReadFile(modpackFile)

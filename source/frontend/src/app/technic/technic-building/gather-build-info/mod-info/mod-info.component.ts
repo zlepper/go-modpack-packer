@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from "@angular/core";
 import {Mod} from "app/models/mod";
 import {Modpack} from "app/models/modpack";
 
@@ -8,14 +8,13 @@ import {Modpack} from "app/models/modpack";
   styleUrls: ['./mod-info.component.scss']
 })
 export class ModInfoComponent implements OnInit {
-  protected showDetails: boolean;
+  public showDetails: boolean;
 
   @Input()
-  protected mod: Mod;
+  public mod: Mod;
 
   @Input()
-  protected modpack: Modpack;
-
+  public modpack: Modpack;
 
   constructor() { }
 

@@ -1,14 +1,13 @@
-import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
-import {Modpack, UploadWaiting, UserPermission} from "app/models/modpack";
-import {Observable} from "rxjs/Observable";
+import {ChangeDetectionStrategy, Component, OnInit} from "@angular/core";
+import {MdCheckboxChange, MdDialogRef, MdSnackBar} from "@angular/material";
+import {Mod} from "app/models/mod";
+import {Modpack, UploadWaiting} from "app/models/modpack";
+import "app/operators/behaviorSubject";
 import {BackendCommunicationService} from "app/services/backend-communication.service";
 import {ModpackService} from "app/services/modpack.service";
-import {Mod} from "app/models/mod";
-import {Subject} from "rxjs/Subject";
 import {BehaviorSubject} from "rxjs/BehaviorSubject";
-import {MdDialogRef, MdCheckboxChange, MdSnackBar} from '@angular/material';
-import 'app/operators/behaviorSubject';
-
+import {Observable} from "rxjs/Observable";
+import {Subject} from "rxjs/Subject";
 
 
 @Component({
@@ -19,21 +18,21 @@ import 'app/operators/behaviorSubject';
 })
 export class TechnicBuildingComponent implements OnInit {
 
-  protected modpack: Observable<Modpack>;
-  protected mods: Observable<Mod[]>;
-  protected readyToBuild: Observable<boolean>;
-  protected totalToScan: Observable<number>;
-  protected totalToPack: Observable<number>;
-  protected packingTodos: Observable<string[]>;
-  protected packingProgressNumber: Observable<number>;
-  protected state: Subject<string>;
-  protected showDone: Subject<boolean>;
-  protected uploading: Observable<string>;
-  protected updateTodos: Observable<string[]>;
-  protected solderDoing: Observable<string>;
-  protected uploadData: Observable<UploadWaiting>;
-  protected solderProgressNumber: Observable<number>;
-  protected uploadProgressNumber: Observable<number>;
+  public modpack: Observable<Modpack>;
+  public mods: Observable<Mod[]>;
+  public readyToBuild: Observable<boolean>;
+  public totalToScan: Observable<number>;
+  public totalToPack: Observable<number>;
+  public packingTodos: Observable<string[]>;
+  public packingProgressNumber: Observable<number>;
+  public state: Subject<string>;
+  public showDone: Subject<boolean>;
+  public uploading: Observable<string>;
+  public updateTodos: Observable<string[]>;
+  public solderDoing: Observable<string>;
+  public uploadData: Observable<UploadWaiting>;
+  public solderProgressNumber: Observable<number>;
+  public uploadProgressNumber: Observable<number>;
 
   constructor(protected backendCommunicationService: BackendCommunicationService,
               protected modpackService: ModpackService,
@@ -104,15 +103,15 @@ export class TechnicBuildingComponent implements OnInit {
 
   }
 
-  skipAll() {
+  public skipAll() {
     this.mods.take(1).subscribe(mods => mods.filter(mod => !mod.isValid()).forEach(mod => mod.skip = true));
   }
 
-  changeShowDone(event: MdCheckboxChange) {
+  public changeShowDone(event: MdCheckboxChange) {
     this.showDone.next(event.checked)
   }
 
-  build() {
+  public build() {
     this.mods.take(1)
       .withLatestFrom(this.modpack.take(1))
       .subscribe(([mods, modpack]) => {
@@ -127,7 +126,7 @@ export class TechnicBuildingComponent implements OnInit {
       });
   }
 
-  cancel() {
+  public cancel() {
     this.dialogRef.close();
   }
 }

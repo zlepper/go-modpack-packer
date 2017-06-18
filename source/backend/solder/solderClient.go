@@ -8,7 +8,6 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/zlepper/go-modpack-packer/source/backend/solder/crawlers"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
-	"github.com/zlepper/go-websocket-connection"
 	"io"
 	"io/ioutil"
 	"log"
@@ -55,7 +54,7 @@ func NewSolderClient(Url string) *SolderClient {
 	}
 }
 
-func TestSolderConnection(conn websocket.WebsocketConnection, data interface{}) {
+func TestSolderConnection(conn types.WebsocketConnection, data interface{}) {
 	conn.Write("solder-test", "Starting solder test")
 	dict := data.(map[string]interface{})
 

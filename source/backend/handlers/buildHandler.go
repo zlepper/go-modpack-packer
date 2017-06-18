@@ -12,7 +12,6 @@ import (
 	"github.com/zlepper/go-modpack-packer/source/backend/solder"
 	"github.com/zlepper/go-modpack-packer/source/backend/solder/upload"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
-	"github.com/zlepper/go-websocket-connection"
 	"io"
 	"io/ioutil"
 	"log"
@@ -27,7 +26,7 @@ import (
 const donePackingPartName string = "done-packing-part"
 const packingPartName string = "packing-part"
 
-func build(conn websocket.WebsocketConnection, data interface{}) {
+func build(conn types.WebsocketConnection, data interface{}) {
 	dat := data.(map[string]interface{})
 	modpack := types.CreateSingleModpackData(dat["modpack"])
 	mods := make([]*types.Mod, 0)
@@ -46,7 +45,7 @@ type uploadWaiting struct {
 	Infos   []*types.OutputInfo `json:"infos"`
 }
 
-func continueRunning(conn websocket.WebsocketConnection, data interface{}) {
+func continueRunning(conn types.WebsocketConnection, data interface{}) {
 	dict := data.(map[string]interface{})
 
 	var uploadInfo uploadWaiting
@@ -63,7 +62,7 @@ func continueRunning(conn websocket.WebsocketConnection, data interface{}) {
 	}
 }
 
-func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.WebsocketConnection) {
+func buildModpack(modpack types.Modpack, mods []*types.Mod, conn types.WebsocketConnection) {
 	// Create output directory
 	outputDirectory := path.Join(modpack.OutputDirectory, modpack.Name)
 	os.MkdirAll(outputDirectory, os.ModePerm)
@@ -171,7 +170,7 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn websocket.Webso
 
 const solderCurrentlyDoingEvent string = "solder-currently-doing"
 
-func updateSolder(modpack types.Modpack, conn websocket.WebsocketConnection) (*solder.SolderClient, string) {
+func updateSolder(modpack types.Modpack, conn types.WebsocketConnection) (*solder.SolderClient, string) {
 	// Create solder client
 	conn.Write(solderCurrentlyDoingEvent, "Logging in to solder")
 	solderclient := solder.NewSolderClient(modpack.Solder.Url)
@@ -202,7 +201,7 @@ func updateSolder(modpack types.Modpack, conn websocket.WebsocketConnection) (*s
 	return solderclient, buildId
 }
 
-func addInfoToSolder(info *types.OutputInfo, buildId string, conn websocket.WebsocketConnection, solderclient *solder.SolderClient) {
+func addInfoToSolder(info *types.OutputInfo, buildId string, conn types.WebsocketConnection, solderclient *solder.SolderClient) {
 	conn.Write("updating-solder", info.ProgressKey)
 	var modid string
 	modid = solderclient.GetModId(info.Id)
@@ -245,7 +244,7 @@ func addInfoToSolder(info *types.OutputInfo, buildId string, conn websocket.Webs
 	conn.Write("done-updating-solder", info.ProgressKey)
 }
 
-func packForgeFolder(modpack types.Modpack, conn websocket.WebsocketConnection, outputDirectory string, ch *chan *types.OutputInfo, sc *solder.SolderClient) {
+func packForgeFolder(modpack types.Modpack, conn types.WebsocketConnection, outputDirectory string, ch *chan *types.OutputInfo, sc *solder.SolderClient) {
 	const minecraftForge string = "Minecraft Forge"
 	version := fmt.Sprintf("%v", modpack.Technic.ForgeVersion.Build)
 	conn.Write(packingPartName, minecraftForge)
@@ -318,7 +317,7 @@ func packForgeFolder(modpack types.Modpack, conn websocket.WebsocketConnection, 
 	}
 }
 
-func packAdditionalFolder(modpack types.Modpack, folderPath string, outputDirectory string, conn websocket.WebsocketConnection, ch *chan *types.OutputInfo) {
+func packAdditionalFolder(modpack types.Modpack, folderPath string, outputDirectory string, conn types.WebsocketConnection, ch *chan *types.OutputInfo) {
 	conn.Write(packingPartName, folderPath)
 	inputFolder := path.Join(modpack.InputDirectory, folderPath)
 	inputFolderInfo, _ := os.Stat(inputFolder)
@@ -354,7 +353,7 @@ func packAdditionalFolder(modpack types.Modpack, folderPath string, outputDirect
 	}
 }
 
-func packFolder(zipWriter *zip.Writer, folder string, parent string, conn websocket.WebsocketConnection) {
+func packFolder(zipWriter *zip.Writer, folder string, parent string, conn types.WebsocketConnection) {
 	files, _ := ioutil.ReadDir(folder)
 	for _, file := range files {
 		if file.IsDir() {
@@ -388,7 +387,7 @@ func packFolder(zipWriter *zip.Writer, folder string, parent string, conn websoc
 	}
 }
 
-func packMod(mod *types.Mod, conn websocket.WebsocketConnection, outputDirectory string, ch *chan *types.OutputInfo) {
+func packMod(mod *types.Mod, conn types.WebsocketConnection, outputDirectory string, ch *chan *types.OutputInfo) {
 	if mod.Md5 == "" {
 		fmt.Println("Calculating md5 of file " + mod.Filename)
 		md5, _ := helpers.ComputeMd5(mod.Filename)

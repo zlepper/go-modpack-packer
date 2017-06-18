@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/getsentry/raven-go"
+	"github.com/zlepper/go-modpack-packer/source/backend/consts"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	"os"
 	"path/filepath"
@@ -33,7 +34,7 @@ func GetModsDb() *modsDb {
 	}
 
 	if len(os.Args) > 1 {
-		dataDirectory := os.Args[1]
+		dataDirectory := consts.DataDirectory
 		modsFile := filepath.Join(dataDirectory, "mods.json")
 		f, err := os.Open(modsFile)
 		if err != nil {
@@ -53,7 +54,7 @@ func GetModsDb() *modsDb {
 }
 
 func (m *modsDb) GetModFromMd5(md5 string) *types.Mod {
-	for i, _ := range m.Mods {
+	for i := range m.Mods {
 		if m.Mods[i].Md5 == md5 {
 			return m.Mods[i]
 		}
@@ -75,7 +76,7 @@ func (m *modsDb) GetModsWithModId(modId string) []*types.Mod {
 func (m *modsDb) Save() {
 	// Don't start saving this multiple times, that will mess things up severely
 	m.m.Lock()
-	dataDirectory := os.Args[1]
+	dataDirectory := consts.DataDirectory
 	modsFile := filepath.Join(dataDirectory, "mods.json")
 	f, err := os.Create(modsFile)
 	if err != nil {
@@ -98,7 +99,7 @@ func (m *modsDb) AddMod(mod *types.Mod) {
 	}
 	fmt.Println(mod.Md5)
 	// Check if mods exists
-	for i, _ := range m.Mods {
+	for i := range m.Mods {
 		// Check if the mods are the same
 		// If the md5 matches, then it's likely the same mod
 		if m.Mods[i].Md5 == mod.Md5 {

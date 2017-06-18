@@ -9,7 +9,7 @@ import {Observable} from "rxjs";
   styleUrls: ['./modpack.component.scss']
 })
 export class ModpackComponent implements OnInit {
-  protected selectedModpack: Observable<Modpack>;
+  public selectedModpack: Observable<Modpack>;
 
   constructor(protected modpackService: ModpackService) {
   }

@@ -9,7 +9,7 @@ import {Modpack} from "app/models/modpack";
 export class TechnicCheckPermissionsComponent implements OnInit {
 
   @Input()
-  protected modpack: Modpack;
+  public modpack: Modpack;
 
   constructor() {
   }

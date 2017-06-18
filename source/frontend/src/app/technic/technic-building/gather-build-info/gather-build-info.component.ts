@@ -1,8 +1,8 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from "@angular/core";
 import {Mod} from "app/models/mod";
-import {Observable} from "rxjs/Observable";
 import {Modpack} from "app/models/modpack";
 import {ModpackService} from "app/services/modpack.service";
+import {Observable} from "rxjs/Observable";
 
 @Component({
   selector: 'app-gather-build-info',
@@ -12,17 +12,17 @@ import {ModpackService} from "app/services/modpack.service";
 export class GatherBuildInfoComponent implements OnInit {
 
   @Input()
-  protected mods: Observable<Mod[]>;
+  public mods: Observable<Mod[]>;
 
   @Input()
-  protected totalToScan: number;
+  public totalToScan: number;
 
   @Input()
-  protected showDone: Observable<boolean>;
+  public showDone: Observable<boolean>;
 
-  protected modpack: Observable<Modpack>;
+  public modpack: Observable<Modpack>;
 
-  protected modsToShow: Observable<Mod[]>;
+  public modsToShow: Observable<Mod[]>;
 
   constructor(protected modpackService: ModpackService) {
   }

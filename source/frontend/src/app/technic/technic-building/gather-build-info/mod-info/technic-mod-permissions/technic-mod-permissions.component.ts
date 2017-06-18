@@ -1,8 +1,8 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from "@angular/core";
 import {Mod} from "app/models/mod";
+import {UserPermission} from "app/models/modpack";
 import {BackendCommunicationService} from "app/services/backend-communication.service";
 import {ModpackService} from "app/services/modpack.service";
-import {UserPermission} from "app/models/modpack";
 
 
 class PermissionSearch {
@@ -24,7 +24,7 @@ class PermissionSearch {
 export class TechnicModPermissionsComponent implements OnInit {
 
   @Input()
-  protected mod: Mod;
+  public mod: Mod;
 
   constructor(protected backendCommunicationService: BackendCommunicationService, protected modpackService: ModpackService) {
   }
@@ -32,7 +32,7 @@ export class TechnicModPermissionsComponent implements OnInit {
   ngOnInit() {
   }
 
-  checkDBForPermissions() {
+  public checkDBForPermissions() {
     this.modpackService.selectedModpack
       .take(1)
       .switchMap(modpack => {

@@ -18,8 +18,8 @@ export interface IFtpTestResult {
 export class FtpOptionsComponent implements OnInit {
 
   @Input()
-  protected modpack: Modpack;
-  protected testing: Subject<boolean>;
+  public modpack: Modpack;
+  public testing: Subject<boolean>;
 
   constructor(protected backendCommunicationService: BackendCommunicationService, protected snackBar: MdSnackBar) {
   }
@@ -35,7 +35,7 @@ export class FtpOptionsComponent implements OnInit {
       });
   }
 
-  testFtp() {
+  public testFtp() {
     console.log('Testing ftp');
     this.testing.next(true);
     this.backendCommunicationService.send('test-ftp', this.modpack.technic.upload.ftp);

@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from "@angular/core";
 import {Modpack, UploadWaiting} from "app/models/modpack";
 
 @Component({
@@ -9,25 +9,25 @@ import {Modpack, UploadWaiting} from "app/models/modpack";
 export class BuildBuildingComponent implements OnInit {
 
   @Input()
-  protected modpack: Modpack;
+  public modpack: Modpack;
 
   @Input()
-  protected progressNumber: number;
+  public progressNumber: number;
 
   @Input()
-  protected total: number;
+  public total: number;
 
   @Input()
-  protected uploadNumber: number;
+  public uploadNumber: number;
 
   @Input()
-  protected uploading: string;
+  public uploading: string;
 
   @Input()
-  protected uploadData: UploadWaiting;
+  public uploadData: UploadWaiting;
 
   @Input()
-  protected solderNumber: number;
+  public solderNumber: number;
 
   constructor() { }
 

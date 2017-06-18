@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/getsentry/raven-go"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
-	"github.com/zlepper/go-websocket-connection"
 	"log"
 	"os"
 	"path"
@@ -25,7 +24,7 @@ func getConnection(modpack *types.Modpack) *s3.S3 {
 	return svc
 }
 
-func GetAwsBuckets(conn websocket.WebsocketConnection, d interface{}) {
+func GetAwsBuckets(conn types.WebsocketConnection, d interface{}) {
 	modpack := types.CreateSingleModpackData(d)
 
 	svc := getConnection(&modpack)
@@ -44,7 +43,7 @@ func GetAwsBuckets(conn websocket.WebsocketConnection, d interface{}) {
 	conn.Write("found-aws-buckets", buckets)
 }
 
-func UploadFilesToS3(modpack *types.Modpack, infos []*types.OutputInfo, conn websocket.WebsocketConnection) {
+func UploadFilesToS3(modpack *types.Modpack, infos []*types.OutputInfo, conn types.WebsocketConnection) {
 	conn.Write("started-uploading-all", "")
 	svc := getConnection(modpack)
 	uploader := s3manager.NewUploaderWithClient(svc)

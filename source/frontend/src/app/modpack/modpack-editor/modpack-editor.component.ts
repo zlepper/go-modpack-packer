@@ -1,6 +1,5 @@
 import {Component, Input, OnInit} from "@angular/core";
 import {Modpack} from "app/models/modpack";
-import {ElectronService} from "app/services/electron.service";
 import {ForgeVersionService} from "app/services/forge-version.service";
 
 @Component({
@@ -13,24 +12,18 @@ export class ModpackEditorComponent implements OnInit {
   @Input()
   public modpack: Modpack;
 
-  constructor(protected forgeVersionService: ForgeVersionService, protected electron: ElectronService) {
-    this.electron.on('selected-input-directory', (path: string) => {
-      this.modpack.inputDirectory = path;
-    });
-    this.electron.on('selected-output-directory', (path: string) => {
-      this.modpack.outputDirectory = path;
-    });
+  constructor(protected forgeVersionService: ForgeVersionService) {
   }
 
   ngOnInit() {
   }
 
-  selectInputDirectory() {
-    this.electron.send('open-input-directory-dialog', null);
+  public selectInputDirectory() {
+    // FIXME
   }
 
-  selectOutputDirectory(): void {
-    this.electron.send('open-output-directory-dialog', null);
+  public selectOutputDirectory(): void {
+    // FIXME
   }
 
 }

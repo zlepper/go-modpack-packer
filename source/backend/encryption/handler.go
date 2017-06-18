@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/zlepper/go-modpack-packer/source/backend/consts"
 	"io"
 	"io/ioutil"
 	"log"
@@ -21,7 +22,7 @@ var key []byte
 
 func init() {
 	// Read bytes from file
-	keyfile := path.Join(os.Args[1], "key")
+	keyfile := path.Join(consts.DataDirectory, "key")
 	var err error
 	key, err = ioutil.ReadFile(keyfile)
 	if err == nil {

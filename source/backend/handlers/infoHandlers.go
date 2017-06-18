@@ -10,7 +10,6 @@ import (
 	"github.com/zlepper/go-modpack-packer/source/backend/db"
 	"github.com/zlepper/go-modpack-packer/source/backend/helpers"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
-	"github.com/zlepper/go-websocket-connection"
 	"io"
 	"io/ioutil"
 	"log"
@@ -25,14 +24,14 @@ import (
 var checkPermissions bool
 var checkPublicPermissions bool
 
-func gatherInformation(conn websocket.WebsocketConnection, data interface{}) {
+func gatherInformation(conn types.WebsocketConnection, data interface{}) {
 	modpack := types.CreateSingleModpackData(data)
 	checkPermissions = modpack.Technic.CheckPermissions
 	checkPublicPermissions = modpack.Technic.IsPublicPack
 	gatherInformationAboutMods(path.Join(modpack.InputDirectory, "mods"), conn)
 }
 
-func gatherInformationAboutMods(inputDirectory string, conn websocket.WebsocketConnection) {
+func gatherInformationAboutMods(inputDirectory string, conn types.WebsocketConnection) {
 	t1 := time.Now()
 	filesAndDirectories, err := ioutil.ReadDir(inputDirectory)
 	if err != nil {
@@ -65,7 +64,7 @@ func gatherInformationAboutMods(inputDirectory string, conn websocket.WebsocketC
 	fmt.Printf("Exploration time: %d ns\n", t2)
 }
 
-func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnection, waitGroup *sync.WaitGroup) {
+func gatherInformationAboutMod(modfile string, conn types.WebsocketConnection, waitGroup *sync.WaitGroup) {
 	// Check if we already have the mod in the database. If we do we should just send that data to the client
 	// instead of working through the zip file and calculating everything again.
 	md5, err := helpers.ComputeMd5(modfile)
@@ -118,7 +117,7 @@ func gatherInformationAboutMod(modfile string, conn websocket.WebsocketConnectio
 	waitGroup.Done()
 }
 
-func readInfoFile(file io.ReadCloser, conn websocket.WebsocketConnection, size int64, filename string) {
+func readInfoFile(file io.ReadCloser, conn types.WebsocketConnection, size int64, filename string) {
 	content := make([]byte, size)
 	_, err := file.Read(content)
 	content = []byte(strings.Replace(strings.Replace(string(content), "\n", " ", -1), "\r", "", -1))
@@ -161,7 +160,7 @@ func readInfoFile(file io.ReadCloser, conn websocket.WebsocketConnection, size i
 
 }
 
-func createModResponse(conn websocket.WebsocketConnection, mod types.ModInfo, filename string) {
+func createModResponse(conn types.WebsocketConnection, mod types.ModInfo, filename string) {
 	modRes := mod.CreateModResponse(filename)
 	modRes.NormalizeId()
 
@@ -178,7 +177,7 @@ func createModResponse(conn websocket.WebsocketConnection, mod types.ModInfo, fi
 
 const modDataReadyEvent string = "mod-data-ready"
 
-func sendModDataReady(mod types.Mod, conn websocket.WebsocketConnection) {
+func sendModDataReady(mod types.Mod, conn types.WebsocketConnection) {
 	if checkPermissions {
 		permissionsDb := db.GetPermissionsDb()
 		permission := permissionsDb.GetPermissionPolicy(mod.ModId, checkPublicPermissions)
@@ -210,7 +209,7 @@ func sendModDataReady(mod types.Mod, conn websocket.WebsocketConnection) {
 
 const gotPermissionDataEvent string = "got-permission-data"
 
-func CheckPermissionStore(conn websocket.WebsocketConnection, data interface{}) {
+func CheckPermissionStore(conn types.WebsocketConnection, data interface{}) {
 	type dataSearch struct {
 		ModId    string `json:"modId"`
 		IsPublic bool   `json:"isPublic"`

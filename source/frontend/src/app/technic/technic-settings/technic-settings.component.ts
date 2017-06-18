@@ -1,6 +1,6 @@
 import {Component, Input, OnInit} from "@angular/core";
+import {MdDialog} from "@angular/material";
 import {Modpack} from "app/models/modpack";
-import {MdDialog} from '@angular/material';
 import {TechnicBuildingComponent} from "app/technic/technic-building/technic-building.component";
 
 @Component({
@@ -11,7 +11,7 @@ import {TechnicBuildingComponent} from "app/technic/technic-building/technic-bui
 export class TechnicSettingsComponent implements OnInit {
 
   @Input()
-  protected modpack: Modpack;
+  public modpack: Modpack;
 
   constructor(protected dialog: MdDialog) {
   }
@@ -19,7 +19,7 @@ export class TechnicSettingsComponent implements OnInit {
   ngOnInit() {
   }
 
-  startBuild() {
+  public startBuild() {
     const dialog = this.dialog.open(TechnicBuildingComponent);
     dialog.afterClosed().subscribe(() => {
       console.log('closed');

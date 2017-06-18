@@ -10,7 +10,7 @@ import {Observable} from "rxjs/Observable";
 })
 export class TechnicComponent implements OnInit {
 
-  protected selectedModpack: Observable<Modpack>;
+  public selectedModpack: Observable<Modpack>;
 
   constructor(protected modpackService: ModpackService) {
   }

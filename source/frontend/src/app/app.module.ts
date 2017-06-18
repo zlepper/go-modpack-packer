@@ -1,4 +1,3 @@
-import {APP_BASE_HREF} from "@angular/common";
 import {NgModule} from "@angular/core";
 import {FlexLayoutModule} from "@angular/flex-layout";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
@@ -9,22 +8,25 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MaterialModule} from "app/collectors/material.module";
 import {HasModpackSelectedGuard} from "app/guards/has-modpack-selected.guard";
 import {BackendCommunicationService} from "app/services/backend-communication.service";
-import {ElectronService} from "app/services/electron.service";
 import {ForgeVersionService} from "app/services/forge-version.service";
 import {ModpackService} from "app/services/modpack.service";
 import {NetworkService} from "app/services/network.service";
 import {WebSocketService} from "app/services/websocket.service";
+import {NoApiValidator} from "app/technic/technic-settings/solder-options/NoApiValidator";
 
 import {AppComponent} from "./app.component";
 import {routes} from "./app.routing";
 import {FtbComponent} from "./ftb/ftb.component";
 import {BodyComponent} from "./main-app/body/body.component";
-import {HeaderComponent} from "./main-app/header/header.component";
 import {ModpackEditorComponent} from "./modpack/modpack-editor/modpack-editor.component";
 import {ModpackHeaderComponent} from "./modpack/modpack-header/modpack-header.component";
 import {ModpackComponent} from "./modpack/modpack.component";
 import {NoModpackSelectedComponent} from "./no-modpack-selected/no-modpack-selected.component";
 import {SettingsComponent} from "./settings/settings.component";
+import {BuildBuildingComponent} from "./technic/technic-building/build-building/build-building.component";
+import {GatherBuildInfoComponent} from "./technic/technic-building/gather-build-info/gather-build-info.component";
+import {ModInfoComponent} from "./technic/technic-building/gather-build-info/mod-info/mod-info.component";
+import {TechnicModPermissionsComponent} from "./technic/technic-building/gather-build-info/mod-info/technic-mod-permissions/technic-mod-permissions.component";
 import {TechnicBuildingComponent} from "./technic/technic-building/technic-building.component";
 import {FileUploadComponent} from "./technic/technic-settings/file-upload/file-upload.component";
 import {FtpOptionsComponent} from "./technic/technic-settings/file-upload/ftp-options/ftp-options.component";
@@ -36,11 +38,6 @@ import {SolderOptionsComponent} from "./technic/technic-settings/solder-options/
 import {TechnicCheckPermissionsComponent} from "./technic/technic-settings/technic-check-permissions/technic-check-permissions.component";
 import {TechnicSettingsComponent} from "./technic/technic-settings/technic-settings.component";
 import {TechnicComponent} from "./technic/technic.component";
-import { GatherBuildInfoComponent } from './technic/technic-building/gather-build-info/gather-build-info.component';
-import { BuildBuildingComponent } from './technic/technic-building/build-building/build-building.component';
-import { ModInfoComponent } from './technic/technic-building/gather-build-info/mod-info/mod-info.component';
-import { TechnicModPermissionsComponent } from './technic/technic-building/gather-build-info/mod-info/technic-mod-permissions/technic-mod-permissions.component';
-import {NoApiValidator} from "app/technic/technic-settings/solder-options/NoApiValidator";
 
 
 @NgModule({
@@ -51,7 +48,6 @@ import {NoApiValidator} from "app/technic/technic-settings/solder-options/NoApiV
     FtbComponent,
     ModpackComponent,
     TechnicComponent,
-    HeaderComponent,
     BodyComponent,
     ModpackHeaderComponent,
     ModpackEditorComponent,
@@ -82,11 +78,6 @@ import {NoApiValidator} from "app/technic/technic-settings/solder-options/NoApiV
     ReactiveFormsModule
   ],
   providers: [
-    {
-      provide: APP_BASE_HREF,
-      useValue: '/'
-    },
-    ElectronService,
     ModpackService,
     ForgeVersionService,
     NetworkService,
