@@ -2,6 +2,6 @@ go_import_path: github.com/zlepper/go-modpack-packer
 language: go
 go:
   - tip
-  - 1.9.x
+#  - 1.9.x
   - 1.8.x
   - master
