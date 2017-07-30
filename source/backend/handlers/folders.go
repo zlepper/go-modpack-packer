@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
-	"log"
 )
 
 func getFolderList(topFolder string) ([]string, error) {

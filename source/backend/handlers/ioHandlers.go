@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"github.com/getsentry/raven-go"
+	"github.com/mitchellh/mapstructure"
 	"github.com/zlepper/go-modpack-packer/source/backend/consts"
 	"github.com/zlepper/go-modpack-packer/source/backend/encryption"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
@@ -10,9 +11,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"sync"
 	"sort"
-	"github.com/mitchellh/mapstructure"
+	"sync"
 )
 
 var mutex *sync.Mutex
@@ -127,12 +127,12 @@ func loadModpacks(conn types.WebsocketConnection) {
 
 type FolderRequest struct {
 	Folder string `json:"folder"`
-	Key    int `json:"key"`
+	Key    int    `json:"key"`
 }
 
 type FolderResponse struct {
 	Folders []string `json:"folders"`
-	Key     int `json:"key"`
+	Key     int      `json:"key"`
 }
 
 func getFolders(conn types.WebsocketConnection, fr interface{}) {
