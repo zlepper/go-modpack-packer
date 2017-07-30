@@ -7,15 +7,27 @@
   </md-input-container>
   <div fxLayout="row" class="input-with-button">
     <md-input-container fxFlex>
-      <input mdInput placeholder="Input directory" [(ngModel)]="modpack.inputDirectory"/>
+      <input mdInput placeholder="Input directory" [(ngModel)]="modpack.inputDirectory" [mdAutocomplete]="inputAuto"
+             [formControl]="inputControl"/>
     </md-input-container>
-    <button md-button (click)="selectInputDirectory()">Select</button>
+
+    <md-autocomplete #inputAuto>
+      <md-option *ngFor="let folder of filteredInputFolders|async" [value]="folder">
+        {{ folder }}
+      </md-option>
+    </md-autocomplete>
   </div>
   <div fxLayout="row" class="input-with-button">
     <md-input-container fxFlex>
-      <input mdInput placeholder="Output directory" [(ngModel)]="modpack.outputDirectory"/>
+      <input mdInput placeholder="Output directory" [(ngModel)]="modpack.outputDirectory" [mdAutocomplete]="outputAuto"
+             [formControl]="outputControl"/>
     </md-input-container>
-    <button md-button (click)="selectOutputDirectory()">Select</button>
+
+    <md-autocomplete #outputAuto>
+      <md-option *ngFor="let folder of filteredOutputFolders|async" [value]="folder">
+        {{folder}}
+      </md-option>
+    </md-autocomplete>
   </div>
   <md-select placeholder="minecraftVersion" [(ngModel)]="modpack.minecraftVersion">
     <md-option *ngFor="let version of forgeVersionService.minecraftVersions|async" [value]="version">{{version}}

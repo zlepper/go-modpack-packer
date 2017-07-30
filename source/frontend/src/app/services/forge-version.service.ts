@@ -1,6 +1,6 @@
 import {Injectable} from "@angular/core";
 import {ForgeMaven, ForgeVersion} from "app/models/forgeversion";
-import {NetworkService} from "app/services/network.service";
+import {CorsNetworkingService} from "app/services/corsnetworking.service";
 import {BehaviorSubject, Observable, Subject} from "rxjs";
 
 @Injectable()
@@ -22,7 +22,7 @@ export class ForgeVersionService {
     return this._ready;
   }
 
-  constructor(protected networkService: NetworkService) {
+  constructor(protected networkService: CorsNetworkingService) {
     this.getForgeVersions();
     this._forgeVersions = new BehaviorSubject<ForgeVersion[]>([]);
     this._minecraftVersions = new BehaviorSubject<string[]>([]);

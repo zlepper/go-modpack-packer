@@ -16,6 +16,7 @@ import (
 	"github.com/zlepper/go-modpack-packer/source/backend/handlers"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	"gopkg.in/olahol/melody.v1"
+	"net/http"
 )
 
 //go:generate go run scripts/frontend.go
@@ -65,12 +66,23 @@ func main() {
 		return nil
 	})
 
+	// Get around that dammed cors implementation in browsers
+	e.GET("/corsaround", func(c echo.Context) error {
+		url := c.QueryParam("url")
+		resp, err := http.Get(url)
+		if err != nil {
+			return c.String(resp.StatusCode, err.Error())
+		}
+		defer resp.Body.Close()
+		return c.Stream(resp.StatusCode, "application/json", resp.Body)
+	})
+
 	devMode := flag.Bool("dev", false, "Setup the application to run in dev mode, which means frontend will be served from disk, not embedded")
 
 	flag.Parse()
 
 	if *devMode {
-		e.Static("/", path.Join("..", "frontend", "dist"))
+		bindNonInline(e)
 	} else {
 		bindFiles(e)
 

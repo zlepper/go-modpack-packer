@@ -11,6 +11,8 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"sort"
+	"github.com/mitchellh/mapstructure"
 )
 
 var mutex *sync.Mutex
@@ -121,4 +123,48 @@ func loadModpacks(conn types.WebsocketConnection) {
 		modpack.Solder.Password = encryption.DecryptString(modpack.Solder.Password)
 	}
 	conn.Write("data-loaded", modpacks)
+}
+
+type FolderRequest struct {
+	Folder string `json:"folder"`
+	Key    int `json:"key"`
+}
+
+type FolderResponse struct {
+	Folders []string `json:"folders"`
+	Key     int `json:"key"`
+}
+
+func getFolders(conn types.WebsocketConnection, fr interface{}) {
+
+	var folders []string
+	var err error
+
+	var folderRequest FolderRequest
+	err = mapstructure.Decode(fr, &folderRequest)
+	if err != nil {
+		conn.Error(err.Error())
+		return
+	}
+
+	path := folderRequest.Folder
+
+	log.Println("Getting folders for " + path)
+
+	if path == "/" {
+		folders, err = GetDrives()
+	} else {
+		folders, err = getFolderList(path)
+	}
+
+	if err != nil {
+		conn.Error(err.Error())
+	} else {
+		if len(folders) == 0 {
+			folders = append(folders, path)
+		}
+		sort.Strings(folders)
+		log.Println(folders)
+		conn.Write("got-folders", FolderResponse{Folders: folders, Key: folderRequest.Key})
+	}
 }

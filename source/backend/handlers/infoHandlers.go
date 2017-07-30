@@ -138,7 +138,6 @@ func readInfoFile(file io.ReadCloser, conn types.WebsocketConnection, size int64
 		// Try with mod version 2, or with litemod
 		err = json.Unmarshal(content, &mod)
 		if err != nil {
-			raven.CaptureError(err, nil)
 			conn.Log(err.Error() + "\n" + string(content) + "\n" + filename)
 			sendModDataReady(types.Mod{Filename: filename}, conn)
 			return

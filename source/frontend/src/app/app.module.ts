@@ -8,6 +8,8 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MaterialModule} from "app/collectors/material.module";
 import {HasModpackSelectedGuard} from "app/guards/has-modpack-selected.guard";
 import {BackendCommunicationService} from "app/services/backend-communication.service";
+import {CorsNetworkingService} from "app/services/corsnetworking.service";
+import {FolderService} from "app/services/folders.service";
 import {ForgeVersionService} from "app/services/forge-version.service";
 import {ModpackService} from "app/services/modpack.service";
 import {NetworkService} from "app/services/network.service";
@@ -65,7 +67,7 @@ import {TechnicComponent} from "./technic/technic.component";
     BuildBuildingComponent,
     ModInfoComponent,
     TechnicModPermissionsComponent,
-    NoApiValidator
+    NoApiValidator,
   ],
   imports: [
     BrowserModule,
@@ -83,7 +85,9 @@ import {TechnicComponent} from "./technic/technic.component";
     NetworkService,
     BackendCommunicationService,
     WebSocketService,
-    HasModpackSelectedGuard
+    HasModpackSelectedGuard,
+    CorsNetworkingService,
+    FolderService
   ],
   bootstrap: [AppComponent],
   entryComponents: [

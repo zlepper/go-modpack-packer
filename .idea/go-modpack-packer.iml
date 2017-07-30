@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module type="GO_MODULE" version="4">
+<module type="WEB_MODULE" version="4">
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
-    <content url="file://$MODULE_DIR$/source/backend">
-      <excludeFolder url="file://$MODULE_DIR$/source/backend/vendor" />
-    </content>
+    <content url="file://$MODULE_DIR$/source/backend" />
     <content url="file://$MODULE_DIR$/source/frontend">
       <excludeFolder url="file://$MODULE_DIR$/source/frontend/dist" />
       <excludeFolder url="file://$MODULE_DIR$/source/frontend/tmp" />
     </content>
-    <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="GOPATH &lt;go-modpack-packer&gt;" level="project" />
     <orderEntry type="library" name="GOPATH &lt;go-modpack-packer&gt;" level="project" />
@@ -17,3 +14,4 @@
     <orderEntry type="library" name="GOPATH &lt;go-modpack-packer&gt;" level="project" />
   </component>
 </module>
+

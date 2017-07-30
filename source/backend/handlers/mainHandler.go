@@ -65,7 +65,10 @@ func HandleMessage(conn types.WebsocketConnection, message []byte) {
 		{
 			CheckPermissionStore(conn, m.Data)
 		}
-
+	case "get-folders":
+		{
+			getFolders(conn, m.Data)
+		}
 	default:
 		{
 			log.Println("Unknown action", m.Action)
