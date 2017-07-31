@@ -26,11 +26,15 @@ export class ObservableWebsocket {
       .merge(fromEvent(this.connection, 'open'))
       .merge(fromEvent(this.connection, 'error'))
       .merge(fromEvent(this.connection, 'close'))
-      .subscribe((e: Event) => this.websocketEvents.next(e));
+      .subscribe((e: Event) => {
+        console.debug(e);
+        return this.websocketEvents.next(e);
+      });
   }
 
   public closeConnection() {
-    if (this.connection) {
+    console.trace('closing websocket connection');
+    if (this.connection && !this.websocketSubscription.closed) {
       this.connection.close();
       this.websocketSubscription.unsubscribe();
       this.connection = undefined;

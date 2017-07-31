@@ -11,7 +11,7 @@ const END_WITH_API_REGEX = /.*\/api\/?$/;
 })
 export class NoApiValidator implements Validator {
   validate(c: AbstractControl): { [key: string]: any; } {
-    return END_WITH_API_REGEX.test(c.value) ? {validateApi: false} : {validateApi: null}
+    return END_WITH_API_REGEX.test(c.value) ? {validateApi: false} : {}
   }
 
 

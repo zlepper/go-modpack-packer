@@ -57,9 +57,16 @@ func continueRunning(conn types.WebsocketConnection, data interface{}) {
 
 	solderclient, buildId := updateSolder(uploadInfo.Modpack, conn)
 	conn.Write(solderCurrentlyDoingEvent, "Updating mods")
+	var wg sync.WaitGroup
 	for _, info := range uploadInfo.Infos {
-		go addInfoToSolder(info, buildId, conn, solderclient)
+		wg.Add(1)
+		go func() {
+			addInfoToSolder(info, buildId, conn, solderclient)
+			wg.Done()
+		}()
 	}
+	wg.Wait()
+	conn.Write("done-updating", "")
 }
 
 func buildModpack(modpack types.Modpack, mods []*types.Mod, conn types.WebsocketConnection) {
@@ -153,17 +160,28 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn types.Websocket
 		{
 			upload.UploadFilesToS3(&modpack, infos, conn)
 		}
+	case "gfs":
+		{
+			upload.UploadFilesToGfs(&modpack, infos, conn)
+		}
 	}
 
 	if modpack.Solder.Use {
 		solderclient, buildId := updateSolder(modpack, conn)
 
 		conn.Write(solderCurrentlyDoingEvent, "Updating mods")
+		var wg sync.WaitGroup
 		for _, info := range infos {
 			localInfo := *info
 			log.Println(localInfo)
-			go addInfoToSolder(&localInfo, buildId, conn, solderclient)
+			wg.Add(1)
+			go func() {
+				addInfoToSolder(&localInfo, buildId, conn, solderclient)
+				wg.Done()
+			}()
 		}
+		wg.Wait()
+		conn.Write("done-updating", "")
 	}
 
 }

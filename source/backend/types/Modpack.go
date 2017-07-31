@@ -47,7 +47,7 @@ type TechnicConfig struct {
 	ForgeVersion     ForgeVersion `json:"forgeVersion"`
 	CheckPermissions bool         `json:"checkPermissions"`
 	IsPublicPack     bool         `json:"isPublicPack"`
-	Memory           float64      `json:"memory"`
+	Memory           int64        `json:"memory"`
 	Java             string       `json:"java"`
 	Upload           UploadConfig `json:"upload",mapstructure:"upload"`
 	RepackAllMods    bool         `json:"repackAllMods"`

@@ -1,21 +1,34 @@
-<h1 md-dialog-title>Build Progress</h1>
-<div md-dialog-content>
-  <app-gather-build-info *ngIf="(state|async) === 'info'" [mods]="mods" [totalToScan]="totalToScan|async" [showDone]="showDone"></app-gather-build-info>
-  <app-build-building *ngIf="(state|async) === 'building'"
-                      [modpack]="modpack|async"
-                      [progressNumber]="packingProgressNumber|async"
-                      [total]="totalToPack|async"
-                      [uploading]="uploading|async"
-                      [uploadData]="uploadData|async"
-                      [solderNumber]="solderProgressNumber|async"
-                      [uploadNumber]="uploadProgressNumber|async"
-  ></app-build-building>
+<ng-container *ngIf="!(done|async); else doneTemplate">
+  <h1 md-dialog-title>Build Progress</h1>
+  <div md-dialog-content>
+    <app-gather-build-info *ngIf="(state|async) === 'info'" [mods]="mods" [totalToScan]="totalToScan|async"
+                           [showDone]="showDone"></app-gather-build-info>
+    <app-build-building *ngIf="(state|async) === 'building'"
+                        [modpack]="modpack|async"
+                        [progressNumber]="packingProgressNumber|async"
+                        [total]="totalToPack|async"
+                        [uploading]="uploading|async"
+                        [uploadData]="uploadData|async"
+                        [solderNumber]="solderProgressNumber|async"
+                        [uploadNumber]="uploadProgressNumber|async"
+    ></app-build-building>
 
-</div>
-<div md-dialog-actions>
-  <md-checkbox (change)="changeShowDone($event)">Show done</md-checkbox>
-  <button md-button (click)="skipAll()">Skip all non-finished</button>
-  <span fxFlex></span>
-  <button md-raised-button (click)="build()">Build</button>
-  <button md-raised-button (click)="cancel()">Cancel</button>
-</div>
+  </div>
+  <div md-dialog-actions>
+    <md-checkbox (change)="changeShowDone($event)">Show done</md-checkbox>
+    <button md-button (click)="skipAll()">Skip all non-finished</button>
+    <span fxFlex></span>
+    <button md-raised-button (click)="build()">Build</button>
+    <button md-raised-button (click)="cancel()">Cancel</button>
+  </div>
+</ng-container>
+<ng-template #doneTemplate>
+  <h1 md-dialog-title>Done building</h1>
+  <div md-dialog-content>
+    The build has finished, and just needs to be activated on solder.
+  </div>
+  <div md-dialog-actions>
+    <span fxFlex></span>
+    <button md-raised-button (click)="cancel()">Close</button>
+  </div>
+</ng-template>

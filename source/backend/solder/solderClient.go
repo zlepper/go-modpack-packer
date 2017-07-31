@@ -9,7 +9,6 @@ import (
 	"github.com/zlepper/go-modpack-packer/source/backend/solder/crawlers"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
@@ -188,12 +187,6 @@ func (s *SolderClient) AddMod(mod *types.OutputInfo) string {
 	response := s.postForm(Url.String(), form)
 	defer response.Body.Close()
 
-	b, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		panic(err)
-	}
-	log.Println(string(b))
-
 	return s.GetModId(mod.Id)
 }
 
@@ -357,7 +350,7 @@ func (s *SolderClient) CreateBuild(modpack *types.Modpack, modpackId string) str
 	form.Add("minecraft", modpack.MinecraftVersion)
 	form.Add("java-version", modpack.Technic.Java)
 	form.Add("memory-enabled", strconv.FormatBool(modpack.Technic.Memory != 0))
-	form.Add("memory", strconv.FormatFloat(modpack.Technic.Memory, 'E', -1, 64))
+	form.Add("memory", strconv.FormatInt(modpack.Technic.Memory, 10))
 	res := s.postForm(Url.String(), form)
 	defer res.Body.Close()
 

@@ -18,4 +18,7 @@ export class ModpackComponent implements OnInit {
     this.selectedModpack = this.modpackService.selectedModpack;
   }
 
+  public saveModpacks() {
+    this.modpackService.saveModpacks();
+  }
 }

@@ -71,4 +71,10 @@ export class ModpackService {
         this._selectedModpack.next(modpack)
       });
   }
+
+  public saveModpacks() {
+    this.modpacks.take(1).subscribe(modpacks => {
+      this.backendCommunication.send('save-modpacks', modpacks);
+    });
+  }
 }

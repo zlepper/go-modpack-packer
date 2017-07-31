@@ -1,20 +1,20 @@
 package upload
 
 import (
-	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	"github.com/mitchellh/mapstructure"
 	"github.com/zlepper/gfs"
+	"github.com/zlepper/go-modpack-packer/source/backend/types"
+	"log"
 	"path"
 	"strings"
-	"log"
 )
 
 type GfsTestResult struct {
-	Success bool `json:"success"`
-	Message string  `json:"message"`
+	Success bool   `json:"success"`
+	Message string `json:"message"`
 }
 
-func uploadFilesToGfs(modpack *types.Modpack, infos []*types.OutputInfo, conn types.WebsocketConnection) {
+func UploadFilesToGfs(modpack *types.Modpack, infos []*types.OutputInfo, conn types.WebsocketConnection) {
 	conn.Write("started-uploading-all", "")
 	var err error
 
@@ -26,7 +26,7 @@ func uploadFilesToGfs(modpack *types.Modpack, infos []*types.OutputInfo, conn ty
 	}
 
 	outdir := path.Join(modpack.OutputDirectory, modpack.Name)
-
+	log.Println("Uploading files to GFS")
 	for _, info := range infos {
 		err := func(info *types.OutputInfo, client *gfs.Client) error {
 			if info.File == "" {
@@ -35,6 +35,8 @@ func uploadFilesToGfs(modpack *types.Modpack, infos []*types.OutputInfo, conn ty
 				return nil
 			}
 
+			log.Println("Uploading file", info.File)
+
 			remotePath := strings.Replace(info.File, outdir, "", 1)
 			conn.Write("starting-upload", info.Name)
 
@@ -42,6 +44,8 @@ func uploadFilesToGfs(modpack *types.Modpack, infos []*types.OutputInfo, conn ty
 			if err != nil {
 				return err
 			}
+
+			log.Println(uploadFile)
 
 			defer uploadFile.Reader.Close()
 

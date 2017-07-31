@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 
 @Component({
   selector: 'app-modpack-header',
@@ -7,9 +7,15 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ModpackHeaderComponent implements OnInit {
 
+  @Output()
+  public save: EventEmitter<void> = new EventEmitter<void>(true);
+
   constructor() { }
 
   ngOnInit() {
+
   }
+
+
 
 }

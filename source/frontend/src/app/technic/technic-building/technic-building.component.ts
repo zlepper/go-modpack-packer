@@ -33,6 +33,7 @@ export class TechnicBuildingComponent implements OnInit {
   public uploadData: Observable<UploadWaiting>;
   public solderProgressNumber: Observable<number>;
   public uploadProgressNumber: Observable<number>;
+  public done: Observable<boolean>;
 
   constructor(protected backendCommunicationService: BackendCommunicationService,
               protected modpackService: ModpackService,
@@ -103,6 +104,11 @@ export class TechnicBuildingComponent implements OnInit {
 
     this.uploadData = this.backendCommunicationService.getMessages<UploadWaiting>('waiting-for-file-upload');
 
+    this.done = this.backendCommunicationService.getMessages<boolean>('done-updating')
+      .map(() => true)
+      .behaviorSubject(false);
+
+    this.done.subscribe(done => console.log('done', done));
   }
 
   public skipAll() {

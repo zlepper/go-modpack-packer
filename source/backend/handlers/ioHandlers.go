@@ -13,7 +13,6 @@ import (
 	"path/filepath"
 	"sort"
 	"sync"
-	"path"
 )
 
 var mutex *sync.Mutex
@@ -24,12 +23,12 @@ func init() {
 
 type inputDirData struct {
 	InputDir string `json:"inputDir"`
-	Key      int `json:"key"`
+	Key      int    `json:"key"`
 }
 
 type foundFolders struct {
 	Folders []string `json:"folders"`
-	Key     int `json:"key"`
+	Key     int      `json:"key"`
 }
 
 func findAdditionalFolders(conn types.WebsocketConnection, data interface{}) {
@@ -40,7 +39,7 @@ func findAdditionalFolders(conn types.WebsocketConnection, data interface{}) {
 		log.Panicln(err)
 	}
 
-	inputDir := path.Dir(dir.InputDir)
+	inputDir := dir.InputDir
 
 	files, err := ioutil.ReadDir(inputDir)
 	if err != nil {
@@ -53,7 +52,7 @@ func findAdditionalFolders(conn types.WebsocketConnection, data interface{}) {
 		if file.IsDir() {
 			// The mods folder should be handled in a special way
 			if file.Name() == "mods" {
-				subFiles, _ := ioutil.ReadDir(filepath.Join(dir.InputDir, file.Name()))
+				subFiles, _ := ioutil.ReadDir(filepath.Join(inputDir, file.Name()))
 				for _, subfile := range subFiles {
 					if subfile.IsDir() {
 						folders = append(folders, filepath.Join(file.Name(), subfile.Name()))
