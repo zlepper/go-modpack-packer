@@ -1,0 +1,17 @@
+<md-input-container>
+  <input mdInput [(ngModel)]="modpack.technic.upload.gfs.url" type="url"
+         placeholder="Url (E.g. http://gfs.example.com:8080)" required>
+</md-input-container>
+<md-input-container>
+  <input mdInput [(ngModel)]="modpack.technic.upload.gfs.username" placeholder="Username" required>
+</md-input-container>
+<md-input-container>
+  <input mdInput [(ngModel)]="modpack.technic.upload.gfs.password" type="password" placeholder="Password">
+</md-input-container>
+<md-input-container>
+  <input mdInput [(ngModel)]="modpack.technic.upload.gfs.path" placeholder="Path">
+</md-input-container>
+<button *ngIf="!(testing|async); else testingGfsLogin" md-raised-button (click)="testGfs()">Test GFS Connection</button>
+<ng-template #testingGfsLogin>
+  <md-progress-bar mode="indeterminate"></md-progress-bar>
+</ng-template>

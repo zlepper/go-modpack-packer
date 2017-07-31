@@ -68,8 +68,9 @@ export class TechnicBuildingComponent implements OnInit {
     this.packingTodos = this.backendCommunicationService.getMessages<string>('packing-part')
       .bufferTime(10)
       .withLatestFrom(donePackingPart)
-      .scan((currentTodos, [newTodos, todosToRemove]) =>
-          [...currentTodos, ...newTodos]
+      .scan((currentTodos: string[], [newTodos, todosToRemove]: string[][]) =>
+          currentTodos
+            .concat(newTodos)
             .filter((todo: string) => todosToRemove.includes(todo))
         , []);
 
@@ -88,8 +89,9 @@ export class TechnicBuildingComponent implements OnInit {
     this.updateTodos = this.backendCommunicationService.getMessages<string>('updating-solder')
       .bufferTime(10)
       .withLatestFrom(doneUpdatingSolder)
-      .scan((currentTodos, [newTodos, todosToRemove]) =>
-          [...currentTodos, ...newTodos]
+      .scan((currentTodos: string[], [newTodos, todosToRemove]: string[][]) =>
+          currentTodos
+            .concat(newTodos)
             .filter((todo: string) => todosToRemove.includes(todo))
         , []);
 
@@ -121,7 +123,7 @@ export class TechnicBuildingComponent implements OnInit {
           this.backendCommunicationService.send('build', {modpack, mods});
           this.state.next('building');
         } else {
-          this.snackBar.open('Some mods are missing info. Please fill it in before continuing.', null, {duration: 5000});
+          this.snackBar.open('Some mods are missing info. Please fill it in before continuing.', '', {duration: 5000});
         }
       });
   }

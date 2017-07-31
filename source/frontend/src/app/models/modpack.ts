@@ -1,4 +1,5 @@
 import {ForgeVersion} from "app/models/forgeversion";
+
 export class AWSConfig {
   public accessKey: string = "";
   public secretKey: string = "";
@@ -13,11 +14,18 @@ export class FtpConfig {
   public path: string = "";
 }
 
+export class GfsConfig {
+  public url: string = "";
+  public username: string = "";
+  public password: string = "";
+  public path: string = "";
+}
 
 export class UploadConfig {
   public type: string = "none";
   public aws: AWSConfig = new AWSConfig();
   public ftp: FtpConfig = new FtpConfig();
+  public gfs: GfsConfig = new GfsConfig();
 }
 
 export class TechnicConfig {
@@ -51,6 +59,12 @@ export class FtbConfig {
 export class Folder {
   public name: string;
   public include: boolean;
+
+
+  constructor(name: string, include: boolean = false) {
+    this.name = name;
+    this.include = include;
+  }
 }
 
 export class Modpack {
@@ -66,6 +80,7 @@ export class Modpack {
   public solder: SolderInfo = new SolderInfo();
   public isNew: boolean = false;
   public id: number;
+  [key: string]: any;
 
   constructor(name: string) {
     this.name = name;

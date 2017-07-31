@@ -1,5 +1,5 @@
-import {AbstractControl, NG_VALIDATORS, Validator} from "@angular/forms";
 import {Directive, forwardRef} from "@angular/core";
+import {AbstractControl, NG_VALIDATORS, Validator} from "@angular/forms";
 
 const END_WITH_API_REGEX = /.*\/api\/?$/;
 
@@ -11,7 +11,7 @@ const END_WITH_API_REGEX = /.*\/api\/?$/;
 })
 export class NoApiValidator implements Validator {
   validate(c: AbstractControl): { [key: string]: any; } {
-    return END_WITH_API_REGEX.test(c.value) ? {validateApi: false} : null
+    return END_WITH_API_REGEX.test(c.value) ? {validateApi: false} : {validateApi: null}
   }
 
 

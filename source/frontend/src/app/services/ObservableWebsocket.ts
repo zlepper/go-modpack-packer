@@ -1,12 +1,16 @@
 import {Observable, Subject} from "rxjs";
+import {fromEvent} from "rxjs/observable/fromEvent";
+import {Subscription} from "rxjs/Subscription";
+
 /**
  * A websocket wrapper that will handle automatic reconnecting without
  * losing observables
  */
 export class ObservableWebsocket {
   private websocketEvents: Subject<Event>;
-  private connection: WebSocket;
+  private connection?: WebSocket;
   private readonly url: string;
+  private websocketSubscription: Subscription;
 
   public constructor(url: string) {
     this.websocketEvents = new Subject<Event>();
@@ -18,27 +22,24 @@ export class ObservableWebsocket {
 
   public createConnection() {
     this.connection = new WebSocket(this.url);
-
-    this.connection.onmessage = e => this.websocketEvents.next(e);
-    this.connection.onopen = e => this.websocketEvents.next(e);
-    this.connection.onerror = e => this.websocketEvents.next(e);
-    this.connection.onclose = e => this.websocketEvents.next(e);
+    this.websocketSubscription = fromEvent(this.connection, 'message')
+      .merge(fromEvent(this.connection, 'open'))
+      .merge(fromEvent(this.connection, 'error'))
+      .merge(fromEvent(this.connection, 'close'))
+      .subscribe((e: Event) => this.websocketEvents.next(e));
   }
 
   public closeConnection() {
     if (this.connection) {
       this.connection.close();
-      // Prevent more events from being emitted
-      this.connection.onmessage = null;
-      this.connection.onopen = null;
-      this.connection.onerror = null;
-      this.connection.onclose = null;
-      this.connection = null;
+      this.websocketSubscription.unsubscribe();
+      this.connection = undefined;
     }
   }
 
   public isConnected(): boolean {
-    return this.connection.readyState === WebSocket.OPEN;
+
+    return !!this.connection && this.connection.readyState === WebSocket.OPEN;
   }
 
   public get events(): Observable<Event> {
@@ -46,6 +47,8 @@ export class ObservableWebsocket {
   }
 
   public send(message: string): void {
-    this.connection.send(message);
+    if (this.connection) {
+      this.connection.send(message);
+    }
   }
 }

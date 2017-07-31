@@ -33,4 +33,11 @@
     <md-option *ngFor="let version of forgeVersionService.minecraftVersions|async" [value]="version">{{version}}
     </md-option>
   </md-select>
+
+  <md-list>
+    <md-list-item *ngFor="let folder of modpack.additionalFolders">
+      <p md-line>{{folder.name}}</p>
+      <md-checkbox [(ngModel)]="folder.include"></md-checkbox>
+    </md-list-item>
+  </md-list>
 </div>

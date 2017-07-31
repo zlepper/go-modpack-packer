@@ -33,7 +33,7 @@ export class ForgeVersionService {
     return this._forgeVersions.map(forgeVersions => forgeVersions.filter(forgeVersion => forgeVersion.minecraftVersion === mcVersion));
   }
 
-  private isNullOrWhiteSpace(s) {
+  private isNullOrWhiteSpace(s: string): boolean {
     return s === null || s.match(/^\s*$/) !== null;
   }
 
@@ -56,9 +56,9 @@ export class ForgeVersionService {
         const mcversion = data.number[i].mcversion;
         const version = data.number[i].version;
         let branch = data.number[i].branch;
-        let downloadUrl: string = null;
+
         branch = this.isNullOrWhiteSpace(branch) ? "" : "-" + branch;
-        downloadUrl = `${data.webpath}${mcversion}-${version}${branch}/forge-${mcversion}-${version}${branch}`;
+        let downloadUrl = `${data.webpath}${mcversion}-${version}${branch}/forge-${mcversion}-${version}${branch}`;
         if (i < 183)
           downloadUrl += "client.";
         else

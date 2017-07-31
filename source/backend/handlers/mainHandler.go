@@ -53,6 +53,10 @@ func HandleMessage(conn types.WebsocketConnection, message []byte) {
 		{
 			upload.TestFtp(conn, m.Data)
 		}
+	case "test-gfs":
+		{
+			upload.TestGfs(conn, m.Data)
+		}
 	case "test-solder":
 		{
 			solder.TestSolderConnection(conn, m.Data)

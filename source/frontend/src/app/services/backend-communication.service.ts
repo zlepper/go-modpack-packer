@@ -10,7 +10,7 @@ export class BackendCommunicationService {
     this.websocketService.messages.filter(message => message.action === 'log')
       .subscribe(message => console.log(message.data));
     this.websocketService.messages.filter(message => message.action === 'notification')
-      .subscribe(message => snackBar.open(message.data, null, {duration: 5000}));
+      .subscribe(message => snackBar.open(message.data, "", {duration: 5000}));
   }
 
   public send(action: string, data: any) {

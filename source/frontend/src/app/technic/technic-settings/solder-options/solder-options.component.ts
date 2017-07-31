@@ -21,7 +21,7 @@ export class SolderOptionsComponent implements OnInit {
   ngOnInit() {
     this.backendCommunicationService.getMessages<string>('solder-test')
       .subscribe(message => {
-        this.snackBar.open(message, null, {duration: 5000});
+        this.snackBar.open(message, '', {duration: 5000});
       });
   }
 

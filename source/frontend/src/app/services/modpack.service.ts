@@ -8,7 +8,7 @@ import {BehaviorSubject, Observable, Subject} from "rxjs";
 export class ModpackService {
 
   private _modpacks: Subject<Modpack[]>;
-  private _selectedModpack: Subject<Modpack>;
+  private _selectedModpack: Subject<Modpack | null>;
 
   constructor(protected backendCommunication: BackendCommunicationService, protected router: Router) {
     this._modpacks = new BehaviorSubject([]);

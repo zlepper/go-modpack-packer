@@ -7,6 +7,7 @@ import {BrowserModule} from "@angular/platform-browser";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {MaterialModule} from "app/collectors/material.module";
 import {HasModpackSelectedGuard} from "app/guards/has-modpack-selected.guard";
+import {AdditionalFoldersService} from "app/services/additional-folders.service";
 import {BackendCommunicationService} from "app/services/backend-communication.service";
 import {CorsNetworkingService} from "app/services/corsnetworking.service";
 import {FolderService} from "app/services/folders.service";
@@ -32,6 +33,7 @@ import {TechnicModPermissionsComponent} from "./technic/technic-building/gather-
 import {TechnicBuildingComponent} from "./technic/technic-building/technic-building.component";
 import {FileUploadComponent} from "./technic/technic-settings/file-upload/file-upload.component";
 import {FtpOptionsComponent} from "./technic/technic-settings/file-upload/ftp-options/ftp-options.component";
+import {GfsOptionsComponent} from './technic/technic-settings/file-upload/gfs-options/gfs-options.component';
 import {S3OptionsComponent} from "./technic/technic-settings/file-upload/s3-options/s3-options.component";
 import {ForgeVersionComponent} from "./technic/technic-settings/forge-version/forge-version.component";
 import {JavaVersionComponent} from "./technic/technic-settings/java-version/java-version.component";
@@ -68,6 +70,7 @@ import {TechnicComponent} from "./technic/technic.component";
     ModInfoComponent,
     TechnicModPermissionsComponent,
     NoApiValidator,
+    GfsOptionsComponent,
   ],
   imports: [
     BrowserModule,
@@ -87,7 +90,8 @@ import {TechnicComponent} from "./technic/technic.component";
     WebSocketService,
     HasModpackSelectedGuard,
     CorsNetworkingService,
-    FolderService
+    FolderService,
+    AdditionalFoldersService
   ],
   bootstrap: [AppComponent],
   entryComponents: [

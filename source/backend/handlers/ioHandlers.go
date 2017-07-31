@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"sort"
 	"sync"
+	"path"
 )
 
 var mutex *sync.Mutex
@@ -23,17 +24,25 @@ func init() {
 
 type inputDirData struct {
 	InputDir string `json:"inputDir"`
+	Key      int `json:"key"`
 }
 
-func createInputDirData(data map[string]interface{}) inputDirData {
-	var res inputDirData
-	res.InputDir = data["inputDir"].(string)
-	return res
+type foundFolders struct {
+	Folders []string `json:"folders"`
+	Key     int `json:"key"`
 }
 
 func findAdditionalFolders(conn types.WebsocketConnection, data interface{}) {
-	dir := createInputDirData(data.(map[string]interface{}))
-	files, err := ioutil.ReadDir(dir.InputDir)
+
+	var dir inputDirData
+	err := mapstructure.Decode(data, &dir)
+	if err != nil {
+		log.Panicln(err)
+	}
+
+	inputDir := path.Dir(dir.InputDir)
+
+	files, err := ioutil.ReadDir(inputDir)
 	if err != nil {
 		raven.CaptureError(err, nil)
 	}
@@ -55,7 +64,7 @@ func findAdditionalFolders(conn types.WebsocketConnection, data interface{}) {
 			}
 		}
 	}
-	conn.Write("found-folders", folders)
+	conn.Write("found-folders", foundFolders{Folders: folders, Key: dir.Key})
 }
 
 func saveModpacks(conn types.WebsocketConnection, data interface{}) {

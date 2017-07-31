@@ -27,10 +27,18 @@ type FtpConfig struct {
 	Path     string `json:"path"`
 }
 
+type GfsConfig struct {
+	Url      string `json:"url"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Path     string `json:"path"`
+}
+
 type UploadConfig struct {
 	Type string    `json:"type"`
 	AWS  AWSConfig `json:"aws"`
 	FTP  FtpConfig `json:"ftp"`
+	GFS  GfsConfig `json:"gfs"`
 }
 
 type TechnicConfig struct {
