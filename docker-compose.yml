@@ -1,0 +1,9 @@
+version: '2'
+services:
+  solder:
+    image: zlepper/solder
+    container_name: solder
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+      - "8080:8080"
