@@ -9,6 +9,9 @@ import (
 	"os"
 	"path"
 
+	"bytes"
+	"compress/gzip"
+	"encoding/base64"
 	"strconv"
 	"strings"
 	"text/template"
@@ -17,6 +20,7 @@ import (
 type filecontent struct {
 	Name    string
 	Content string
+	IsMap   bool
 }
 
 type templateInput struct {
@@ -33,14 +37,25 @@ import (
 	"net/http"
 	"io/ioutil"
 	"path"
+	"log"
+	"encoding/base64"
 )
 
 // Allows access to all the frontend files, now embedded in the application
 func bindFiles(e *echo.Echo) {
 	{{range .Files}}
-	e.GET("/{{.Name}}", func(c echo.Context) error {
-		return c.String(http.StatusOK, {{.Content}})
-	})
+	{{if not .IsMap}}
+	{
+		bin, err := base64.StdEncoding.DecodeString("{{.Content}}")
+		if err != nil {
+			log.Panicln(err)
+		}
+		e.GET("/{{.Name}}", func(c echo.Context) error {
+			c.Response().Header().Add("Content-Encoding", "gzip")
+			return c.Blob(http.StatusOK, "", bin)
+		})
+	}
+	{{end}}
 	{{end}}
 
 	e.GET("/", func(c echo.Context) error {
@@ -93,12 +108,29 @@ func main() {
 	for _, f := range fs {
 		filename := f.Name()
 		content, _ := ioutil.ReadFile(path.Join(dir, filename))
+
 		if strings.HasSuffix(filename, ".js") ||
 			strings.HasSuffix(filename, ".js.map") ||
 			strings.HasSuffix(filename, ".css") ||
 			strings.HasSuffix(filename, ".css.map") {
-			s := strconv.Quote(string(content))
-			ti.Files = append(ti.Files, filecontent{Name: filename, Content: s})
+
+			// We need the output to be base64 encoded
+			var buf bytes.Buffer
+			encoder := base64.NewEncoder(base64.StdEncoding, &buf)
+
+			zipWriter := gzip.NewWriter(encoder)
+			zipWriter.Name = filename
+			_, err := zipWriter.Write(content)
+			if err != nil {
+				panic(err)
+			}
+			if err = zipWriter.Close(); err != nil {
+				panic(err)
+			}
+
+			isMap := strings.HasSuffix(filename, ".map")
+
+			ti.Files = append(ti.Files, filecontent{Name: filename, Content: buf.String(), IsMap: isMap})
 		}
 		if filename == "index.html" {
 			s := strconv.Quote(string(content))

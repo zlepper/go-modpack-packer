@@ -17,6 +17,7 @@ import (
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	"gopkg.in/olahol/melody.v1"
 	"net/http"
+	"time"
 )
 
 //go:generate go run scripts/frontend.go
@@ -81,6 +82,7 @@ func main() {
 	devMode := flag.Bool("dev", false, "Setup the application to run in dev mode, which means frontend will be served from disk, not embedded")
 
 	flag.Parse()
+	println("Dev mode", *devMode)
 
 	if *devMode {
 		bindNonInline(e)
@@ -88,7 +90,17 @@ func main() {
 		bindFiles(e)
 
 		go func() {
-			println(e.Server.Addr)
+			startupWaitCount := 0
+			// Wait for the http server to start
+			for e.Server.Addr == "" {
+				log.Println("Waiting for server startup")
+				time.Sleep(20 * time.Millisecond)
+				startupWaitCount++
+				if startupWaitCount > 10 {
+					log.Panicln("Backend did not start in a timely manner. That is unexpected. Please report this as a bug on GitHub. ")
+				}
+			}
+
 			cmd := exec.Command("cmd", fmt.Sprintf(`/c start http://%s`, e.Server.Addr))
 			err := cmd.Run()
 			if err != nil {
