@@ -14,6 +14,7 @@ import {FolderService} from "app/services/folders.service";
 import {ForgeVersionService} from "app/services/forge-version.service";
 import {ModpackService} from "app/services/modpack.service";
 import {NetworkService} from "app/services/network.service";
+import {UpdateService} from "app/services/update.service";
 import {WebSocketService} from "app/services/websocket.service";
 import {NoApiValidator} from "app/technic/technic-settings/solder-options/NoApiValidator";
 
@@ -91,7 +92,8 @@ import {TechnicComponent} from "./technic/technic.component";
     HasModpackSelectedGuard,
     CorsNetworkingService,
     FolderService,
-    AdditionalFoldersService
+    AdditionalFoldersService,
+    UpdateService
   ],
   bootstrap: [AppComponent],
   entryComponents: [

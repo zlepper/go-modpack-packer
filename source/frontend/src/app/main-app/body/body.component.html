@@ -1,25 +1,36 @@
-<div class="container" fxLayout="column">
-  <md-sidenav-container fxFlex fxLayout="column">
-    <md-sidenav mode="side" opened="true">
-      <div fxLayout="column" class="container">
-        <div class="select-wrapper">
-          <md-select placeholser="Modpack" #selectModpack [(ngModel)]="selectedModpackId" (change)="selectedModpackChanged(selectedModpackId)">
-            <md-option *ngFor="let modpack of modpackService.modpacks|async" [value]="modpack.id">{{modpack.name}}</md-option>
-            <md-option [value]="-1">New modpack</md-option>
-          </md-select>
-        </div>
-        <md-nav-list *ngIf="(modpackService.selectedModpack|async) !== null">
-          <a md-list-item [routerLink]="['/modpack']">Modpack Details</a>
-          <a md-list-item [routerLink]="['/technic']">Technic</a>
-        </md-nav-list>
-        <span fxFlex></span>
-        <md-nav-list>
-          <a md-list-item [routerLink]="['/settings']">Settings</a>
-        </md-nav-list>
-      </div>
-    </md-sidenav>
-    <div class="content">
-      <router-outlet></router-outlet>
-    </div>
-  </md-sidenav-container>
+<div class="container" fxLayout="column" *ngIf="updateService.updating|async; else notUpdatingView"
+     fxLayoutAlign="center center">
+  <md-spinner [mode]="'indeterminate'"></md-spinner>
+  <h1>{{updateService.updateMessage|async}}</h1>
 </div>
+<ng-template #notUpdatingView>
+  <div class="container" fxLayout="column">
+    <md-sidenav-container fxFlex fxLayout="column">
+      <md-sidenav mode="side" opened="true">
+        <div fxLayout="column" class="container">
+          <div class="select-wrapper">
+            <md-select placeholser="Modpack" #selectModpack [(ngModel)]="selectedModpackId"
+                       (change)="selectedModpackChanged(selectedModpackId)">
+              <md-option *ngFor="let modpack of modpackService.modpacks|async" [value]="modpack.id">{{modpack.name}}
+              </md-option>
+              <md-option [value]="-1">New modpack</md-option>
+            </md-select>
+          </div>
+          <md-nav-list *ngIf="(modpackService.selectedModpack|async) !== null">
+            <a md-list-item [routerLink]="['/modpack']">Modpack Details</a>
+            <a md-list-item [routerLink]="['/technic']">Technic</a>
+          </md-nav-list>
+          <span fxFlex></span>
+          <md-nav-list>
+            <a md-list-item href="javascript:void(0);" (click)="updateService.startUpdate()"
+               *ngIf="updateService.updateAvailable|async">Click to update</a>
+            <a md-list-item [routerLink]="['/settings']">Settings</a>
+          </md-nav-list>
+        </div>
+      </md-sidenav>
+      <div class="content">
+        <router-outlet></router-outlet>
+      </div>
+    </md-sidenav-container>
+  </div>
+</ng-template>

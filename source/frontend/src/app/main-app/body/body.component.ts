@@ -1,5 +1,6 @@
 import {ChangeDetectionStrategy, Component, OnInit} from "@angular/core";
 import {ModpackService} from "app/services/modpack.service";
+import {UpdateService} from "app/services/update.service";
 
 @Component({
   selector: 'app-body',
@@ -11,7 +12,7 @@ export class BodyComponent implements OnInit {
 
   public selectedModpackId: number;
 
-  constructor(public modpackService: ModpackService) {
+  constructor(public modpackService: ModpackService, public updateService: UpdateService) {
 
   }
 

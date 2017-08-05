@@ -14,6 +14,7 @@ import (
 	"github.com/labstack/echo/middleware"
 	"github.com/zlepper/go-modpack-packer/source/backend/consts"
 	"github.com/zlepper/go-modpack-packer/source/backend/handlers"
+	"github.com/zlepper/go-modpack-packer/source/backend/internal"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	"gopkg.in/olahol/melody.v1"
 	"net/http"
@@ -42,6 +43,9 @@ func (w *WebsocketConnection) Write(action string, data interface{}) {
 }
 func (w *WebsocketConnection) Error(data interface{}) {
 	w.Write("error", data)
+}
+func (w *WebsocketConnection) Close() {
+	w.session.Close()
 }
 
 func main() {
@@ -80,39 +84,72 @@ func main() {
 	})
 
 	devMode := flag.Bool("dev", false, "Setup the application to run in dev mode, which means frontend will be served from disk, not embedded")
+	autoLaunch := flag.Bool("autolaunch", true, "Indicates if a browser windows should automatically be launched")
+	port := flag.String("port", "8084", "The port the backend should not on. If nothing is provided a free port is automatically found")
+	sendReloadSignal := flag.Bool("sendreloadsignal", false, "True if a reload signal should be send to the first frontend to connect")
 
 	flag.Parse()
-	println("Dev mode", *devMode)
+
+	log.Println("devMode", *devMode)
+	log.Println("autoLaunch", *autoLaunch)
+	log.Println("port", *port)
+	log.Println("sendReloadSignal", *sendReloadSignal)
 
 	if *devMode {
 		bindNonInline(e)
 	} else {
 		bindFiles(e)
 
-		go func() {
-			startupWaitCount := 0
-			// Wait for the http server to start
-			for e.Server.Addr == "" {
-				log.Println("Waiting for server startup")
-				time.Sleep(20 * time.Millisecond)
-				startupWaitCount++
-				if startupWaitCount > 10 {
-					log.Panicln("Backend did not start in a timely manner. That is unexpected. Please report this as a bug on GitHub. ")
+		if *autoLaunch {
+			go func() {
+				startupWaitCount := 0
+				// Wait for the http server to start
+				for e.Server.Addr == "" {
+					log.Println("Waiting for server startup")
+					time.Sleep(20 * time.Millisecond)
+					startupWaitCount++
+					if startupWaitCount > 10 {
+						log.Panicln("Backend did not start in a timely manner. That is unexpected. Please report this as a bug on GitHub. ")
+					}
 				}
-			}
 
-			cmd := exec.Command("cmd", fmt.Sprintf(`/c start http://%s`, e.Server.Addr))
-			err := cmd.Run()
-			if err != nil {
-				log.Panic(err)
-			}
-		}()
+				cmd := exec.Command("cmd", fmt.Sprintf(`/c start http://%s`, e.Server.Addr))
+				err := cmd.Run()
+				if err != nil {
+					log.Panic(err)
+				}
+			}()
 
+		}
 	}
 
-	m.HandleMessage(func(s *melody.Session, msg []byte) {
-		handlers.HandleMessage(&WebsocketConnection{s}, msg)
+	first := true
+	m.HandleConnect(func(s *melody.Session) {
+		// Let the connect finish and then continue updating
+		// and check for update
+		go func() {
+			conn := &WebsocketConnection{s}
+			if first && *sendReloadSignal {
+				conn.Write("update-progress", "Done updating. Reloading in 5 seconds.")
+				conn.Write("reload-frontend", "")
+				first = false
+			}
+			handlers.CheckForUpdates(conn)
+		}()
 	})
 
-	e.Logger.Fatal(e.Start("localhost:8084")) // TODO Change this to get a free port from the OS
+	m.HandleMessage(func(s *melody.Session, msg []byte) {
+		conn := &WebsocketConnection{s}
+		handlers.HandleMessage(conn, msg)
+	})
+
+	internal.EchoInstance = e
+
+	err = e.Start("localhost:" + *port) // TODO Change this to get a free port from the OS
+	if err != nil {
+		log.Println(err)
+	}
+
+	// Wait for any outstanding process to finish before being killing the main thread
+	internal.OutstandingProcess.Wait()
 }

@@ -73,6 +73,10 @@ func HandleMessage(conn types.WebsocketConnection, message []byte) {
 		{
 			getFolders(conn, m.Data)
 		}
+	case "start-update":
+		{
+			updateToLatestVersion(conn)
+		}
 	default:
 		{
 			log.Println("Unknown action", m.Action)

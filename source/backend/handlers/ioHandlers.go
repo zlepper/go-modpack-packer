@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"sort"
 	"sync"
+	"github.com/zlepper/go-modpack-packer/source/backend/internal"
 )
 
 var mutex *sync.Mutex
@@ -67,6 +68,7 @@ func findAdditionalFolders(conn types.WebsocketConnection, data interface{}) {
 }
 
 func saveModpacks(conn types.WebsocketConnection, data interface{}) {
+	internal.OutstandingProcess.Add(1)
 	// Get the appData directory, since go doesn't expose it, electron passes it as a parameter
 	dataDirectory := consts.DataDirectory
 	modpackFile := filepath.Join(dataDirectory, "modpacks.json")
@@ -98,6 +100,7 @@ func saveModpacks(conn types.WebsocketConnection, data interface{}) {
 		return
 	}
 	mutex.Unlock()
+	internal.OutstandingProcess.Done()
 }
 
 func loadModpacks(conn types.WebsocketConnection) {

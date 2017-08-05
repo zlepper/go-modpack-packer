@@ -5,6 +5,7 @@ type WebsocketConnection interface {
 	WriteData(data interface{})
 	Write(action string, data interface{})
 	Error(data interface{})
+	Close()
 }
 
 type Message struct {
