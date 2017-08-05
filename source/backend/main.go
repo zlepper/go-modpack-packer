@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"os/exec"
 	"path"
 
 	"flag"
@@ -14,6 +13,7 @@ import (
 	"github.com/labstack/echo/middleware"
 	"github.com/zlepper/go-modpack-packer/source/backend/consts"
 	"github.com/zlepper/go-modpack-packer/source/backend/handlers"
+	"github.com/zlepper/go-modpack-packer/source/backend/helpers"
 	"github.com/zlepper/go-modpack-packer/source/backend/internal"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	"gopkg.in/olahol/melody.v1"
@@ -21,7 +21,7 @@ import (
 	"time"
 )
 
-//go:generate go run scripts/frontend.go
+//go:generate go run scripts/build.go
 
 type WebsocketConnection struct {
 	session *melody.Session
@@ -113,18 +113,16 @@ func main() {
 					}
 				}
 
-				cmd := exec.Command("cmd", fmt.Sprintf(`/c start http://%s`, e.Server.Addr))
-				err := cmd.Run()
-				if err != nil {
-					log.Panic(err)
-				}
+				helpers.OpenWebPage(fmt.Sprintf(`/c start http://%s`, e.Server.Addr))
 			}()
 
 		}
 	}
 
 	first := true
+	totalConnections := 0
 	m.HandleConnect(func(s *melody.Session) {
+		totalConnections++
 		// Let the connect finish and then continue updating
 		// and check for update
 		go func() {
@@ -136,6 +134,13 @@ func main() {
 			}
 			handlers.CheckForUpdates(conn)
 		}()
+	})
+
+	m.HandleDisconnect(func(s *melody.Session) {
+		totalConnections--
+		if totalConnections == 0 {
+			e.Close()
+		}
 	})
 
 	m.HandleMessage(func(s *melody.Session, msg []byte) {

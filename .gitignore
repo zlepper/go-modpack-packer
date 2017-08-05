@@ -172,3 +172,5 @@ Temporary Items
 dist/
 /release/
 /source/backend/vendor/
+/source/backend/build/
+/source/backend/.ModpackPacker/
