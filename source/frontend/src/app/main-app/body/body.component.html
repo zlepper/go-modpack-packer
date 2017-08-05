@@ -1,10 +1,10 @@
-<div class="container" fxLayout="column" *ngIf="updateService.updating|async; else notUpdatingView"
+<div fxFlex class="container" fxLayout="column" *ngIf="updateService.updating|async; else notUpdatingView"
      fxLayoutAlign="center center">
   <md-spinner [mode]="'indeterminate'"></md-spinner>
   <h1>{{updateService.updateMessage|async}}</h1>
 </div>
 <ng-template #notUpdatingView>
-  <div class="container" fxLayout="column">
+  <div class="container" fxLayout="column" fxFlex>
     <md-sidenav-container fxFlex fxLayout="column">
       <md-sidenav mode="side" opened="true">
         <div fxLayout="column" class="container">
@@ -28,7 +28,7 @@
           </md-nav-list>
         </div>
       </md-sidenav>
-      <div class="content">
+      <div class="content" fxLayout="column">
         <router-outlet></router-outlet>
       </div>
     </md-sidenav-container>

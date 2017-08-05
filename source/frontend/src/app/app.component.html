@@ -1,5 +1,5 @@
 <div fxLayout="column" class="container mat-typography">
-  <app-body fxFlex *ngIf="ready|async; else notReady"></app-body>
+  <app-body fxFlex *ngIf="ready|async; else notReady" fxLayout="column"></app-body>
   <ng-template #notReady>
     <div fxFlex fxLayout="column" fxLayoutAlign="center center">
       <md-spinner [mode]="'indeterminate'"></md-spinner>

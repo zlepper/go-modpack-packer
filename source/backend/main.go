@@ -113,7 +113,7 @@ func main() {
 					}
 				}
 
-				helpers.OpenWebPage(fmt.Sprintf(`/c start http://%s`, e.Server.Addr))
+				helpers.OpenWebPage(fmt.Sprintf(`http://%s`, e.Server.Addr))
 			}()
 
 		}
