@@ -1,8 +1,8 @@
 package types
 
 type OutputInfo struct {
-	File             string          `json:"file"`
-	Name             string          `json:"name"`
+	File string `json:"file"`
+	Name string `json:"name"`
 	// Slug
 	Id               string          `json:"id"`
 	Version          string          `json:"version"`

@@ -17,36 +17,36 @@ type configuration struct {
 
 var (
 	configurations []configuration = []configuration{
-		//{
-		//	OS:        "windows",
-		//	Arch:      "386",
-		//	Extension: "windows-x32.exe",
-		//},
+		{
+			OS:        "windows",
+			Arch:      "386",
+			Extension: "windows-x32.exe",
+		},
 		{
 			OS:        "windows",
 			Arch:      "amd64",
 			Extension: "windows-x64.exe",
 		},
-		//{
-		//	OS:        "darwin",
-		//	Arch:      "386",
-		//	Extension: "osx-x32",
-		//},
-		//{
-		//	OS:        "darwin",
-		//	Arch:      "amd64",
-		//	Extension: "osx-x64",
-		//},
-		//{
-		//	OS:        "linux",
-		//	Arch:      "386",
-		//	Extension: "linux-x32",
-		//},
-		//{
-		//	OS:        "linux",
-		//	Arch:      "amd64",
-		//	Extension: "linux-x64",
-		//},
+		{
+			OS:        "darwin",
+			Arch:      "386",
+			Extension: "osx-x32",
+		},
+		{
+			OS:        "darwin",
+			Arch:      "amd64",
+			Extension: "osx-x64",
+		},
+		{
+			OS:        "linux",
+			Arch:      "386",
+			Extension: "linux-x32",
+		},
+		{
+			OS:        "linux",
+			Arch:      "amd64",
+			Extension: "linux-x64",
+		},
 	}
 )
 

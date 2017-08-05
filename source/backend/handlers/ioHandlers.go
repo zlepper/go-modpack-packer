@@ -6,6 +6,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/zlepper/go-modpack-packer/source/backend/consts"
 	"github.com/zlepper/go-modpack-packer/source/backend/encryption"
+	"github.com/zlepper/go-modpack-packer/source/backend/internal"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
 	"io/ioutil"
 	"log"
@@ -13,7 +14,6 @@ import (
 	"path/filepath"
 	"sort"
 	"sync"
-	"github.com/zlepper/go-modpack-packer/source/backend/internal"
 )
 
 var mutex *sync.Mutex

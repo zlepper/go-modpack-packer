@@ -1,8 +1,8 @@
 package db
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
 func TestGetPermissionsDb(t *testing.T) {
