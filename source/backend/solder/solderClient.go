@@ -17,6 +17,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 type SolderClient struct {
@@ -28,6 +29,7 @@ type SolderClient struct {
 	lock              sync.RWMutex
 	modVersionIdLock  sync.RWMutex
 	sema              chan struct{}
+	addMutex          sync.Mutex
 }
 
 func NewSolderClient(Url string) *SolderClient {
@@ -174,6 +176,15 @@ func (s *SolderClient) CreatePack(name, slug string) string {
 }
 
 func (s *SolderClient) AddMod(mod *types.OutputInfo) string {
+	// Ensure we don't attempt to create the mod multiple times, as this won't work
+	s.addMutex.Lock()
+	defer s.addMutex.Unlock()
+
+	modId := s.GetModId(mod.Id)
+	if modId != "" {
+		return modId
+	}
+
 	Url := s.createUrl("mod/create")
 
 	form := url.Values{}
@@ -187,7 +198,8 @@ func (s *SolderClient) AddMod(mod *types.OutputInfo) string {
 	response := s.postForm(Url.String(), form)
 	defer response.Body.Close()
 
-	return s.GetModId(mod.Id)
+	modResponse := crawlers.CrawlMod(response)
+	return modResponse.Id
 }
 
 func (s *SolderClient) AddModVersion(modId, md5, version string) {
@@ -403,18 +415,19 @@ func (s *SolderClient) GetModId(modid string) string {
 	s.lock.RUnlock()
 
 	Url := s.createUrl("mod/list")
+	Url.Query().Add("bust", strconv.FormatInt(time.Now().UnixNano(), 10))
 
 	response := s.doRequest(http.MethodGet, Url.String(), "")
 	defer response.Body.Close()
 	mods := crawlers.CrawlModList(response)
 	for _, mod := range mods {
+		id := mod.Id
+		if strings.Trim(id, " ") != "" {
+			s.lock.Lock()
+			s.modIdCache[mod.Name] = mod.Id
+			s.lock.Unlock()
+		}
 		if strings.ToLower(mod.Name) == strings.ToLower(modid) {
-			id := mod.Id
-			if strings.Trim(id, " ") != "" {
-				s.lock.Lock()
-				s.modIdCache[modid] = id
-				s.lock.Unlock()
-			}
 			return id
 		}
 	}
