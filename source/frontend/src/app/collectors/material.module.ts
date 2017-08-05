@@ -11,6 +11,7 @@ import {
   MdListModule,
   MdMenuModule,
   MdProgressBarModule,
+  MdProgressSpinnerModule,
   MdRadioModule,
   MdRippleModule,
   MdSelectModule,
@@ -37,7 +38,8 @@ import {
     MdSidenavModule,
     MdSnackBarModule,
     MdToolbarModule,
-    MdAutocompleteModule
+    MdAutocompleteModule,
+    MdProgressSpinnerModule
   ],
   exports: [
     MdButtonModule,
@@ -56,7 +58,8 @@ import {
     MdSidenavModule,
     MdSnackBarModule,
     MdToolbarModule,
-    MdAutocompleteModule
+    MdAutocompleteModule,
+    MdProgressSpinnerModule
   ]
 })
 export class MaterialModule {

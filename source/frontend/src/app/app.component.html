@@ -1,3 +1,9 @@
 <div fxLayout="column" class="container mat-typography">
-  <app-body fxFlex></app-body>
+  <app-body fxFlex *ngIf="ready|async; else notReady"></app-body>
+  <ng-template #notReady>
+    <div fxFlex fxLayout="column" fxLayoutAlign="center center">
+      <md-spinner [mode]="'indeterminate'"></md-spinner>
+      <h1>Waiting for backend to finish loading</h1>
+    </div>
+  </ng-template>
 </div>

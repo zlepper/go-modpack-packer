@@ -9,7 +9,6 @@ export class ModpackService {
 
   private _modpacks: Subject<Modpack[]>;
   private _selectedModpack: Subject<Modpack | null>;
-
   constructor(protected backendCommunication: BackendCommunicationService, protected router: Router) {
     this._modpacks = new BehaviorSubject([]);
     this._selectedModpack = new BehaviorSubject(null);
@@ -27,7 +26,14 @@ export class ModpackService {
           this.router.navigate(['modpack']);
         }
       });
+
+    this._ready = this.backendCommunication.getMessages('data-loaded')
+      .take(1)
+      .map(() => true)
+      .behaviorSubject(false);
   }
+
+  private _ready: Observable<boolean>;
 
   public get modpacks(): Observable<Modpack[]> {
     return this._modpacks;
@@ -35,6 +41,10 @@ export class ModpackService {
 
   public get selectedModpack(): Observable<Modpack> {
     return this._selectedModpack;
+  }
+
+  public get ready(): Observable<boolean> {
+    return this._ready;
   }
 
   /**

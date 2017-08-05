@@ -1,4 +1,6 @@
 import {Component, OnInit} from "@angular/core";
+import {ModpackService} from "app/services/modpack.service";
+import {Observable} from "rxjs/Observable";
 
 @Component({
   selector: 'app-root',
@@ -7,10 +9,13 @@ import {Component, OnInit} from "@angular/core";
 })
 export class AppComponent implements OnInit {
 
-  constructor() {
+  public ready: Observable<boolean>;
+
+  constructor(private modpackService: ModpackService) {
   }
 
   ngOnInit(): void {
+    this.ready = this.modpackService.ready;
   }
 
 }
