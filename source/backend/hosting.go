@@ -2,12 +2,12 @@
 package main
 
 import (
-	"encoding/base64"
 	"github.com/labstack/echo"
-	"io/ioutil"
-	"log"
 	"net/http"
+	"io/ioutil"
 	"path"
+	"log"
+	"encoding/base64"
 )
 
 // Allows access to all the frontend files, now embedded in the application
@@ -120,3 +120,4 @@ func bindNonInline(e *echo.Echo) {
 	}
 
 }
+	
