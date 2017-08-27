@@ -10,6 +10,19 @@ import {Observable} from "rxjs/Observable";
 import {Subject} from "rxjs/Subject";
 
 
+function sortMods(left: Mod, right: Mod): number {
+  const name1 = left.modid.toLowerCase();
+  const name2 = right.modid.toLowerCase();
+
+  if (name1 < name2) {
+    return -1;
+  }
+  if (name2 > name1) {
+    return 1;
+  }
+  return 0;
+}
+
 @Component({
   selector: 'app-technic-building',
   templateUrl: './technic-building.component.html',
@@ -55,6 +68,7 @@ export class TechnicBuildingComponent implements OnInit {
       .map(mod => Mod.fromJson(mod))
       .bufferTime(10)
       .scan((currentMods: Mod[], newMods: Mod[]) => [...currentMods, ...newMods], [])
+      .map(mods => mods.sort(sortMods))
       .behaviorSubject([]);
 
     this.readyToBuild = this.backendCommunicationService.getMessages('all-mod-files-scanned').behaviorSubject(false);
@@ -102,7 +116,7 @@ export class TechnicBuildingComponent implements OnInit {
 
     this.solderProgressNumber = doneUpdatingSolder.scan((currentProgress, doneTodos) => currentProgress + doneTodos.length, 0);
 
-    this.uploadData = this.backendCommunicationService.getMessages<UploadWaiting>('waiting-for-file-upload');
+    this.uploadData = this.backendCommunicationService.getMessages<UploadWaiting>('waiting-for-file-upload').behaviorSubject(null);
 
     this.done = this.backendCommunicationService.getMessages<boolean>('done-updating')
       .map(() => true)
@@ -132,6 +146,12 @@ export class TechnicBuildingComponent implements OnInit {
           this.snackBar.open('Some mods are missing info. Please fill it in before continuing.', '', {duration: 5000});
         }
       });
+  }
+
+  public continueBuild() {
+    this.uploadData.take(1).subscribe(data => {
+      this.backendCommunicationService.send('continue-running', data);
+    });
   }
 
   public cancel() {

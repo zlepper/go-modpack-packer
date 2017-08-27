@@ -11,6 +11,7 @@
                         [uploadData]="uploadData|async"
                         [solderNumber]="solderProgressNumber|async"
                         [uploadNumber]="uploadProgressNumber|async"
+                        (continueBuild)="continueBuild()"
     ></app-build-building>
 
   </div>

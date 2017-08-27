@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/base64"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -62,53 +63,62 @@ var (
 
 func main() {
 
-	buildFrontend()
-	embedFrontend()
+	embedOnly := flag.Bool("embedOnly", false, "Set to true to only generate embeding")
 
-	log.Println("Starting build")
-	goBinary, err := exec.LookPath("go")
-	if err != nil {
-		log.Panicln(err)
-	}
+	flag.Parse()
 
-	var wg sync.WaitGroup
-	wg.Add(len(configurations))
-	for _, conf := range configurations {
-		go func(conf configuration) {
-			log.Printf("building binary for '%s'\n", conf.Extension)
-			cmd := exec.Cmd{
-				Path: goBinary,
-				Args: []string{
-					goBinary,
-					"build",
-					"-o",
-					fmt.Sprintf("build/modpack-packer-%s", conf.Extension),
-					"github.com/zlepper/go-modpack-packer/source/backend",
-				},
-				Env: append(
-					os.Environ(),
-					fmt.Sprintf("GOOS=%s", conf.OS),
-					fmt.Sprintf("GOARCH=%s", conf.Arch),
-				),
-			}
-			output, err := cmd.CombinedOutput()
-			if err != nil {
-				log.Println("build args", cmd.Args)
-				log.Println("Error when building", err, "\n", string(output))
-				return
-			}
-			log.Printf("Successfully build binary for '%s'\n", conf.Extension)
-			wg.Done()
-		}(conf)
+	if *embedOnly {
+		embedFrontend()
+	} else {
+		buildFrontend()
+		embedFrontend()
+
+		log.Println("Starting build")
+		goBinary, err := exec.LookPath("go")
+		if err != nil {
+			log.Panicln(err)
+		}
+
+		var wg sync.WaitGroup
+		wg.Add(len(configurations))
+		for _, conf := range configurations {
+			go func(conf configuration) {
+				log.Printf("building binary for '%s'\n", conf.Extension)
+				cmd := exec.Cmd{
+					Path: goBinary,
+					Args: []string{
+						goBinary,
+						"build",
+						"-o",
+						fmt.Sprintf("build/modpack-packer-%s", conf.Extension),
+						"github.com/zlepper/go-modpack-packer/source/backend",
+					},
+					Env: append(
+						os.Environ(),
+						fmt.Sprintf("GOOS=%s", conf.OS),
+						fmt.Sprintf("GOARCH=%s", conf.Arch),
+					),
+				}
+				output, err := cmd.CombinedOutput()
+				if err != nil {
+					log.Println("build args", cmd.Args)
+					log.Println("Error when building", err, "\n", string(output))
+					return
+				}
+				log.Printf("Successfully build binary for '%s'\n", conf.Extension)
+				wg.Done()
+			}(conf)
+		}
+		wg.Wait()
+		log.Println("Finished building all configurations.")
 	}
-	wg.Wait()
-	log.Println("Finished building all configurations.")
 }
 
 type filecontent struct {
-	Name    string
-	Content string
-	IsMap   bool
+	Name        string
+	Content     string
+	IsMap       bool
+	ContentType string
 }
 
 type templateInput struct {
@@ -140,7 +150,7 @@ func bindFiles(e *echo.Echo) {
 		}
 		e.GET("/{{.Name}}", func(c echo.Context) error {
 			c.Response().Header().Add("Content-Encoding", "gzip")
-			return c.Blob(http.StatusOK, "", bin)
+			return c.Blob(http.StatusOK, "{{.ContentType}}", bin)
 		})
 	}
 	{{end}}
@@ -158,29 +168,29 @@ func bindFiles(e *echo.Echo) {
 	println("Not found handlers attached")
 }
 
-func loadContent(s string) string {
+func loadContent(s string) []byte {
 	content, err := ioutil.ReadFile(path.Join("..", "frontend", "dist", s))
 	if err != nil {
-		return ""
+		return make([]byte, 0)
 	}
-	return string(content)
+	return content
 }
 
 func bindNonInline(e *echo.Echo) {
 
 	{{range .Files}}
 	e.GET("/{{.Name}}", func(c echo.Context) error {
-		return c.String(http.StatusOK, loadContent("{{.Name}}"))
+		return c.Blob(http.StatusOK, "{{.ContentType}}", loadContent("{{.Name}}"))
 	})
 	{{end}}
 
 	e.GET("/", func(c echo.Context) error {
-		return c.HTML(http.StatusOK, loadContent("index.html"))
+		return c.HTML(http.StatusOK, string(loadContent("index.html")))
 	})
 
 	echo.NotFoundHandler = func(c echo.Context) error {
 		println("Not found handler called")
-		return c.HTML(http.StatusOK, loadContent("index.html"))
+		return c.HTML(http.StatusOK, string(loadContent("index.html")))
 	}
 
 }
@@ -220,7 +230,14 @@ func embedFrontend() {
 
 			isMap := strings.HasSuffix(filename, ".map")
 
-			ti.Files = append(ti.Files, filecontent{Name: filename, Content: buf.String(), IsMap: isMap})
+			contentType := "application/octet-stream"
+			if strings.HasSuffix(filename, ".js") {
+				contentType = "application/javascript"
+			} else if strings.HasSuffix(filename, ".css") {
+				contentType = "text/css"
+			}
+
+			ti.Files = append(ti.Files, filecontent{Name: filename, Content: buf.String(), IsMap: isMap, ContentType: contentType})
 		}
 		if filename == "index.html" {
 			s := strconv.Quote(string(content))

@@ -1,5 +1,7 @@
-import {Component, Input, OnInit} from "@angular/core";
+import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
 import {Modpack, UploadWaiting} from "app/models/modpack";
+import {BehaviorSubject} from "rxjs/BehaviorSubject";
+import {Subject} from "rxjs/Subject";
 
 @Component({
   selector: 'app-build-building',
@@ -29,10 +31,20 @@ export class BuildBuildingComponent implements OnInit {
   @Input()
   public solderNumber: number;
 
+  @Output()
+  public continueBuild = new EventEmitter<void>();
+
+  public continueClicked: Subject<boolean> = new BehaviorSubject(false);
+
   constructor() { }
 
 
   ngOnInit() {
+  }
+
+  continueBuildingWithManualStorage() {
+    this.continueBuild.emit();
+    this.continueClicked.next(true);
   }
 
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/zlepper/go-modpack-packer/source/backend/db"
 	"github.com/zlepper/go-modpack-packer/source/backend/helpers"
+	"github.com/zlepper/go-modpack-packer/source/backend/internal"
 	"github.com/zlepper/go-modpack-packer/source/backend/solder"
 	"github.com/zlepper/go-modpack-packer/source/backend/solder/upload"
 	"github.com/zlepper/go-modpack-packer/source/backend/types"
@@ -192,9 +193,9 @@ func updateSolder(modpack types.Modpack, conn types.WebsocketConnection) (*solde
 	// Create solder client
 	conn.Write(solderCurrentlyDoingEvent, "Logging in to solder")
 	solderclient := solder.NewSolderClient(modpack.Solder.Url)
-	loginSuccessful := solderclient.Login(modpack.Solder.Username, modpack.Solder.Password)
-	if !loginSuccessful {
-		log.Panic("Could not login to solder with the supplied credentials.")
+	err := solderclient.Login(modpack.Solder.Username, modpack.Solder.Password)
+	if err != nil {
+		log.Panic("Could not login to solder with the supplied credentials.", err)
 	}
 
 	conn.Write(solderCurrentlyDoingEvent, "Checking if modpack already exists")
@@ -228,9 +229,9 @@ func addInfoToSolder(info *types.OutputInfo, buildId string, conn types.Websocke
 		modid = solderclient.AddMod(info)
 	}
 	if modid == "" {
-		log.Println("Something went wrong wehn adding a mod to solder.")
+		log.Println("Something went wrong when adding a mod to solder.")
 		log.Printf("%v\n", *info)
-		log.Printf("Application version: %s\n", os.Args[2])
+		log.Printf("Application version: %s\n", internal.Version)
 		log.Panic("Error. See above lines")
 	}
 

@@ -21,7 +21,7 @@ import (
 	"time"
 )
 
-//go:generate go run scripts/build.go
+//go:generate go run scripts/build.go -embedOnly
 
 type WebsocketConnection struct {
 	session *melody.Session
@@ -138,9 +138,14 @@ func main() {
 
 	m.HandleDisconnect(func(s *melody.Session) {
 		totalConnections--
-		if totalConnections == 0 {
-			e.Close()
-		}
+		go func() {
+			// If there are still zero connections after 5 seconds, then we can close
+			time.Sleep(5 * time.Second)
+			if totalConnections == 0 {
+
+				e.Close()
+			}
+		}()
 	})
 
 	m.HandleMessage(func(s *melody.Session, msg []byte) {

@@ -102,6 +102,7 @@ func (m *Mod) SetSolderStatus(status bool) {
 
 func SafeNormalizeString(s string) string {
 	s = strings.Replace(strings.ToLower(s), " ", "-", -1)
+	s = strings.Replace(s, "_", "-", -1)
 	return strings.Replace(s, ".", "", -1)
 }
 

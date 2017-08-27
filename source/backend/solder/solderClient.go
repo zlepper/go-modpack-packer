@@ -67,11 +67,11 @@ func TestSolderConnection(conn types.WebsocketConnection, data interface{}) {
 	}
 
 	client := NewSolderClient(solderInfo.Url)
-	loginSuccess := client.Login(solderInfo.Username, solderInfo.Password)
-	if loginSuccess {
+	err = client.Login(solderInfo.Username, solderInfo.Password)
+	if err == nil {
 		conn.Write("solder-test", "Solder connection seems alright")
 	} else {
-		conn.Write("solder-test", "Could not connect to solder and login")
+		conn.Write("solder-test", "Could not connect to solder and login\n"+err.Error())
 	}
 }
 
@@ -122,7 +122,7 @@ func (s *SolderClient) doRequest(method, url, data string) *http.Response {
 	return response
 }
 
-func (s *SolderClient) Login(email string, password string) bool {
+func (s *SolderClient) Login(email string, password string) error {
 	Url := s.createUrl("login")
 
 	form := url.Values{}
@@ -199,6 +199,7 @@ func (s *SolderClient) AddMod(mod *types.OutputInfo) string {
 	defer response.Body.Close()
 
 	modResponse := crawlers.CrawlMod(response)
+	log.Println(modResponse)
 	return modResponse.Id
 }
 
