@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
 import {Modpack, UploadWaiting} from "app/models/modpack";
 import {BehaviorSubject} from "rxjs/BehaviorSubject";
 import {Subject} from "rxjs/Subject";
@@ -6,7 +6,8 @@ import {Subject} from "rxjs/Subject";
 @Component({
   selector: 'app-build-building',
   templateUrl: './build-building.component.html',
-  styleUrls: ['./build-building.component.scss']
+  styleUrls: ['./build-building.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BuildBuildingComponent implements OnInit {
 

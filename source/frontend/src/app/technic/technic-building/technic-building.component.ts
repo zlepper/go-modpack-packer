@@ -10,19 +10,6 @@ import {Observable} from "rxjs/Observable";
 import {Subject} from "rxjs/Subject";
 
 
-function sortMods(left: Mod, right: Mod): number {
-  const name1 = left.modid.toLowerCase();
-  const name2 = right.modid.toLowerCase();
-
-  if (name1 < name2) {
-    return -1;
-  }
-  if (name2 > name1) {
-    return 1;
-  }
-  return 0;
-}
-
 @Component({
   selector: 'app-technic-building',
   templateUrl: './technic-building.component.html',
@@ -68,7 +55,6 @@ export class TechnicBuildingComponent implements OnInit {
       .map(mod => Mod.fromJson(mod))
       .bufferTime(10)
       .scan((currentMods: Mod[], newMods: Mod[]) => [...currentMods, ...newMods], [])
-      .map(mods => mods.sort(sortMods))
       .behaviorSubject([]);
 
     this.readyToBuild = this.backendCommunicationService.getMessages('all-mod-files-scanned').behaviorSubject(false);
