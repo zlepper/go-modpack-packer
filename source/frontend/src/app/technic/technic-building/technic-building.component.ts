@@ -3,6 +3,7 @@ import {MdCheckboxChange, MdDialogRef, MdSnackBar} from "@angular/material";
 import {Mod} from "app/models/mod";
 import {Modpack, UploadWaiting} from "app/models/modpack";
 import "app/operators/behaviorSubject";
+import 'app/operators/betterBufferTime';
 import {BackendCommunicationService} from "app/services/backend-communication.service";
 import {ModpackService} from "app/services/modpack.service";
 import {BehaviorSubject} from "rxjs/BehaviorSubject";
@@ -43,7 +44,6 @@ export class TechnicBuildingComponent implements OnInit {
 
   ngOnInit() {
     this.modpack = this.modpackService.selectedModpack;
-    this.mods = new BehaviorSubject<Mod[]>([]);
     this.state = new BehaviorSubject('info');
     this.showDone = new BehaviorSubject(false);
 
@@ -53,7 +53,7 @@ export class TechnicBuildingComponent implements OnInit {
 
     this.mods = this.backendCommunicationService.getMessages<Mod>('mod-data-ready')
       .map(mod => Mod.fromJson(mod))
-      .bufferTime(10)
+      .betterBufferTime(10)
       .scan((currentMods: Mod[], newMods: Mod[]) => [...currentMods, ...newMods], [])
       .behaviorSubject([]);
 
@@ -64,10 +64,10 @@ export class TechnicBuildingComponent implements OnInit {
     this.totalToPack = this.backendCommunicationService.getMessages<number>('total-to-pack').behaviorSubject(-1);
 
     const donePackingPart = this.backendCommunicationService.getMessages<string>('done-packing-part')
-      .bufferTime(10);
+      .betterBufferTime(10);
 
     this.packingTodos = this.backendCommunicationService.getMessages<string>('packing-part')
-      .bufferTime(10)
+      .betterBufferTime(10)
       .withLatestFrom(donePackingPart)
       .scan((currentTodos: string[], [newTodos, todosToRemove]: string[][]) =>
           currentTodos
@@ -85,10 +85,10 @@ export class TechnicBuildingComponent implements OnInit {
 
     this.uploadProgressNumber = this.backendCommunicationService.getMessages<string>('finished-uploading').scan(currentProgress => currentProgress + 1, 0);
 
-    const doneUpdatingSolder = this.backendCommunicationService.getMessages<string>('done-updating-solder').bufferTime(10);
+    const doneUpdatingSolder = this.backendCommunicationService.getMessages<string>('done-updating-solder').betterBufferTime(10);
 
     this.updateTodos = this.backendCommunicationService.getMessages<string>('updating-solder')
-      .bufferTime(10)
+      .betterBufferTime(10)
       .withLatestFrom(doneUpdatingSolder)
       .scan((currentTodos: string[], [newTodos, todosToRemove]: string[][]) =>
           currentTodos

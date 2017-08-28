@@ -6,9 +6,8 @@ import {Observable} from "rxjs/Observable";
  * @returns {Observable<T>}
  */
 function log<T>(this: Observable<T>): Observable<T> {
-  return this.map(value => {
+  return this.do(value => {
     console.log(value);
-    return value;
   });
 }
 
