@@ -28,8 +28,9 @@ type SolderClient struct {
 	buildCache        map[string]crawlers.Build
 	lock              sync.RWMutex
 	modVersionIdLock  sync.RWMutex
-	sema              chan struct{}
+	modListSemaphor   chan struct{}
 	addMutex          sync.Mutex
+	buildMutex        sync.Mutex
 }
 
 func NewSolderClient(Url string) *SolderClient {
@@ -51,7 +52,7 @@ func NewSolderClient(Url string) *SolderClient {
 		modVersionIdCache: make(map[string]map[string]string),
 		modIdCache:        make(map[string]string),
 		buildCache:        make(map[string]crawlers.Build),
-		sema:              make(chan struct{}, 20),
+		modListSemaphor:   make(chan struct{}, 20),
 	}
 }
 
@@ -83,8 +84,8 @@ func (s *SolderClient) createUrl(after string) url.URL {
 }
 
 func (s *SolderClient) postForm(url string, data url.Values) *http.Response {
-	s.sema <- struct{}{}
-	defer func() { <-s.sema }()
+	s.modListSemaphor <- struct{}{}
+	defer func() { <-s.modListSemaphor }()
 
 	req, err := http.NewRequest(http.MethodPost, url, strings.NewReader(data.Encode()))
 	if err != nil {
@@ -101,8 +102,8 @@ func (s *SolderClient) postForm(url string, data url.Values) *http.Response {
 }
 
 func (s *SolderClient) doRequest(method, url, data string) *http.Response {
-	s.sema <- struct{}{}
-	defer func() { <-s.sema }()
+	s.modListSemaphor <- struct{}{}
+	defer func() { <-s.modListSemaphor }()
 
 	var body io.Reader
 	if data != "" {
@@ -229,6 +230,9 @@ func (s *SolderClient) IsModversionOnline(mod *types.OutputInfo) bool {
 }
 
 func (s *SolderClient) GetBuild(buildId string) crawlers.Build {
+	s.buildMutex.Lock()
+	defer s.buildMutex.Unlock()
+
 	s.lock.RLock()
 	build, ok := s.buildCache[buildId]
 	s.lock.RUnlock()
