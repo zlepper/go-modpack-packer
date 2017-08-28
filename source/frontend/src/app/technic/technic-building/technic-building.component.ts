@@ -10,6 +10,17 @@ import {BehaviorSubject} from "rxjs/BehaviorSubject";
 import {Observable} from "rxjs/Observable";
 import {Subject} from "rxjs/Subject";
 
+function modSort(left: Mod, right: Mod) {
+  const leftName = left.modid || left.filename;
+  const rightName = left.modid || right.filename;
+  if (leftName < rightName) {
+    return 1;
+  }
+  if (leftName > rightName) {
+    return -1;
+  }
+  return 0;
+}
 
 @Component({
   selector: 'app-technic-building',
@@ -55,6 +66,7 @@ export class TechnicBuildingComponent implements OnInit {
       .map(mod => Mod.fromJson(mod))
       .betterBufferTime(10)
       .scan((currentMods: Mod[], newMods: Mod[]) => [...currentMods, ...newMods], [])
+      .map(mods => mods.sort(modSort))
       .behaviorSubject([]);
 
     this.readyToBuild = this.backendCommunicationService.getMessages('all-mod-files-scanned').behaviorSubject(false);
