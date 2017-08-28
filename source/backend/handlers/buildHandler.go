@@ -105,8 +105,8 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn types.Websocket
 	var wg sync.WaitGroup
 	var lock sync.Mutex
 	// Handle mods
+	wg.Add(len(mods))
 	for _, mod := range mods {
-		wg.Add(1)
 		go func(m *types.Mod) {
 			mod.NormalizeAll()
 			// If the mod already is on solder, then we should likely skip it
