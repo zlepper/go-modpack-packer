@@ -50,6 +50,8 @@ export class SolderInfo {
   public url: string = "";
   public username: string = "";
   public password: string = "";
+  public version: string = '';
+  public apiKey: string = '';
 }
 
 export class FtbConfig {

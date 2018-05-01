@@ -67,6 +67,8 @@ type SolderInfo struct {
 	Url      string `json:"url"`
 	Username string `json:"username"`
 	Password string `json:"password"`
+	Version  string `json:"version"`
+	ApiKey   string `json:"apiKey"`
 }
 
 type Modpack struct {

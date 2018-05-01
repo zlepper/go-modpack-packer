@@ -20,7 +20,7 @@ import (
 	"time"
 )
 
-type SolderClient struct {
+type SolderClientV7 struct {
 	Client            *http.Client
 	Url               *url.URL
 	modVersionIdCache map[string]map[string]string
@@ -33,7 +33,7 @@ type SolderClient struct {
 	buildMutex        sync.Mutex
 }
 
-func NewSolderClient(Url string) *SolderClient {
+func NewV7SolderClient(Url string) *SolderClientV7 {
 	var cookieJar, _ = cookiejar.New(nil)
 
 	var client = &http.Client{
@@ -46,7 +46,7 @@ func NewSolderClient(Url string) *SolderClient {
 		log.Panic(err)
 	}
 
-	return &SolderClient{
+	return &SolderClientV7{
 		Client:            client,
 		Url:               u,
 		modVersionIdCache: make(map[string]map[string]string),
@@ -67,7 +67,7 @@ func TestSolderConnection(conn types.WebsocketConnection, data interface{}) {
 		log.Panic(err)
 	}
 
-	client := NewSolderClient(solderInfo.Url)
+	client := NewV7SolderClient(solderInfo.Url)
 	err = client.Login(solderInfo.Username, solderInfo.Password)
 	if err == nil {
 		conn.Write("solder-test", "Solder connection seems alright")
@@ -76,14 +76,14 @@ func TestSolderConnection(conn types.WebsocketConnection, data interface{}) {
 	}
 }
 
-func (s *SolderClient) createUrl(after string) url.URL {
+func (s *SolderClientV7) createUrl(after string) url.URL {
 	url := *s.Url
 	url.Path = path.Join(url.Path, after)
 	log.Println(url.Path)
 	return url
 }
 
-func (s *SolderClient) postForm(url string, data url.Values) *http.Response {
+func (s *SolderClientV7) postForm(url string, data url.Values) *http.Response {
 	s.modListSemaphor <- struct{}{}
 	defer func() { <-s.modListSemaphor }()
 
@@ -101,7 +101,7 @@ func (s *SolderClient) postForm(url string, data url.Values) *http.Response {
 	return resp
 }
 
-func (s *SolderClient) doRequest(method, url, data string) *http.Response {
+func (s *SolderClientV7) doRequest(method, url, data string) *http.Response {
 	s.modListSemaphor <- struct{}{}
 	defer func() { <-s.modListSemaphor }()
 
@@ -123,7 +123,7 @@ func (s *SolderClient) doRequest(method, url, data string) *http.Response {
 	return response
 }
 
-func (s *SolderClient) Login(email string, password string) error {
+func (s *SolderClientV7) Login(email string, password string) error {
 	Url := s.createUrl("login")
 
 	form := url.Values{}
@@ -136,7 +136,7 @@ func (s *SolderClient) Login(email string, password string) error {
 	return crawlers.CrawlLogin(response)
 }
 
-func IsOnSolder(client *SolderClient, m *types.Mod) bool {
+func IsOnSolder(client *SolderClientV7, m *types.Mod) bool {
 	if client == nil {
 		return m.IsOnSolder
 	}
@@ -151,7 +151,7 @@ func IsOnSolder(client *SolderClient, m *types.Mod) bool {
 	return true
 }
 
-func (s *SolderClient) CreatePack(name, slug string) string {
+func (s *SolderClientV7) CreatePack(name, slug string) string {
 	id := s.GetModpackId(slug)
 	if id != "" {
 		return id
@@ -176,7 +176,7 @@ func (s *SolderClient) CreatePack(name, slug string) string {
 
 }
 
-func (s *SolderClient) AddMod(mod *types.OutputInfo) string {
+func (s *SolderClientV7) AddMod(mod *types.OutputInfo) string {
 	// Ensure we don't attempt to create the mod multiple times, as this won't work
 	s.addMutex.Lock()
 	defer s.addMutex.Unlock()
@@ -204,7 +204,7 @@ func (s *SolderClient) AddMod(mod *types.OutputInfo) string {
 	return modResponse.Id
 }
 
-func (s *SolderClient) AddModVersion(modId, md5, version string) {
+func (s *SolderClientV7) AddModVersion(modId, md5, version string) {
 	form := url.Values{}
 	form.Add("mod-id", modId)
 	form.Add("add-version", version)
@@ -216,7 +216,7 @@ func (s *SolderClient) AddModVersion(modId, md5, version string) {
 	defer res.Body.Close()
 }
 
-func (s *SolderClient) RehashModVersion(modversionId string, md5 string) {
+func (s *SolderClientV7) RehashModVersion(modversionId string, md5 string) {
 	form := url.Values{}
 	form.Add("version-id", modversionId)
 	form.Add("md5", md5)
@@ -225,11 +225,11 @@ func (s *SolderClient) RehashModVersion(modversionId string, md5 string) {
 	res.Body.Close()
 }
 
-func (s *SolderClient) IsModversionOnline(mod *types.OutputInfo) bool {
+func (s *SolderClientV7) IsModversionOnline(mod *types.OutputInfo) bool {
 	return s.GetModVersionId(mod) != ""
 }
 
-func (s *SolderClient) GetBuild(buildId string) crawlers.Build {
+func (s *SolderClientV7) GetBuild(buildId string) crawlers.Build {
 	s.buildMutex.Lock()
 	defer s.buildMutex.Unlock()
 
@@ -251,7 +251,7 @@ func (s *SolderClient) GetBuild(buildId string) crawlers.Build {
 	return build
 }
 
-func (s *SolderClient) IsModInBuild(mod *types.OutputInfo, buildId string) bool {
+func (s *SolderClientV7) IsModInBuild(mod *types.OutputInfo, buildId string) bool {
 	build := s.GetBuild(buildId)
 
 	for _, m := range build.Mods {
@@ -263,7 +263,7 @@ func (s *SolderClient) IsModInBuild(mod *types.OutputInfo, buildId string) bool 
 	return false
 }
 
-func (s *SolderClient) IsModversionActiveInBuild(mod *types.OutputInfo, buildId string) bool {
+func (s *SolderClientV7) IsModversionActiveInBuild(mod *types.OutputInfo, buildId string) bool {
 	build := s.GetBuild(buildId)
 
 	for _, m := range build.Mods {
@@ -274,7 +274,7 @@ func (s *SolderClient) IsModversionActiveInBuild(mod *types.OutputInfo, buildId 
 	return false
 }
 
-func (s *SolderClient) GetActiveModversionInBuildId(mod *types.OutputInfo, buildId string) string {
+func (s *SolderClientV7) GetActiveModversionInBuildId(mod *types.OutputInfo, buildId string) string {
 	Url := s.createUrl("modpack/build/" + buildId)
 	res := s.doRequest(http.MethodGet, Url.String(), "")
 	defer res.Body.Close()
@@ -293,7 +293,7 @@ func (s *SolderClient) GetActiveModversionInBuildId(mod *types.OutputInfo, build
 	return s.GetModVersionId(mod)
 }
 
-func (s *SolderClient) SetModVersionInBuild(mod *types.OutputInfo, buildId string) {
+func (s *SolderClientV7) SetModVersionInBuild(mod *types.OutputInfo, buildId string) {
 	modVersionId := s.GetModVersionId(mod)
 	Url := s.createUrl("modpack/build/modify")
 
@@ -311,16 +311,16 @@ func (s *SolderClient) SetModVersionInBuild(mod *types.OutputInfo, buildId strin
 	res.Body.Close()
 }
 
-func (s *SolderClient) IsPackOnline(modpack *types.Modpack) bool {
+func (s *SolderClientV7) IsPackOnline(modpack *types.Modpack) bool {
 	return s.GetModpackId(modpack.GetSlug()) != ""
 }
 
-func (s *SolderClient) IsBuildOnline(modpack *types.Modpack) bool {
+func (s *SolderClientV7) IsBuildOnline(modpack *types.Modpack) bool {
 	id := s.GetBuildId(modpack)
 	return id != ""
 }
 
-func (s *SolderClient) GetModVersionId(mod *types.OutputInfo) string {
+func (s *SolderClientV7) GetModVersionId(mod *types.OutputInfo) string {
 	modId, modVersion := mod.Id, mod.GenerateOnlineVersion()
 	s.modVersionIdLock.RLock()
 	l, ok := s.modVersionIdCache[modId]
@@ -359,7 +359,7 @@ func (s *SolderClient) GetModVersionId(mod *types.OutputInfo) string {
 	return id
 }
 
-func (s *SolderClient) CreateBuild(modpack *types.Modpack, modpackId string) string {
+func (s *SolderClientV7) CreateBuild(modpack *types.Modpack, modpackId string) string {
 	Url := s.createUrl("modpack/add-build/" + modpackId)
 
 	form := url.Values{}
@@ -377,7 +377,7 @@ func (s *SolderClient) CreateBuild(modpack *types.Modpack, modpackId string) str
 	return segments[len(segments)-1]
 }
 
-func (s *SolderClient) GetBuildId(modpack *types.Modpack) string {
+func (s *SolderClientV7) GetBuildId(modpack *types.Modpack) string {
 	modpackId := s.GetModpackId(modpack.GetSlug())
 	Url := s.createUrl("modpack/view/" + modpackId)
 
@@ -393,7 +393,7 @@ func (s *SolderClient) GetBuildId(modpack *types.Modpack) string {
 	return ""
 }
 
-func (s *SolderClient) GetModpackId(slug string) string {
+func (s *SolderClientV7) GetModpackId(slug string) string {
 	Url := s.createUrl("modpack/list")
 
 	res := s.doRequest(http.MethodGet, Url.String(), "")
@@ -408,7 +408,7 @@ func (s *SolderClient) GetModpackId(slug string) string {
 	return ""
 }
 
-func (s *SolderClient) GetModId(modid string) string {
+func (s *SolderClientV7) GetModId(modid string) string {
 	s.lock.RLock()
 	if id, ok := s.modIdCache[modid]; ok {
 		s.lock.RUnlock()
@@ -445,7 +445,7 @@ type addBuildToModpackResponse struct {
 	Reason string `json:"reason"`
 }
 
-func (s *SolderClient) AddModversionToBuild(mod *types.OutputInfo, modpackBuildId string) {
+func (s *SolderClientV7) AddModversionToBuild(mod *types.OutputInfo, modpackBuildId string) {
 	Url := s.createUrl("modpack/modify/add")
 
 	form := url.Values{}

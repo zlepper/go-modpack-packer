@@ -6,8 +6,8 @@ package solder
 //	"testing"
 //)
 //
-//func getClient() *SolderClient {
-//	client := NewSolderClient("http://solder.zlepper.dk/index.php")
+//func getClient() *SolderClientV7 {
+//	client := NewV7SolderClient("http://solder.zlepper.dk/index.php")
 //	client.Login("test@test.com", "password")
 //
 //	return client

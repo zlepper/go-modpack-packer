@@ -24,8 +24,8 @@ import (
 	"time"
 )
 
-const donePackingPartName string = "done-packing-part"
-const packingPartName string = "packing-part"
+const donePackingPartName = "done-packing-part"
+const packingPartName = "packing-part"
 
 func build(conn types.WebsocketConnection, data interface{}) {
 	dat := data.(map[string]interface{})
@@ -80,10 +80,10 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn types.Websocket
 	ch = make(chan *types.OutputInfo)
 
 	startTime := time.Now()
-	var solderClient *solder.SolderClient
+	var solderClient *solder.SolderClientV7
 	// Only create the solder client if we actually have to use solder
 	if modpack.Solder.Use {
-		solderClient = solder.NewSolderClient(modpack.Solder.Url)
+		solderClient = solder.NewV7SolderClient(modpack.Solder.Url)
 		solderClient.Login(modpack.Solder.Username, modpack.Solder.Password)
 	}
 
@@ -187,12 +187,12 @@ func buildModpack(modpack types.Modpack, mods []*types.Mod, conn types.Websocket
 
 }
 
-const solderCurrentlyDoingEvent string = "solder-currently-doing"
+const solderCurrentlyDoingEvent = "solder-currently-doing"
 
-func updateSolder(modpack types.Modpack, conn types.WebsocketConnection) (*solder.SolderClient, string) {
+func updateSolder(modpack types.Modpack, conn types.WebsocketConnection) (*solder.SolderClientV7, string) {
 	// Create solder client
 	conn.Write(solderCurrentlyDoingEvent, "Logging in to solder")
-	solderclient := solder.NewSolderClient(modpack.Solder.Url)
+	solderclient := solder.NewV7SolderClient(modpack.Solder.Url)
 	err := solderclient.Login(modpack.Solder.Username, modpack.Solder.Password)
 	if err != nil {
 		log.Panic("Could not login to solder with the supplied credentials.", err)
@@ -220,7 +220,7 @@ func updateSolder(modpack types.Modpack, conn types.WebsocketConnection) (*solde
 	return solderclient, buildId
 }
 
-func addInfoToSolder(info *types.OutputInfo, buildId string, conn types.WebsocketConnection, solderclient *solder.SolderClient) {
+func addInfoToSolder(info *types.OutputInfo, buildId string, conn types.WebsocketConnection, solderclient *solder.SolderClientV7) {
 	conn.Write("updating-solder", info.ProgressKey)
 	var modid string
 	modid = solderclient.GetModId(info.Id)
@@ -263,8 +263,8 @@ func addInfoToSolder(info *types.OutputInfo, buildId string, conn types.Websocke
 	conn.Write("done-updating-solder", info.ProgressKey)
 }
 
-func packForgeFolder(modpack types.Modpack, conn types.WebsocketConnection, outputDirectory string, ch *chan *types.OutputInfo, sc *solder.SolderClient) {
-	const minecraftForge string = "Minecraft Forge"
+func packForgeFolder(modpack types.Modpack, conn types.WebsocketConnection, outputDirectory string, ch *chan *types.OutputInfo, sc *solder.SolderClientV7) {
+	const minecraftForge = "Minecraft Forge"
 	version := fmt.Sprintf("%v", modpack.Technic.ForgeVersion.Build)
 	conn.Write(packingPartName, minecraftForge)
 	isOnSolder := false

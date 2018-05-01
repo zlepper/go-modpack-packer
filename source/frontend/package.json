@@ -10,7 +10,7 @@
     "lint": "ng lint",
     "e2e": "ng e2e",
     "prod": "ng build --prod",
-    "watch": "ng build --watch"
+    "watch": "ng build --watch --no-aot"
   },
   "private": true,
   "dependencies": {
